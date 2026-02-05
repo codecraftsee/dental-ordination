@@ -466,3 +466,18 @@ a {
     font-size: 0.9rem;
   }
 }
+
+@media print {
+  .navbar {
+    display: none !important;
+  }
+
+  main {
+    padding: 0 !important;
+    margin: 0 !important;
+  }
+
+  body {
+    background: white;
+  }
+}

@@ -28,6 +28,10 @@ export class TranslateService {
     return this.translations()[key] || key;
   }
 
+  instant(key: string): string {
+    return this.translate(key);
+  }
+
   private detectLanguage(): Lang {
     const stored = localStorage.getItem(STORAGE_KEY);
     if (stored === 'en' || stored === 'sr') return stored;
