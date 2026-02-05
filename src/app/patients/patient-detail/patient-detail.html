@@ -1,0 +1,90 @@
+@if (patient(); as p) {
+  <div class="container page">
+    <div class="page-header">
+      <h1 class="section-title">{{ 'patient.details' | translate }}</h1>
+      <div>
+        <a [routerLink]="['/patients', p.id, 'dental-card']" class="btn btn-primary">{{ 'patients.viewDentalCard' | translate }}</a>
+        <a [routerLink]="['/patients', p.id, 'edit']" class="btn btn-outline">{{ 'common.edit' | translate }}</a>
+        <button class="btn btn-outline-danger" (click)="deletePatient()">{{ 'common.delete' | translate }}</button>
+        <a routerLink="/patients" class="btn btn-outline">{{ 'common.back' | translate }}</a>
+      </div>
+    </div>
+
+    <div class="detail-card">
+      <div class="detail-grid">
+        <div class="detail-item">
+          <div class="detail-label">{{ 'patient.firstName' | translate }}</div>
+          <div class="detail-value">{{ p.firstName }}</div>
+        </div>
+        <div class="detail-item">
+          <div class="detail-label">{{ 'patient.lastName' | translate }}</div>
+          <div class="detail-value">{{ p.lastName }}</div>
+        </div>
+        <div class="detail-item">
+          <div class="detail-label">{{ 'patient.parentName' | translate }}</div>
+          <div class="detail-value">{{ p.parentName }}</div>
+        </div>
+        <div class="detail-item">
+          <div class="detail-label">{{ 'patient.gender' | translate }}</div>
+          <div class="detail-value">{{ 'patient.gender.' + p.gender | translate }}</div>
+        </div>
+        <div class="detail-item">
+          <div class="detail-label">{{ 'patient.dateOfBirth' | translate }}</div>
+          <div class="detail-value">{{ p.dateOfBirth | localizedDate:'mediumDate' }}</div>
+        </div>
+        <div class="detail-item">
+          <div class="detail-label">{{ 'patient.address' | translate }}</div>
+          <div class="detail-value">{{ p.address }}</div>
+        </div>
+        <div class="detail-item">
+          <div class="detail-label">{{ 'patient.city' | translate }}</div>
+          <div class="detail-value">{{ p.city }}</div>
+        </div>
+        <div class="detail-item">
+          <div class="detail-label">{{ 'patient.phone' | translate }}</div>
+          <div class="detail-value">{{ p.phone }}</div>
+        </div>
+        <div class="detail-item">
+          <div class="detail-label">{{ 'patient.email' | translate }}</div>
+          <div class="detail-value">{{ p.email }}</div>
+        </div>
+        <div class="detail-item">
+          <div class="detail-label">{{ 'patient.createdAt' | translate }}</div>
+          <div class="detail-value">{{ p.createdAt | localizedDate:'mediumDate' }}</div>
+        </div>
+      </div>
+    </div>
+
+    <h2 class="mt-lg">{{ 'patient.recentVisits' | translate }}</h2>
+    @if (recentVisits().length > 0) {
+      <table class="data-table mt-md">
+        <thead>
+          <tr>
+            <th>{{ 'visits.date' | translate }}</th>
+            <th>{{ 'visits.doctor' | translate }}</th>
+            <th>{{ 'visits.tooth' | translate }}</th>
+            <th>{{ 'visits.diagnosis' | translate }}</th>
+            <th>{{ 'visits.treatment' | translate }}</th>
+            <th>{{ 'visits.price' | translate }}</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (visit of recentVisits(); track visit.id) {
+            <tr>
+              <td><a [routerLink]="['/visits', visit.id]">{{ visit.date | localizedDate:'mediumDate' }}</a></td>
+              <td><a [routerLink]="['/doctors', visit.doctorId]">{{ getDoctorName(visit.doctorId) }}</a></td>
+              <td>{{ visit.toothNumber || '-' }}</td>
+              <td>{{ getDiagnosisName(visit.diagnosisId) }}</td>
+              <td>{{ getTreatmentName(visit.treatmentId) }}</td>
+              <td>{{ visit.price | currencyFormat }}</td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    } @else {
+      <div class="empty-state">
+        <p class="empty-state-text">{{ 'patient.noVisits' | translate }}</p>
+      </div>
+    }
+  </div>
+}

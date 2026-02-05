@@ -1,0 +1,68 @@
+<div class="container page">
+  <div class="page-header">
+    <h1 class="section-title">{{ 'visits.title' | translate }}</h1>
+    <a routerLink="/visits/new" class="btn btn-primary">{{ 'visits.addNew' | translate }}</a>
+  </div>
+
+  <div class="search-bar">
+    <input
+      type="text"
+      class="form-control"
+      [placeholder]="'visits.search' | translate"
+      (input)="onSearch($event)"
+    />
+    <select class="form-control" (change)="onPatientChange($event)">
+      <option value="">{{ 'visits.filterPatient' | translate }}</option>
+      @for (p of patients; track p.id) {
+        <option [value]="p.id">{{ p.firstName }} {{ p.lastName }}</option>
+      }
+    </select>
+    <select class="form-control" (change)="onDoctorChange($event)">
+      <option value="">{{ 'visits.filterDoctor' | translate }}</option>
+      @for (d of doctors; track d.id) {
+        <option [value]="d.id">Dr. {{ d.firstName }} {{ d.lastName }}</option>
+      }
+    </select>
+  </div>
+  <div class="search-bar">
+    <input type="date" class="form-control" [placeholder]="'visits.filterDateFrom' | translate" (change)="onDateFromChange($event)" />
+    <input type="date" class="form-control" [placeholder]="'visits.filterDateTo' | translate" (change)="onDateToChange($event)" />
+  </div>
+
+  @if (filteredVisits().length > 0) {
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>{{ 'visits.date' | translate }}</th>
+          <th>{{ 'visits.patient' | translate }}</th>
+          <th>{{ 'visits.doctor' | translate }}</th>
+          <th>{{ 'visits.tooth' | translate }}</th>
+          <th>{{ 'visits.diagnosis' | translate }}</th>
+          <th>{{ 'visits.treatment' | translate }}</th>
+          <th>{{ 'visits.price' | translate }}</th>
+          <th>{{ 'visits.actions' | translate }}</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (visit of filteredVisits(); track visit.id) {
+          <tr>
+            <td>{{ visit.date | localizedDate:'mediumDate' }}</td>
+            <td><a [routerLink]="['/patients', visit.patientId]">{{ getPatientName(visit.patientId) }}</a></td>
+            <td><a [routerLink]="['/doctors', visit.doctorId]">{{ getDoctorName(visit.doctorId) }}</a></td>
+            <td>{{ visit.toothNumber || '-' }}</td>
+            <td>{{ getDiagnosisName(visit.diagnosisId) }}</td>
+            <td>{{ getTreatmentName(visit.treatmentId) }}</td>
+            <td>{{ visit.price | currencyFormat }}</td>
+            <td>
+              <a [routerLink]="['/visits', visit.id]" class="btn btn-sm btn-outline">{{ 'common.view' | translate }}</a>
+            </td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  } @else {
+    <div class="empty-state">
+      <p class="empty-state-text">{{ 'visits.noResults' | translate }}</p>
+    </div>
+  }
+</div>

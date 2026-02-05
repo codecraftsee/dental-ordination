@@ -1,0 +1,78 @@
+@if (patient(); as p) {
+  <div class="container page">
+    <div class="page-header">
+      <h1 class="section-title">{{ 'dentalCard.title' | translate }}</h1>
+      <div>
+        <a [routerLink]="['/patients', p.id]" class="btn btn-outline">{{ 'common.back' | translate }}</a>
+      </div>
+    </div>
+
+    <div class="detail-card">
+      <h2>{{ 'dentalCard.patientInfo' | translate }}</h2>
+      <div class="detail-grid mt-md">
+        <div class="detail-item">
+          <div class="detail-label">{{ 'patient.firstName' | translate }}</div>
+          <div class="detail-value">{{ p.firstName }}</div>
+        </div>
+        <div class="detail-item">
+          <div class="detail-label">{{ 'patient.lastName' | translate }}</div>
+          <div class="detail-value">{{ p.lastName }}</div>
+        </div>
+        <div class="detail-item">
+          <div class="detail-label">{{ 'patient.parentName' | translate }}</div>
+          <div class="detail-value">{{ p.parentName }}</div>
+        </div>
+        <div class="detail-item">
+          <div class="detail-label">{{ 'patient.dateOfBirth' | translate }}</div>
+          <div class="detail-value">{{ p.dateOfBirth | localizedDate:'mediumDate' }}</div>
+        </div>
+        <div class="detail-item">
+          <div class="detail-label">{{ 'patient.phone' | translate }}</div>
+          <div class="detail-value">{{ p.phone }}</div>
+        </div>
+        <div class="detail-item">
+          <div class="detail-label">{{ 'patient.city' | translate }}</div>
+          <div class="detail-value">{{ p.city }}</div>
+        </div>
+      </div>
+    </div>
+
+    <h2 class="mt-lg">{{ 'dentalCard.visitHistory' | translate }}</h2>
+    @if (visits().length > 0) {
+      <table class="data-table mt-md">
+        <thead>
+          <tr>
+            <th>{{ 'dentalCard.date' | translate }}</th>
+            <th>{{ 'visits.doctor' | translate }}</th>
+            <th>{{ 'dentalCard.tooth' | translate }}</th>
+            <th>{{ 'dentalCard.diagnosis' | translate }}</th>
+            <th>{{ 'dentalCard.treatment' | translate }}</th>
+            <th>{{ 'dentalCard.price' | translate }}</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (visit of visits(); track visit.id) {
+            <tr>
+              <td><a [routerLink]="['/visits', visit.id]">{{ visit.date | localizedDate:'mediumDate' }}</a></td>
+              <td>{{ getDoctorName(visit.doctorId) }}</td>
+              <td>{{ visit.toothNumber || '-' }}</td>
+              <td title="{{ getDiagnosisName(visit.diagnosisId) }}">{{ getDiagnosisCode(visit.diagnosisId) }}</td>
+              <td title="{{ getTreatmentName(visit.treatmentId) }}">{{ getTreatmentCode(visit.treatmentId) }}</td>
+              <td>{{ visit.price | currencyFormat }}</td>
+            </tr>
+          }
+        </tbody>
+        <tfoot>
+          <tr>
+            <td colspan="5"><strong>{{ 'dentalCard.total' | translate }}</strong></td>
+            <td><strong>{{ totalCost() | currencyFormat }}</strong></td>
+          </tr>
+        </tfoot>
+      </table>
+    } @else {
+      <div class="empty-state">
+        <p class="empty-state-text">{{ 'dentalCard.noVisits' | translate }}</p>
+      </div>
+    }
+  </div>
+}

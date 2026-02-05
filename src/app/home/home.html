@@ -1,0 +1,64 @@
+<div class="container dashboard">
+  <h1 class="section-title">{{ 'home.title' | translate }}</h1>
+
+  <div class="stats-grid">
+    <div class="stat-card">
+      <div class="stat-value">{{ totalPatients }}</div>
+      <div class="stat-label">{{ 'home.totalPatients' | translate }}</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-value">{{ totalDoctors }}</div>
+      <div class="stat-label">{{ 'home.totalDoctors' | translate }}</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-value">{{ visitsThisMonth }}</div>
+      <div class="stat-label">{{ 'home.visitsThisMonth' | translate }}</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-value">{{ totalVisits }}</div>
+      <div class="stat-label">{{ 'home.totalVisits' | translate }}</div>
+    </div>
+  </div>
+
+  <div class="quick-actions">
+    <h2>{{ 'home.quickActions' | translate }}</h2>
+    <div class="actions-row">
+      <a routerLink="/patients/new" class="btn btn-primary btn-lg">{{ 'home.newPatient' | translate }}</a>
+      <a routerLink="/visits/new" class="btn btn-success btn-lg">{{ 'home.newVisit' | translate }}</a>
+    </div>
+  </div>
+
+  <div class="recent-visits-section">
+    <h2>{{ 'home.recentVisits' | translate }}</h2>
+    @if (recentVisits.length > 0) {
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>{{ 'visits.date' | translate }}</th>
+            <th>{{ 'visits.patient' | translate }}</th>
+            <th>{{ 'visits.doctor' | translate }}</th>
+            <th>{{ 'visits.diagnosis' | translate }}</th>
+            <th>{{ 'visits.treatment' | translate }}</th>
+            <th>{{ 'visits.price' | translate }}</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (visit of recentVisits; track visit.id) {
+            <tr>
+              <td>{{ visit.date | localizedDate:'mediumDate' }}</td>
+              <td><a [routerLink]="['/patients', visit.patientId]">{{ getPatientName(visit.patientId) }}</a></td>
+              <td>{{ getDoctorName(visit.doctorId) }}</td>
+              <td>{{ getDiagnosisName(visit.diagnosisId) }}</td>
+              <td>{{ getTreatmentName(visit.treatmentId) }}</td>
+              <td>{{ visit.price | currencyFormat }}</td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    } @else {
+      <div class="empty-state">
+        <p class="empty-state-text">{{ 'home.noRecentVisits' | translate }}</p>
+      </div>
+    }
+  </div>
+</div>

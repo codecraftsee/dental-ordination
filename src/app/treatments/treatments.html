@@ -1,0 +1,108 @@
+<div class="container page">
+  <div class="page-header">
+    <h1 class="section-title">{{ 'treatments.title' | translate }}</h1>
+    <button class="btn btn-primary" (click)="openAddForm()">{{ 'treatments.addNew' | translate }}</button>
+  </div>
+
+  <div class="search-bar">
+    <input
+      type="text"
+      class="form-control"
+      [placeholder]="'treatments.search' | translate"
+      (input)="onSearch($event)"
+    />
+    <select class="form-control" (change)="onCategoryChange($event)">
+      <option value="">{{ 'treatments.filterCategory' | translate }}</option>
+      @for (cat of categories; track cat) {
+        <option [value]="cat">{{ 'treatmentCategory.' + cat | translate }}</option>
+      }
+    </select>
+  </div>
+
+  @if (showForm()) {
+    <div class="card mb-lg">
+      <h3>{{ (editingId() ? 'treatments.editTitle' : 'treatments.addTitle') | translate }}</h3>
+      <form [formGroup]="form" (ngSubmit)="onSubmit()">
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">{{ 'treatments.code' | translate }}</label>
+            <input type="text" class="form-control" formControlName="code" />
+            @if (f['code'].invalid && f['code'].touched) {
+              <div class="form-error">{{ 'common.required' | translate }}</div>
+            }
+          </div>
+          <div class="form-group">
+            <label class="form-label">{{ 'treatments.name' | translate }}</label>
+            <input type="text" class="form-control" formControlName="name" />
+            @if (f['name'].invalid && f['name'].touched) {
+              <div class="form-error">{{ 'common.required' | translate }}</div>
+            }
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">{{ 'treatments.category' | translate }}</label>
+            <select class="form-control" formControlName="category">
+              <option value="">{{ 'treatments.filterCategory' | translate }}</option>
+              @for (cat of categories; track cat) {
+                <option [value]="cat">{{ 'treatmentCategory.' + cat | translate }}</option>
+              }
+            </select>
+            @if (f['category'].invalid && f['category'].touched) {
+              <div class="form-error">{{ 'common.required' | translate }}</div>
+            }
+          </div>
+          <div class="form-group">
+            <label class="form-label">{{ 'treatments.defaultPrice' | translate }}</label>
+            <input type="number" class="form-control" formControlName="defaultPrice" />
+            @if (f['defaultPrice'].invalid && f['defaultPrice'].touched) {
+              <div class="form-error">{{ 'common.required' | translate }}</div>
+            }
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">{{ 'treatments.description' | translate }}</label>
+          <textarea class="form-control" formControlName="description" rows="2"></textarea>
+        </div>
+        <div class="form-actions">
+          <button type="submit" class="btn btn-primary">{{ 'common.save' | translate }}</button>
+          <button type="button" class="btn btn-outline" (click)="cancelForm()">{{ 'common.cancel' | translate }}</button>
+        </div>
+      </form>
+    </div>
+  }
+
+  @if (filteredTreatments().length > 0) {
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>{{ 'treatments.code' | translate }}</th>
+          <th>{{ 'treatments.name' | translate }}</th>
+          <th>{{ 'treatments.category' | translate }}</th>
+          <th>{{ 'treatments.defaultPrice' | translate }}</th>
+          <th>{{ 'treatments.description' | translate }}</th>
+          <th>{{ 'treatments.actions' | translate }}</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (tx of filteredTreatments(); track tx.id) {
+          <tr>
+            <td>{{ tx.code }}</td>
+            <td>{{ tx.name }}</td>
+            <td><span class="badge badge-primary">{{ 'treatmentCategory.' + tx.category | translate }}</span></td>
+            <td>{{ tx.defaultPrice | currencyFormat }}</td>
+            <td>{{ tx.description }}</td>
+            <td>
+              <button class="btn btn-sm btn-outline" (click)="openEditForm(tx)">{{ 'common.edit' | translate }}</button>
+              <button class="btn btn-sm btn-outline-danger" (click)="deleteTreatment(tx.id)">{{ 'common.delete' | translate }}</button>
+            </td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  } @else {
+    <div class="empty-state">
+      <p class="empty-state-text">{{ 'treatments.noResults' | translate }}</p>
+    </div>
+  }
+</div>
