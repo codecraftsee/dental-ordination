@@ -1,11 +1,16 @@
-import { Injectable, signal } from '@angular/core';
-import { Doctor, Specialization } from '../models/doctor.model';
-
-const STORAGE_KEY = 'dental-doctors';
+import { Injectable, inject, signal } from '@angular/core';
+import { HttpClient, HttpParams } from '@angular/common/http';
+import { Observable, tap } from 'rxjs';
+import { environment } from '../../environments/environment';
+import { Doctor, DoctorCreate, DoctorUpdate } from '../models/doctor.model';
 
 @Injectable({ providedIn: 'root' })
 export class DoctorService {
-  private readonly items = signal<Doctor[]>(this.load());
+  private http = inject(HttpClient);
+  private apiUrl = environment.apiUrl + '/api/doctors';
+
+  private readonly items = signal<Doctor[]>([]);
+  private loaded = false;
 
   getAll(): Doctor[] {
     return this.items();
@@ -15,33 +20,40 @@ export class DoctorService {
     return this.items().find(d => d.id === id);
   }
 
-  create(data: Omit<Doctor, 'id' | 'createdAt'>): Doctor {
-    const doctor: Doctor = {
-      ...data,
-      id: crypto.randomUUID(),
-      createdAt: new Date().toISOString(),
-    };
-    const updated = [doctor, ...this.items()];
-    this.items.set(updated);
-    this.save(updated);
-    return doctor;
+  loadAll(params?: { specialization?: string }): Observable<Doctor[]> {
+    let httpParams = new HttpParams();
+    if (params?.specialization) httpParams = httpParams.set('specialization', params.specialization);
+
+    return this.http.get<Doctor[]>(this.apiUrl, { params: httpParams }).pipe(
+      tap(doctors => {
+        this.items.set(doctors);
+        this.loaded = true;
+      }),
+    );
   }
 
-  update(id: string, data: Partial<Omit<Doctor, 'id' | 'createdAt'>>): Doctor | undefined {
-    const items = this.items();
-    const index = items.findIndex(d => d.id === id);
-    if (index === -1) return undefined;
-    const updated = [...items];
-    updated[index] = { ...updated[index], ...data };
-    this.items.set(updated);
-    this.save(updated);
-    return updated[index];
+  loadById(id: string): Observable<Doctor> {
+    return this.http.get<Doctor>(`${this.apiUrl}/${id}`);
   }
 
-  delete(id: string): void {
-    const updated = this.items().filter(d => d.id !== id);
-    this.items.set(updated);
-    this.save(updated);
+  create(data: DoctorCreate): Observable<Doctor> {
+    return this.http.post<Doctor>(this.apiUrl, data).pipe(
+      tap(doctor => this.items.set([doctor, ...this.items()])),
+    );
+  }
+
+  update(id: string, data: DoctorUpdate): Observable<Doctor> {
+    return this.http.put<Doctor>(`${this.apiUrl}/${id}`, data).pipe(
+      tap(updated => {
+        this.items.set(this.items().map(d => (d.id === id ? updated : d)));
+      }),
+    );
+  }
+
+  delete(id: string): Observable<void> {
+    return this.http.delete<void>(`${this.apiUrl}/${id}`).pipe(
+      tap(() => this.items.set(this.items().filter(d => d.id !== id))),
+    );
   }
 
   search(query: string, filters: { specialization?: string }): Doctor[] {
@@ -51,59 +63,17 @@ export class DoctorService {
     }
     if (query.trim()) {
       const q = query.toLowerCase().trim();
-      results = results.filter(d =>
-        d.firstName.toLowerCase().includes(q) ||
-        d.lastName.toLowerCase().includes(q) ||
-        d.licenseNumber.toLowerCase().includes(q)
+      results = results.filter(
+        d =>
+          d.firstName.toLowerCase().includes(q) ||
+          d.lastName.toLowerCase().includes(q) ||
+          (d.licenseNumber || '').toLowerCase().includes(q),
       );
     }
     return results;
   }
 
-  private load(): Doctor[] {
-    const raw = localStorage.getItem(STORAGE_KEY);
-    if (raw) return JSON.parse(raw);
-    const seed = this.createSeedData();
-    this.save(seed);
-    return seed;
-  }
-
-  private save(items: Doctor[]): void {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(items));
-  }
-
-  private createSeedData(): Doctor[] {
-    return [
-      {
-        id: 'seed-doctor-ana',
-        firstName: 'Ana',
-        lastName: 'Marković',
-        specialization: Specialization.GeneralDentistry,
-        phone: '011-111-2222',
-        email: 'ana.markovic@dental.rs',
-        licenseNumber: 'LIC-2024-001',
-        createdAt: '2025-01-01T08:00:00.000Z',
-      },
-      {
-        id: 'seed-doctor-nikola',
-        firstName: 'Nikola',
-        lastName: 'Đorđević',
-        specialization: Specialization.Orthodontics,
-        phone: '011-333-4444',
-        email: 'nikola.djordjevic@dental.rs',
-        licenseNumber: 'LIC-2024-002',
-        createdAt: '2025-01-01T08:00:00.000Z',
-      },
-      {
-        id: 'seed-doctor-maja',
-        firstName: 'Maja',
-        lastName: 'Ilić',
-        specialization: Specialization.Endodontics,
-        phone: '011-555-6666',
-        email: 'maja.ilic@dental.rs',
-        licenseNumber: 'LIC-2024-003',
-        createdAt: '2025-01-01T08:00:00.000Z',
-      },
-    ];
+  isLoaded(): boolean {
+    return this.loaded;
   }
 }

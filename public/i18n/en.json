@@ -181,5 +181,14 @@
   "common.confirmDelete": "Are you sure you want to delete this item?",
   "common.required": "This field is required",
   "common.invalidEmail": "Please enter a valid email address",
-  "common.minLength": "Minimum length is {0} characters"
+  "common.minLength": "Minimum length is {0} characters",
+
+  "nav.logout": "Logout",
+
+  "login.title": "Login",
+  "login.email": "Email",
+  "login.password": "Password",
+  "login.submit": "Login",
+  "login.error": "Invalid email or password",
+  "login.loading": "Logging in..."
 }

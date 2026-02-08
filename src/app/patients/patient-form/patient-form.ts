@@ -38,22 +38,22 @@ export default class PatientForm implements OnInit {
     });
 
     if (this.isEditMode && this.patientId) {
-      const patient = this.patientService.getById(this.patientId);
-      if (patient) {
-        this.form.patchValue({
-          firstName: patient.firstName,
-          lastName: patient.lastName,
-          parentName: patient.parentName,
-          gender: patient.gender,
-          dateOfBirth: patient.dateOfBirth,
-          address: patient.address,
-          city: patient.city,
-          phone: patient.phone,
-          email: patient.email,
-        });
-      } else {
-        this.router.navigate(['/patients']);
-      }
+      this.patientService.loadById(this.patientId).subscribe({
+        next: patient => {
+          this.form.patchValue({
+            firstName: patient.firstName,
+            lastName: patient.lastName,
+            parentName: patient.parentName,
+            gender: patient.gender,
+            dateOfBirth: patient.dateOfBirth,
+            address: patient.address,
+            city: patient.city,
+            phone: patient.phone,
+            email: patient.email,
+          });
+        },
+        error: () => this.router.navigate(['/patients']),
+      });
     }
   }
 
@@ -68,11 +68,13 @@ export default class PatientForm implements OnInit {
     }
 
     if (this.isEditMode && this.patientId) {
-      this.patientService.update(this.patientId, this.form.value);
-      this.router.navigate(['/patients', this.patientId]);
+      this.patientService.update(this.patientId, this.form.value).subscribe(patient => {
+        this.router.navigate(['/patients', patient.id]);
+      });
     } else {
-      const patient = this.patientService.create(this.form.value);
-      this.router.navigate(['/patients', patient.id]);
+      this.patientService.create(this.form.value).subscribe(patient => {
+        this.router.navigate(['/patients', patient.id]);
+      });
     }
   }
 }

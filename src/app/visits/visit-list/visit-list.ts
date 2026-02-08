@@ -1,5 +1,6 @@
-import { Component, inject, signal, computed } from '@angular/core';
+import { Component, inject, signal, computed, OnInit } from '@angular/core';
 import { RouterLink } from '@angular/router';
+import { forkJoin } from 'rxjs';
 import { TranslatePipe } from '../../shared/translate.pipe';
 import { LocalizedDatePipe } from '../../shared/localized-date.pipe';
 import { CurrencyFormatPipe } from '../../shared/currency-format.pipe';
@@ -15,7 +16,7 @@ import { TreatmentService } from '../../services/treatment.service';
   templateUrl: './visit-list.html',
   styleUrl: './visit-list.scss',
 })
-export default class VisitList {
+export default class VisitList implements OnInit {
   private visitService = inject(VisitService);
   private patientService = inject(PatientService);
   private doctorService = inject(DoctorService);
@@ -28,8 +29,8 @@ export default class VisitList {
   dateFromFilter = signal<string>('');
   dateToFilter = signal<string>('');
 
-  patients = this.patientService.getAll();
-  doctors = this.doctorService.getAll();
+  patients = computed(() => this.patientService.getAll());
+  doctors = computed(() => this.doctorService.getAll());
 
   private patientNames = computed(() => {
     const map = new Map<string, string>();
@@ -61,6 +62,16 @@ export default class VisitList {
     );
   });
 
+  ngOnInit(): void {
+    forkJoin([
+      this.visitService.loadAll(),
+      this.patientService.loadAll(),
+      this.doctorService.loadAll(),
+      this.diagnosisService.loadAll(),
+      this.treatmentService.loadAll(),
+    ]).subscribe();
+  }
+
   getPatientName(id: string): string {
     return this.patientNames().get(id) || '';
   }
@@ -69,11 +80,13 @@ export default class VisitList {
     return this.doctorNames().get(id) || '';
   }
 
-  getDiagnosisName(id: string): string {
+  getDiagnosisName(id: string | undefined): string {
+    if (!id) return '';
     return this.diagnosisService.getById(id)?.name || '';
   }
 
-  getTreatmentName(id: string): string {
+  getTreatmentName(id: string | undefined): string {
+    if (!id) return '';
     return this.treatmentService.getById(id)?.name || '';
   }
 

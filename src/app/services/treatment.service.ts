@@ -1,11 +1,16 @@
-import { Injectable, signal } from '@angular/core';
-import { Treatment, TreatmentCategory } from '../models/treatment.model';
-
-const STORAGE_KEY = 'dental-treatments';
+import { Injectable, inject, signal } from '@angular/core';
+import { HttpClient, HttpParams } from '@angular/common/http';
+import { Observable, tap } from 'rxjs';
+import { environment } from '../../environments/environment';
+import { Treatment, TreatmentCreate, TreatmentUpdate } from '../models/treatment.model';
 
 @Injectable({ providedIn: 'root' })
 export class TreatmentService {
-  private readonly items = signal<Treatment[]>(this.load());
+  private http = inject(HttpClient);
+  private apiUrl = environment.apiUrl + '/api/treatments';
+
+  private readonly items = signal<Treatment[]>([]);
+  private loaded = false;
 
   getAll(): Treatment[] {
     return this.items();
@@ -15,33 +20,40 @@ export class TreatmentService {
     return this.items().find(t => t.id === id);
   }
 
-  create(data: Omit<Treatment, 'id' | 'createdAt'>): Treatment {
-    const treatment: Treatment = {
-      ...data,
-      id: crypto.randomUUID(),
-      createdAt: new Date().toISOString(),
-    };
-    const updated = [treatment, ...this.items()];
-    this.items.set(updated);
-    this.save(updated);
-    return treatment;
+  loadAll(params?: { category?: string }): Observable<Treatment[]> {
+    let httpParams = new HttpParams();
+    if (params?.category) httpParams = httpParams.set('category', params.category);
+
+    return this.http.get<Treatment[]>(this.apiUrl, { params: httpParams }).pipe(
+      tap(treatments => {
+        this.items.set(treatments);
+        this.loaded = true;
+      }),
+    );
   }
 
-  update(id: string, data: Partial<Omit<Treatment, 'id' | 'createdAt'>>): Treatment | undefined {
-    const items = this.items();
-    const index = items.findIndex(t => t.id === id);
-    if (index === -1) return undefined;
-    const updated = [...items];
-    updated[index] = { ...updated[index], ...data };
-    this.items.set(updated);
-    this.save(updated);
-    return updated[index];
+  loadById(id: string): Observable<Treatment> {
+    return this.http.get<Treatment>(`${this.apiUrl}/${id}`);
   }
 
-  delete(id: string): void {
-    const updated = this.items().filter(t => t.id !== id);
-    this.items.set(updated);
-    this.save(updated);
+  create(data: TreatmentCreate): Observable<Treatment> {
+    return this.http.post<Treatment>(this.apiUrl, data).pipe(
+      tap(treatment => this.items.set([treatment, ...this.items()])),
+    );
+  }
+
+  update(id: string, data: TreatmentUpdate): Observable<Treatment> {
+    return this.http.put<Treatment>(`${this.apiUrl}/${id}`, data).pipe(
+      tap(updated => {
+        this.items.set(this.items().map(t => (t.id === id ? updated : t)));
+      }),
+    );
+  }
+
+  delete(id: string): Observable<void> {
+    return this.http.delete<void>(`${this.apiUrl}/${id}`).pipe(
+      tap(() => this.items.set(this.items().filter(t => t.id !== id))),
+    );
   }
 
   search(query: string, filters: { category?: string }): Treatment[] {
@@ -51,83 +63,17 @@ export class TreatmentService {
     }
     if (query.trim()) {
       const q = query.toLowerCase().trim();
-      results = results.filter(t =>
-        t.name.toLowerCase().includes(q) ||
-        t.code.toLowerCase().includes(q) ||
-        t.description.toLowerCase().includes(q)
+      results = results.filter(
+        t =>
+          t.name.toLowerCase().includes(q) ||
+          t.code.toLowerCase().includes(q) ||
+          (t.description || '').toLowerCase().includes(q),
       );
     }
     return results;
   }
 
-  private load(): Treatment[] {
-    const raw = localStorage.getItem(STORAGE_KEY);
-    if (raw) return JSON.parse(raw);
-    const seed = this.createSeedData();
-    this.save(seed);
-    return seed;
-  }
-
-  private save(items: Treatment[]): void {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(items));
-  }
-
-  private createSeedData(): Treatment[] {
-    return [
-      {
-        id: 'seed-tx-composite',
-        code: 'TX-001',
-        name: 'Composite Filling',
-        category: TreatmentCategory.Restorative,
-        description: 'Tooth-colored composite resin restoration',
-        defaultPrice: 3000,
-        createdAt: '2025-01-01T00:00:00.000Z',
-      },
-      {
-        id: 'seed-tx-root-canal',
-        code: 'TX-002',
-        name: 'Root Canal Treatment',
-        category: TreatmentCategory.Endodontic,
-        description: 'Endodontic treatment to remove infected pulp tissue',
-        defaultPrice: 8000,
-        createdAt: '2025-01-01T00:00:00.000Z',
-      },
-      {
-        id: 'seed-tx-scaling',
-        code: 'TX-003',
-        name: 'Scaling and Polishing',
-        category: TreatmentCategory.Preventive,
-        description: 'Professional teeth cleaning and tartar removal',
-        defaultPrice: 2500,
-        createdAt: '2025-01-01T00:00:00.000Z',
-      },
-      {
-        id: 'seed-tx-extraction',
-        code: 'TX-004',
-        name: 'Tooth Extraction',
-        category: TreatmentCategory.Surgical,
-        description: 'Simple tooth extraction',
-        defaultPrice: 2000,
-        createdAt: '2025-01-01T00:00:00.000Z',
-      },
-      {
-        id: 'seed-tx-crown',
-        code: 'TX-005',
-        name: 'Dental Crown',
-        category: TreatmentCategory.Prosthetic,
-        description: 'Porcelain or ceramic dental crown',
-        defaultPrice: 15000,
-        createdAt: '2025-01-01T00:00:00.000Z',
-      },
-      {
-        id: 'seed-tx-braces',
-        code: 'TX-006',
-        name: 'Orthodontic Braces',
-        category: TreatmentCategory.Orthodontic,
-        description: 'Fixed orthodontic braces for teeth alignment',
-        defaultPrice: 60000,
-        createdAt: '2025-01-01T00:00:00.000Z',
-      },
-    ];
+  isLoaded(): boolean {
+    return this.loaded;
   }
 }

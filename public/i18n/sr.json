@@ -181,5 +181,14 @@
   "common.confirmDelete": "Da li ste sigurni da želite da obrišete?",
   "common.required": "Ovo polje je obavezno",
   "common.invalidEmail": "Unesite ispravnu email adresu",
-  "common.minLength": "Minimalna dužina je {0} karaktera"
+  "common.minLength": "Minimalna dužina je {0} karaktera",
+
+  "nav.logout": "Odjava",
+
+  "login.title": "Prijava",
+  "login.email": "Email",
+  "login.password": "Lozinka",
+  "login.submit": "Prijavi se",
+  "login.error": "Pogrešan email ili lozinka",
+  "login.loading": "Prijavljivanje..."
 }

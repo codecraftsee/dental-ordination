@@ -1,5 +1,6 @@
 import { Component, inject, signal, OnInit } from '@angular/core';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
+import { forkJoin } from 'rxjs';
 import { TranslatePipe } from '../../shared/translate.pipe';
 import { LocalizedDatePipe } from '../../shared/localized-date.pipe';
 import { CurrencyFormatPipe } from '../../shared/currency-format.pipe';
@@ -33,13 +34,24 @@ export default class PatientDetail implements OnInit {
 
   ngOnInit(): void {
     const id = this.route.snapshot.paramMap.get('id');
-    if (id) {
-      this.patient.set(this.patientService.getById(id));
-      this.recentVisits.set(this.visitService.getByPatientId(id).slice(0, 5));
-    }
-    if (!this.patient()) {
+    if (!id) {
       this.router.navigate(['/patients']);
+      return;
     }
+
+    forkJoin([
+      this.patientService.loadById(id),
+      this.visitService.loadAll({ patientId: id }),
+      this.doctorService.loadAll(),
+      this.diagnosisService.loadAll(),
+      this.treatmentService.loadAll(),
+    ]).subscribe({
+      next: ([patient]) => {
+        this.patient.set(patient);
+        this.recentVisits.set(this.visitService.getByPatientId(id).slice(0, 5));
+      },
+      error: () => this.router.navigate(['/patients']),
+    });
   }
 
   getDoctorName(id: string): string {
@@ -47,19 +59,22 @@ export default class PatientDetail implements OnInit {
     return d ? `Dr. ${d.firstName} ${d.lastName}` : '';
   }
 
-  getDiagnosisName(id: string): string {
+  getDiagnosisName(id: string | undefined): string {
+    if (!id) return '';
     return this.diagnosisService.getById(id)?.name || '';
   }
 
-  getTreatmentName(id: string): string {
+  getTreatmentName(id: string | undefined): string {
+    if (!id) return '';
     return this.treatmentService.getById(id)?.name || '';
   }
 
   deletePatient(): void {
     const p = this.patient();
     if (p && confirm(this.translateService.translate('common.confirmDelete'))) {
-      this.patientService.delete(p.id);
-      this.router.navigate(['/patients']);
+      this.patientService.delete(p.id).subscribe(() => {
+        this.router.navigate(['/patients']);
+      });
     }
   }
 }

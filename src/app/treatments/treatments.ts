@@ -1,4 +1,4 @@
-import { Component, inject, signal, computed } from '@angular/core';
+import { Component, inject, signal, computed, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import { TranslatePipe } from '../shared/translate.pipe';
 import { CurrencyFormatPipe } from '../shared/currency-format.pipe';
@@ -11,7 +11,7 @@ import { TreatmentCategory, Treatment } from '../models/treatment.model';
   templateUrl: './treatments.html',
   styleUrl: './treatments.scss',
 })
-export default class Treatments {
+export default class Treatments implements OnInit {
   private fb = inject(FormBuilder);
   private treatmentService = inject(TreatmentService);
 
@@ -34,6 +34,10 @@ export default class Treatments {
     description: [''],
     defaultPrice: [0, [Validators.required, Validators.min(0)]],
   });
+
+  ngOnInit(): void {
+    this.treatmentService.loadAll().subscribe();
+  }
 
   get f() {
     return this.form.controls;
@@ -79,14 +83,13 @@ export default class Treatments {
 
     const id = this.editingId();
     if (id) {
-      this.treatmentService.update(id, this.form.value);
+      this.treatmentService.update(id, this.form.value).subscribe(() => this.cancelForm());
     } else {
-      this.treatmentService.create(this.form.value);
+      this.treatmentService.create(this.form.value).subscribe(() => this.cancelForm());
     }
-    this.cancelForm();
   }
 
   deleteTreatment(id: string): void {
-    this.treatmentService.delete(id);
+    this.treatmentService.delete(id).subscribe();
   }
 }

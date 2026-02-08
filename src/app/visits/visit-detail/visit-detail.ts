@@ -1,5 +1,6 @@
 import { Component, inject, signal, OnInit } from '@angular/core';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
+import { forkJoin } from 'rxjs';
 import { TranslatePipe } from '../../shared/translate.pipe';
 import { LocalizedDatePipe } from '../../shared/localized-date.pipe';
 import { CurrencyFormatPipe } from '../../shared/currency-format.pipe';
@@ -31,12 +32,21 @@ export default class VisitDetail implements OnInit {
 
   ngOnInit(): void {
     const id = this.route.snapshot.paramMap.get('id');
-    if (id) {
-      this.visit.set(this.visitService.getById(id));
-    }
-    if (!this.visit()) {
+    if (!id) {
       this.router.navigate(['/visits']);
+      return;
     }
+
+    forkJoin([
+      this.visitService.loadById(id),
+      this.patientService.loadAll(),
+      this.doctorService.loadAll(),
+      this.diagnosisService.loadAll(),
+      this.treatmentService.loadAll(),
+    ]).subscribe({
+      next: ([visit]) => this.visit.set(visit),
+      error: () => this.router.navigate(['/visits']),
+    });
   }
 
   getPatientName(id: string): string {
@@ -49,27 +59,32 @@ export default class VisitDetail implements OnInit {
     return d ? `Dr. ${d.firstName} ${d.lastName}` : '';
   }
 
-  getDiagnosisName(id: string): string {
+  getDiagnosisName(id: string | undefined): string {
+    if (!id) return '';
     return this.diagnosisService.getById(id)?.name || '';
   }
 
-  getDiagnosisCode(id: string): string {
+  getDiagnosisCode(id: string | undefined): string {
+    if (!id) return '';
     return this.diagnosisService.getById(id)?.code || '';
   }
 
-  getTreatmentName(id: string): string {
+  getTreatmentName(id: string | undefined): string {
+    if (!id) return '';
     return this.treatmentService.getById(id)?.name || '';
   }
 
-  getTreatmentCode(id: string): string {
+  getTreatmentCode(id: string | undefined): string {
+    if (!id) return '';
     return this.treatmentService.getById(id)?.code || '';
   }
 
   deleteVisit(): void {
     const v = this.visit();
     if (v && confirm(this.translateService.translate('common.confirmDelete'))) {
-      this.visitService.delete(v.id);
-      this.router.navigate(['/visits']);
+      this.visitService.delete(v.id).subscribe(() => {
+        this.router.navigate(['/visits']);
+      });
     }
   }
 }

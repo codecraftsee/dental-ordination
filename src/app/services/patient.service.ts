@@ -1,11 +1,16 @@
-import { Injectable, signal } from '@angular/core';
-import { Patient } from '../models/patient.model';
-
-const STORAGE_KEY = 'dental-patients';
+import { Injectable, inject, signal } from '@angular/core';
+import { HttpClient, HttpParams } from '@angular/common/http';
+import { Observable, tap } from 'rxjs';
+import { environment } from '../../environments/environment';
+import { Patient, PatientCreate, PatientUpdate } from '../models/patient.model';
 
 @Injectable({ providedIn: 'root' })
 export class PatientService {
-  private readonly items = signal<Patient[]>(this.load());
+  private http = inject(HttpClient);
+  private apiUrl = environment.apiUrl + '/api/patients';
+
+  private readonly items = signal<Patient[]>([]);
+  private loaded = false;
 
   getAll(): Patient[] {
     return this.items();
@@ -15,33 +20,41 @@ export class PatientService {
     return this.items().find(p => p.id === id);
   }
 
-  create(data: Omit<Patient, 'id' | 'createdAt'>): Patient {
-    const patient: Patient = {
-      ...data,
-      id: crypto.randomUUID(),
-      createdAt: new Date().toISOString(),
-    };
-    const updated = [patient, ...this.items()];
-    this.items.set(updated);
-    this.save(updated);
-    return patient;
+  loadAll(params?: { search?: string; city?: string }): Observable<Patient[]> {
+    let httpParams = new HttpParams();
+    if (params?.search) httpParams = httpParams.set('search', params.search);
+    if (params?.city) httpParams = httpParams.set('city', params.city);
+
+    return this.http.get<Patient[]>(this.apiUrl, { params: httpParams }).pipe(
+      tap(patients => {
+        this.items.set(patients);
+        this.loaded = true;
+      }),
+    );
   }
 
-  update(id: string, data: Partial<Omit<Patient, 'id' | 'createdAt'>>): Patient | undefined {
-    const items = this.items();
-    const index = items.findIndex(p => p.id === id);
-    if (index === -1) return undefined;
-    const updated = [...items];
-    updated[index] = { ...updated[index], ...data };
-    this.items.set(updated);
-    this.save(updated);
-    return updated[index];
+  loadById(id: string): Observable<Patient> {
+    return this.http.get<Patient>(`${this.apiUrl}/${id}`);
   }
 
-  delete(id: string): void {
-    const updated = this.items().filter(p => p.id !== id);
-    this.items.set(updated);
-    this.save(updated);
+  create(data: PatientCreate): Observable<Patient> {
+    return this.http.post<Patient>(this.apiUrl, data).pipe(
+      tap(patient => this.items.set([patient, ...this.items()])),
+    );
+  }
+
+  update(id: string, data: PatientUpdate): Observable<Patient> {
+    return this.http.put<Patient>(`${this.apiUrl}/${id}`, data).pipe(
+      tap(updated => {
+        this.items.set(this.items().map(p => (p.id === id ? updated : p)));
+      }),
+    );
+  }
+
+  delete(id: string): Observable<void> {
+    return this.http.delete<void>(`${this.apiUrl}/${id}`).pipe(
+      tap(() => this.items.set(this.items().filter(p => p.id !== id))),
+    );
   }
 
   search(query: string, filters: { city?: string; gender?: string }): Patient[] {
@@ -54,74 +67,23 @@ export class PatientService {
     }
     if (query.trim()) {
       const q = query.toLowerCase().trim();
-      results = results.filter(p =>
-        p.firstName.toLowerCase().includes(q) ||
-        p.lastName.toLowerCase().includes(q) ||
-        p.phone.includes(q) ||
-        p.city.toLowerCase().includes(q)
+      results = results.filter(
+        p =>
+          p.firstName.toLowerCase().includes(q) ||
+          p.lastName.toLowerCase().includes(q) ||
+          (p.phone || '').includes(q) ||
+          (p.city || '').toLowerCase().includes(q),
       );
     }
     return results;
   }
 
   getCities(): string[] {
-    const cities = new Set(this.items().map(p => p.city));
+    const cities = new Set(this.items().map(p => p.city).filter(Boolean) as string[]);
     return [...cities].sort();
   }
 
-  private load(): Patient[] {
-    const raw = localStorage.getItem(STORAGE_KEY);
-    if (raw) return JSON.parse(raw);
-    const seed = this.createSeedData();
-    this.save(seed);
-    return seed;
-  }
-
-  private save(items: Patient[]): void {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(items));
-  }
-
-  private createSeedData(): Patient[] {
-    return [
-      {
-        id: 'seed-patient-miodrag',
-        firstName: 'Miodrag',
-        lastName: 'Petrović',
-        parentName: 'Zoran',
-        gender: 'male',
-        dateOfBirth: '1985-03-15',
-        address: 'Knez Mihailova 25',
-        city: 'Beograd',
-        phone: '011-234-5678',
-        email: 'miodrag.petrovic@email.com',
-        createdAt: '2025-01-10T09:00:00.000Z',
-      },
-      {
-        id: 'seed-patient-jelena',
-        firstName: 'Jelena',
-        lastName: 'Nikolić',
-        parentName: 'Dragan',
-        gender: 'female',
-        dateOfBirth: '1992-07-22',
-        address: 'Bulevar Oslobođenja 10',
-        city: 'Novi Sad',
-        phone: '021-345-6789',
-        email: 'jelena.nikolic@email.com',
-        createdAt: '2025-02-05T10:30:00.000Z',
-      },
-      {
-        id: 'seed-patient-marko',
-        firstName: 'Marko',
-        lastName: 'Jovanović',
-        parentName: 'Milan',
-        gender: 'male',
-        dateOfBirth: '2010-11-08',
-        address: 'Svetozara Markovića 5',
-        city: 'Beograd',
-        phone: '011-456-7890',
-        email: 'milan.jovanovic@email.com',
-        createdAt: '2025-03-12T14:00:00.000Z',
-      },
-    ];
+  isLoaded(): boolean {
+    return this.loaded;
   }
 }
