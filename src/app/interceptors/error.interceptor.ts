@@ -21,7 +21,7 @@ export const errorInterceptor: HttpInterceptorFn = (req, next) => {
               return throwError(() => error);
             }
             const retryReq = req.clone({
-              setHeaders: { Authorization: `Bearer ${tokenResponse.access_token}` },
+              setHeaders: { Authorization: `Bearer ${tokenResponse.accessToken}` },
             });
             return next(retryReq);
           }),

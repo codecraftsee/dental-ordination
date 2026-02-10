@@ -1,5 +1,5 @@
 import { Injectable, inject, signal, computed } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Router } from '@angular/router';
 import { Observable, tap, catchError, of } from 'rxjs';
 import { environment } from '../../environments/environment';
@@ -30,12 +30,21 @@ export class AuthService {
   }
 
   login(credentials: LoginRequest): Observable<TokenResponse> {
-    return this.http.post<TokenResponse>(`${this.apiUrl}/login`, credentials).pipe(
-      tap(response => {
-        localStorage.setItem(ACCESS_TOKEN_KEY, response.access_token);
-        localStorage.setItem(REFRESH_TOKEN_KEY, response.refresh_token);
-      }),
-    );
+    // Backend uses OAuth2PasswordRequestForm which expects form data with 'username' field
+    const body = new URLSearchParams();
+    body.set('username', credentials.email);
+    body.set('password', credentials.password);
+
+    return this.http
+      .post<TokenResponse>(`${this.apiUrl}/login`, body.toString(), {
+        headers: new HttpHeaders({ 'Content-Type': 'application/x-www-form-urlencoded' }),
+      })
+      .pipe(
+        tap(response => {
+          localStorage.setItem(ACCESS_TOKEN_KEY, response.accessToken);
+          localStorage.setItem(REFRESH_TOKEN_KEY, response.refreshToken);
+        }),
+      );
   }
 
   refreshToken(): Observable<TokenResponse | null> {
@@ -45,11 +54,11 @@ export class AuthService {
       return of(null);
     }
     return this.http
-      .post<TokenResponse>(`${this.apiUrl}/refresh`, { refresh_token: refreshToken })
+      .post<TokenResponse>(`${this.apiUrl}/refresh`, { refreshToken })
       .pipe(
         tap(response => {
-          localStorage.setItem(ACCESS_TOKEN_KEY, response.access_token);
-          localStorage.setItem(REFRESH_TOKEN_KEY, response.refresh_token);
+          localStorage.setItem(ACCESS_TOKEN_KEY, response.accessToken);
+          localStorage.setItem(REFRESH_TOKEN_KEY, response.refreshToken);
         }),
         catchError(() => {
           this.logout();
