@@ -1,7 +1,7 @@
 import { Component, inject, OnInit, OnDestroy } from '@angular/core';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
-import { Subscription } from 'rxjs';
+import { Subscription, forkJoin } from 'rxjs';
 import { TranslatePipe } from '../../shared/translate.pipe';
 import { VisitService } from '../../services/visit.service';
 import { PatientService } from '../../services/patient.service';
@@ -24,10 +24,10 @@ export default class VisitForm implements OnInit, OnDestroy {
   private diagnosisService = inject(DiagnosisService);
   private treatmentService = inject(TreatmentService);
 
-  patients = this.patientService.getAll();
-  doctors = this.doctorService.getAll();
-  diagnoses = this.diagnosisService.getAll();
-  treatments = this.treatmentService.getAll();
+  get patients() { return this.patientService.getAll(); }
+  get doctors() { return this.doctorService.getAll(); }
+  get diagnoses() { return this.diagnosisService.getAll(); }
+  get treatments() { return this.treatmentService.getAll(); }
 
   form!: FormGroup;
   private treatmentSub?: Subscription;
@@ -44,6 +44,13 @@ export default class VisitForm implements OnInit, OnDestroy {
       treatmentNotes: [''],
       price: [0, [Validators.required, Validators.min(0)]],
     });
+
+    forkJoin([
+      this.patientService.loadAll(),
+      this.doctorService.loadAll(),
+      this.diagnosisService.loadAll(),
+      this.treatmentService.loadAll(),
+    ]).subscribe();
 
     this.treatmentSub = this.form.get('treatmentId')!.valueChanges.subscribe(treatmentId => {
       if (treatmentId) {
@@ -70,11 +77,12 @@ export default class VisitForm implements OnInit, OnDestroy {
     }
 
     const formValue = this.form.value;
-    const visit = this.visitService.create({
+    this.visitService.create({
       ...formValue,
       toothNumber: formValue.toothNumber ? Number(formValue.toothNumber) : null,
       price: Number(formValue.price),
+    }).subscribe(visit => {
+      this.router.navigate(['/visits', visit.id]);
     });
-    this.router.navigate(['/visits', visit.id]);
   }
 }

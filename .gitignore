@@ -42,3 +42,7 @@ __screenshots__/
 # System files
 .DS_Store
 Thumbs.db
+debug.log
+nul
+.claude/settings.local.json
+specs/Pavković Miodrag 417.xlsx

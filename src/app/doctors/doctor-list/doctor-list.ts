@@ -1,4 +1,4 @@
-import { Component, inject, signal, computed } from '@angular/core';
+import { Component, inject, signal, computed, OnInit } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { TranslatePipe } from '../../shared/translate.pipe';
 import { DoctorService } from '../../services/doctor.service';
@@ -10,7 +10,7 @@ import { Specialization } from '../../models/doctor.model';
   templateUrl: './doctor-list.html',
   styleUrl: './doctor-list.scss',
 })
-export default class DoctorList {
+export default class DoctorList implements OnInit {
   private doctorService = inject(DoctorService);
 
   specializations = Object.values(Specialization);
@@ -22,6 +22,10 @@ export default class DoctorList {
       specialization: this.specializationFilter() || undefined,
     });
   });
+
+  ngOnInit(): void {
+    this.doctorService.loadAll().subscribe();
+  }
 
   onSearch(event: Event): void {
     this.searchQuery.set((event.target as HTMLInputElement).value);

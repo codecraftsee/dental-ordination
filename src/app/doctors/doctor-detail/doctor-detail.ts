@@ -1,5 +1,6 @@
 import { Component, inject, signal, OnInit } from '@angular/core';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
+import { forkJoin } from 'rxjs';
 import { TranslatePipe } from '../../shared/translate.pipe';
 import { LocalizedDatePipe } from '../../shared/localized-date.pipe';
 import { CurrencyFormatPipe } from '../../shared/currency-format.pipe';
@@ -33,13 +34,24 @@ export default class DoctorDetail implements OnInit {
 
   ngOnInit(): void {
     const id = this.route.snapshot.paramMap.get('id');
-    if (id) {
-      this.doctor.set(this.doctorService.getById(id));
-      this.visits.set(this.visitService.getByDoctorId(id));
-    }
-    if (!this.doctor()) {
+    if (!id) {
       this.router.navigate(['/doctors']);
+      return;
     }
+
+    forkJoin([
+      this.doctorService.loadById(id),
+      this.visitService.loadAll({ doctorId: id }),
+      this.patientService.loadAll(),
+      this.diagnosisService.loadAll(),
+      this.treatmentService.loadAll(),
+    ]).subscribe({
+      next: ([doctor]) => {
+        this.doctor.set(doctor);
+        this.visits.set(this.visitService.getByDoctorId(id));
+      },
+      error: () => this.router.navigate(['/doctors']),
+    });
   }
 
   getPatientName(id: string): string {
@@ -47,19 +59,22 @@ export default class DoctorDetail implements OnInit {
     return p ? `${p.firstName} ${p.lastName}` : '';
   }
 
-  getDiagnosisName(id: string): string {
+  getDiagnosisName(id: string | undefined): string {
+    if (!id) return '';
     return this.diagnosisService.getById(id)?.name || '';
   }
 
-  getTreatmentName(id: string): string {
+  getTreatmentName(id: string | undefined): string {
+    if (!id) return '';
     return this.treatmentService.getById(id)?.name || '';
   }
 
   deleteDoctor(): void {
     const d = this.doctor();
     if (d && confirm(this.translateService.translate('common.confirmDelete'))) {
-      this.doctorService.delete(d.id);
-      this.router.navigate(['/doctors']);
+      this.doctorService.delete(d.id).subscribe(() => {
+        this.router.navigate(['/doctors']);
+      });
     }
   }
 }

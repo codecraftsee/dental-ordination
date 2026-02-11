@@ -37,19 +37,19 @@ export default class DoctorForm implements OnInit {
     });
 
     if (this.isEditMode && this.doctorId) {
-      const doctor = this.doctorService.getById(this.doctorId);
-      if (doctor) {
-        this.form.patchValue({
-          firstName: doctor.firstName,
-          lastName: doctor.lastName,
-          specialization: doctor.specialization,
-          phone: doctor.phone,
-          email: doctor.email,
-          licenseNumber: doctor.licenseNumber,
-        });
-      } else {
-        this.router.navigate(['/doctors']);
-      }
+      this.doctorService.loadById(this.doctorId).subscribe({
+        next: doctor => {
+          this.form.patchValue({
+            firstName: doctor.firstName,
+            lastName: doctor.lastName,
+            specialization: doctor.specialization,
+            phone: doctor.phone,
+            email: doctor.email,
+            licenseNumber: doctor.licenseNumber,
+          });
+        },
+        error: () => this.router.navigate(['/doctors']),
+      });
     }
   }
 
@@ -64,11 +64,13 @@ export default class DoctorForm implements OnInit {
     }
 
     if (this.isEditMode && this.doctorId) {
-      this.doctorService.update(this.doctorId, this.form.value);
-      this.router.navigate(['/doctors', this.doctorId]);
+      this.doctorService.update(this.doctorId, this.form.value).subscribe(doctor => {
+        this.router.navigate(['/doctors', doctor.id]);
+      });
     } else {
-      const doctor = this.doctorService.create(this.form.value);
-      this.router.navigate(['/doctors', doctor.id]);
+      this.doctorService.create(this.form.value).subscribe(doctor => {
+        this.router.navigate(['/doctors', doctor.id]);
+      });
     }
   }
 }

@@ -12,6 +12,20 @@ export interface Diagnosis {
   code: string;
   name: string;
   category: DiagnosisCategory;
-  description: string;
+  description?: string;
   createdAt: string;
+}
+
+export interface DiagnosisCreate {
+  code: string;
+  name: string;
+  category: DiagnosisCategory;
+  description?: string;
+}
+
+export interface DiagnosisUpdate {
+  code?: string;
+  name?: string;
+  category?: DiagnosisCategory;
+  description?: string;
 }

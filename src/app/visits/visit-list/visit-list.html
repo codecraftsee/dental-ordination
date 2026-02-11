@@ -13,13 +13,13 @@
     />
     <select class="form-control" (change)="onPatientChange($event)">
       <option value="">{{ 'visits.filterPatient' | translate }}</option>
-      @for (p of patients; track p.id) {
+      @for (p of patients(); track p.id) {
         <option [value]="p.id">{{ p.firstName }} {{ p.lastName }}</option>
       }
     </select>
     <select class="form-control" (change)="onDoctorChange($event)">
       <option value="">{{ 'visits.filterDoctor' | translate }}</option>
-      @for (d of doctors; track d.id) {
+      @for (d of doctors(); track d.id) {
         <option [value]="d.id">Dr. {{ d.firstName }} {{ d.lastName }}</option>
       }
     </select>

@@ -13,7 +13,7 @@
     />
     <select class="form-control" (change)="onCityChange($event)">
       <option value="">{{ 'patients.filterCity' | translate }}</option>
-      @for (city of cities; track city) {
+      @for (city of cities(); track city) {
         <option [value]="city">{{ city }}</option>
       }
     </select>

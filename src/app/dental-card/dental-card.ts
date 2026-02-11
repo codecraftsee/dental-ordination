@@ -1,5 +1,6 @@
 import { Component, inject, signal, computed, OnInit } from '@angular/core';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
+import { forkJoin } from 'rxjs';
 import { TranslatePipe } from '../shared/translate.pipe';
 import { LocalizedDatePipe } from '../shared/localized-date.pipe';
 import { CurrencyFormatPipe } from '../shared/currency-format.pipe';
@@ -34,20 +35,31 @@ export default class DentalCard implements OnInit {
   today = new Date().toISOString().split('T')[0];
 
   totalCost = computed(() => {
-    return this.visits().reduce((sum, v) => sum + v.price, 0);
+    return this.visits().reduce((sum, v) => sum + (v.price || 0), 0);
   });
 
   ngOnInit(): void {
     const id = this.route.snapshot.paramMap.get('id');
-    if (id) {
-      this.patient.set(this.patientService.getById(id));
-      this.visits.set(
-        this.visitService.getByPatientId(id).sort((a, b) => a.date.localeCompare(b.date))
-      );
-    }
-    if (!this.patient()) {
+    if (!id) {
       this.router.navigate(['/patients']);
+      return;
     }
+
+    forkJoin([
+      this.patientService.loadById(id),
+      this.visitService.loadAll({ patientId: id }),
+      this.doctorService.loadAll(),
+      this.diagnosisService.loadAll(),
+      this.treatmentService.loadAll(),
+    ]).subscribe({
+      next: ([patient]) => {
+        this.patient.set(patient);
+        this.visits.set(
+          this.visitService.getByPatientId(id).sort((a, b) => a.date.localeCompare(b.date)),
+        );
+      },
+      error: () => this.router.navigate(['/patients']),
+    });
   }
 
   getDoctorName(id: string): string {
@@ -56,7 +68,7 @@ export default class DentalCard implements OnInit {
   }
 
   formatDiagnosis(visit: Visit): string {
-    const diag = this.diagnosisService.getById(visit.diagnosisId);
+    const diag = visit.diagnosisId ? this.diagnosisService.getById(visit.diagnosisId) : undefined;
     const parts: string[] = [];
     if (diag) parts.push(diag.code);
     if (visit.toothNumber) parts.push(`d ${visit.toothNumber}`);
@@ -65,7 +77,7 @@ export default class DentalCard implements OnInit {
   }
 
   formatTreatment(visit: Visit): string {
-    const treat = this.treatmentService.getById(visit.treatmentId);
+    const treat = visit.treatmentId ? this.treatmentService.getById(visit.treatmentId) : undefined;
     const parts: string[] = [];
     if (treat) parts.push(treat.name);
     if (visit.treatmentNotes) parts.push(visit.treatmentNotes);
@@ -89,12 +101,12 @@ export default class DentalCard implements OnInit {
     rows.push([`${t('patient.gender')}:`, '', p.gender === 'male' ? t('patient.gender.male') : t('patient.gender.female')]);
     rows.push([`${t('patient.lastName')}:`, '', p.lastName]);
     rows.push([`${t('patient.firstName')}:`, '', p.firstName]);
-    rows.push([`${t('patient.parentName')}:`, '', p.parentName]);
+    rows.push([`${t('patient.parentName')}:`, '', p.parentName || '']);
     rows.push([`${t('patient.dateOfBirth')}:`, '', p.dateOfBirth]);
-    rows.push([`${t('patient.address')}:`, '', p.address]);
-    rows.push([`${t('patient.city')}:`, '', p.city]);
-    rows.push([`${t('patient.phone')}:`, '', p.phone]);
-    rows.push([`${t('patient.email')}:`, '', p.email]);
+    rows.push([`${t('patient.address')}:`, '', p.address || '']);
+    rows.push([`${t('patient.city')}:`, '', p.city || '']);
+    rows.push([`${t('patient.phone')}:`, '', p.phone || '']);
+    rows.push([`${t('patient.email')}:`, '', p.email || '']);
     rows.push([`${t('dentalCard.recordDate')}:`, '', this.today]);
     rows.push([]);
 

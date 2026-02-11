@@ -13,8 +13,28 @@ export interface Doctor {
   firstName: string;
   lastName: string;
   specialization: Specialization;
-  phone: string;
-  email: string;
-  licenseNumber: string;
+  phone?: string;
+  email?: string;
+  licenseNumber?: string;
+  userId?: string;
   createdAt: string;
+  updatedAt: string;
+}
+
+export interface DoctorCreate {
+  firstName: string;
+  lastName: string;
+  specialization: Specialization;
+  phone?: string;
+  email?: string;
+  licenseNumber?: string;
+}
+
+export interface DoctorUpdate {
+  firstName?: string;
+  lastName?: string;
+  specialization?: Specialization;
+  phone?: string;
+  email?: string;
+  licenseNumber?: string;
 }

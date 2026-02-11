@@ -13,7 +13,23 @@ export interface Treatment {
   code: string;
   name: string;
   category: TreatmentCategory;
-  description: string;
-  defaultPrice: number;
+  description?: string;
+  defaultPrice?: number;
   createdAt: string;
+}
+
+export interface TreatmentCreate {
+  code: string;
+  name: string;
+  category: TreatmentCategory;
+  description?: string;
+  defaultPrice?: number;
+}
+
+export interface TreatmentUpdate {
+  code?: string;
+  name?: string;
+  category?: TreatmentCategory;
+  description?: string;
+  defaultPrice?: number;
 }

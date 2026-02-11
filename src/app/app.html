@@ -1,17 +1,20 @@
-<nav class="navbar">
-  <div class="navbar-inner container">
-    <a class="navbar-brand" routerLink="/">{{ 'nav.brand' | translate }}</a>
-    <div class="navbar-links">
-      <a routerLink="/" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }">{{ 'nav.home' | translate }}</a>
-      <a routerLink="/patients" routerLinkActive="active">{{ 'nav.patients' | translate }}</a>
-      <a routerLink="/doctors" routerLinkActive="active">{{ 'nav.doctors' | translate }}</a>
-      <a routerLink="/visits" routerLinkActive="active">{{ 'nav.visits' | translate }}</a>
-      <a routerLink="/diagnoses" routerLinkActive="active">{{ 'nav.diagnoses' | translate }}</a>
-      <a routerLink="/treatments" routerLinkActive="active">{{ 'nav.treatments' | translate }}</a>
-      <app-language-switcher />
+@if (authService.isAuthenticated()) {
+  <nav class="navbar">
+    <div class="navbar-inner container">
+      <a class="navbar-brand" routerLink="/">{{ 'nav.brand' | translate }}</a>
+      <div class="navbar-links">
+        <a routerLink="/" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }">{{ 'nav.home' | translate }}</a>
+        <a routerLink="/patients" routerLinkActive="active">{{ 'nav.patients' | translate }}</a>
+        <a routerLink="/doctors" routerLinkActive="active">{{ 'nav.doctors' | translate }}</a>
+        <a routerLink="/visits" routerLinkActive="active">{{ 'nav.visits' | translate }}</a>
+        <a routerLink="/diagnoses" routerLinkActive="active">{{ 'nav.diagnoses' | translate }}</a>
+        <a routerLink="/treatments" routerLinkActive="active">{{ 'nav.treatments' | translate }}</a>
+        <app-language-switcher />
+        <button class="btn-logout" (click)="logout()">{{ 'nav.logout' | translate }}</button>
+      </div>
     </div>
-  </div>
-</nav>
+  </nav>
+}
 <main>
   <router-outlet />
 </main>

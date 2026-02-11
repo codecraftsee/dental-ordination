@@ -1,4 +1,4 @@
-import { Component, inject, signal, computed } from '@angular/core';
+import { Component, inject, signal, computed, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import { TranslatePipe } from '../shared/translate.pipe';
 import { DiagnosisService } from '../services/diagnosis.service';
@@ -10,7 +10,7 @@ import { DiagnosisCategory, Diagnosis } from '../models/diagnosis.model';
   templateUrl: './diagnoses.html',
   styleUrl: './diagnoses.scss',
 })
-export default class Diagnoses {
+export default class Diagnoses implements OnInit {
   private fb = inject(FormBuilder);
   private diagnosisService = inject(DiagnosisService);
 
@@ -32,6 +32,10 @@ export default class Diagnoses {
     category: ['', Validators.required],
     description: [''],
   });
+
+  ngOnInit(): void {
+    this.diagnosisService.loadAll().subscribe();
+  }
 
   get f() {
     return this.form.controls;
@@ -76,14 +80,13 @@ export default class Diagnoses {
 
     const id = this.editingId();
     if (id) {
-      this.diagnosisService.update(id, this.form.value);
+      this.diagnosisService.update(id, this.form.value).subscribe(() => this.cancelForm());
     } else {
-      this.diagnosisService.create(this.form.value);
+      this.diagnosisService.create(this.form.value).subscribe(() => this.cancelForm());
     }
-    this.cancelForm();
   }
 
   deleteDiagnosis(id: string): void {
-    this.diagnosisService.delete(id);
+    this.diagnosisService.delete(id).subscribe();
   }
 }
