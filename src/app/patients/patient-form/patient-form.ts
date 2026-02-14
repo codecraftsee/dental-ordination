@@ -1,4 +1,4 @@
-import { Component, inject, OnInit } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { TranslatePipe } from '../../shared/translate.pipe';
@@ -9,6 +9,7 @@ import { PatientService } from '../../services/patient.service';
   imports: [ReactiveFormsModule, RouterLink, TranslatePipe],
   templateUrl: './patient-form.html',
   styleUrl: './patient-form.scss',
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export default class PatientForm implements OnInit {
   private fb = inject(FormBuilder);

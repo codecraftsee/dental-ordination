@@ -1,4 +1,4 @@
-import { Component, inject, signal, computed, OnInit } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject, signal, computed, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import { TranslatePipe } from '../shared/translate.pipe';
 import { CurrencyFormatPipe } from '../shared/currency-format.pipe';
@@ -10,6 +10,7 @@ import { TreatmentCategory, Treatment } from '../models/treatment.model';
   imports: [ReactiveFormsModule, TranslatePipe, CurrencyFormatPipe],
   templateUrl: './treatments.html',
   styleUrl: './treatments.scss',
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export default class Treatments implements OnInit {
   private fb = inject(FormBuilder);
