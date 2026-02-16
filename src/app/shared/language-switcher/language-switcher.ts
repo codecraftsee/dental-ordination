@@ -1,4 +1,4 @@
-import { Component, inject } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import { TranslateService, Lang } from '../../services/translate.service';
 
 @Component({
@@ -54,6 +54,7 @@ import { TranslateService, Lang } from '../../services/translate.service';
       }
     }
   `],
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class LanguageSwitcher {
   protected translateService = inject(TranslateService);

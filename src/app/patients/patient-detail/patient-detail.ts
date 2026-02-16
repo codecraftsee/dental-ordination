@@ -1,4 +1,4 @@
-import { Component, inject, signal, OnInit } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject, signal, OnInit } from '@angular/core';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { forkJoin } from 'rxjs';
 import { TranslatePipe } from '../../shared/translate.pipe';
@@ -18,6 +18,7 @@ import { Visit } from '../../models/visit.model';
   imports: [RouterLink, TranslatePipe, LocalizedDatePipe, CurrencyFormatPipe],
   templateUrl: './patient-detail.html',
   styleUrl: './patient-detail.scss',
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export default class PatientDetail implements OnInit {
   private route = inject(ActivatedRoute);

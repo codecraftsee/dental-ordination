@@ -1,4 +1,4 @@
-import { Component, inject, OnInit } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { TranslatePipe } from '../../shared/translate.pipe';
@@ -10,6 +10,7 @@ import { Specialization } from '../../models/doctor.model';
   imports: [ReactiveFormsModule, RouterLink, TranslatePipe],
   templateUrl: './doctor-form.html',
   styleUrl: './doctor-form.scss',
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export default class DoctorForm implements OnInit {
   private fb = inject(FormBuilder);

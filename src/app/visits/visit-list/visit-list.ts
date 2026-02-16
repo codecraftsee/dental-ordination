@@ -1,4 +1,4 @@
-import { Component, inject, signal, computed, OnInit } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject, signal, computed, OnInit } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { forkJoin } from 'rxjs';
 import { TranslatePipe } from '../../shared/translate.pipe';
@@ -15,6 +15,7 @@ import { TreatmentService } from '../../services/treatment.service';
   imports: [RouterLink, TranslatePipe, LocalizedDatePipe, CurrencyFormatPipe],
   templateUrl: './visit-list.html',
   styleUrl: './visit-list.scss',
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export default class VisitList implements OnInit {
   private visitService = inject(VisitService);

@@ -1,4 +1,4 @@
-import { Component, inject, OnInit, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject, OnInit, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { forkJoin } from 'rxjs';
 import { TranslatePipe } from '../shared/translate.pipe';
@@ -15,6 +15,7 @@ import { TreatmentService } from '../services/treatment.service';
   imports: [RouterLink, TranslatePipe, LocalizedDatePipe, CurrencyFormatPipe],
   templateUrl: './home.html',
   styleUrl: './home.scss',
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export default class Home implements OnInit {
   private patientService = inject(PatientService);
