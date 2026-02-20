@@ -17,6 +17,10 @@
   "home.newPatient": "Novi Pacijent",
   "home.newVisit": "Nova Poseta",
   "home.noRecentVisits": "Nema nedavnih poseta",
+  "home.importXlsx": "Uvezi XLSX",
+  "home.importing": "Uvoz u toku...",
+  "home.importSuccess": "Uvoz uspešno završen",
+  "home.importError": "Uvoz završen sa upozorenjima",
 
   "patients.title": "Pacijenti",
   "patients.search": "Pretraži pacijente...",

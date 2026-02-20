@@ -30,7 +30,7 @@ export const caseTransformInterceptor: HttpInterceptorFn = (req, next) => {
   }
 
   // Transform outgoing request body: camelCase → snake_case
-  if (req.body && typeof req.body === 'object') {
+  if (req.body && typeof req.body === 'object' && !(req.body instanceof FormData)) {
     req = req.clone({
       body: transformKeys(req.body, camelToSnake),
     });

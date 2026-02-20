@@ -25,8 +25,29 @@
     <div class="actions-row">
       <a routerLink="/patients/new" class="btn btn-primary btn-lg">{{ 'home.newPatient' | translate }}</a>
       <a routerLink="/visits/new" class="btn btn-success btn-lg">{{ 'home.newVisit' | translate }}</a>
+      <button class="btn btn-secondary btn-lg" (click)="triggerXlsxInput()" [disabled]="importing()">
+        @if (importing()) {
+          {{ 'home.importing' | translate }}
+        } @else {
+          {{ 'home.importXlsx' | translate }}
+        }
+      </button>
+      <input
+        #xlsxInput
+        type="file"
+        multiple
+        accept=".xlsx"
+        (change)="onXlsxSelected($event)"
+        style="display: none"
+      />
     </div>
   </div>
+
+  @if (importMessage()) {
+    <div class="import-message" [class.error]="importError()">
+      {{ importMessage() }}
+    </div>
+  }
 
   <div class="recent-visits-section">
     <h2>{{ 'home.recentVisits' | translate }}</h2>

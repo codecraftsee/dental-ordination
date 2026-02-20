@@ -17,6 +17,10 @@
   "home.newPatient": "New Patient",
   "home.newVisit": "New Visit",
   "home.noRecentVisits": "No recent visits",
+  "home.importXlsx": "Import XLSX",
+  "home.importing": "Importing...",
+  "home.importSuccess": "Import completed successfully",
+  "home.importError": "Import completed with warnings",
 
   "patients.title": "Patients",
   "patients.search": "Search patients...",

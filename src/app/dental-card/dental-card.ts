@@ -35,7 +35,7 @@ export default class DentalCard implements OnInit {
   today = new Date().toISOString().split('T')[0];
 
   totalCost = computed(() => {
-    return this.visits().reduce((sum, v) => sum + (v.price || 0), 0);
+    return this.visits().reduce((sum, v) => sum + (Number(v.price) || 0), 0);
   });
 
   ngOnInit(): void {
