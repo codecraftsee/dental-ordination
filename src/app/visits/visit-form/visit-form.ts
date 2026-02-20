@@ -1,4 +1,4 @@
-import { Component, inject, OnInit, OnDestroy } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject, OnInit, OnDestroy } from '@angular/core';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 import { Subscription, forkJoin } from 'rxjs';
@@ -14,6 +14,7 @@ import { TreatmentService } from '../../services/treatment.service';
   imports: [ReactiveFormsModule, RouterLink, TranslatePipe],
   templateUrl: './visit-form.html',
   styleUrl: './visit-form.scss',
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export default class VisitForm implements OnInit, OnDestroy {
   private fb = inject(FormBuilder);

@@ -1,4 +1,4 @@
-import { Component, inject, signal, computed, OnInit } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject, signal, computed, OnInit } from '@angular/core';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { forkJoin } from 'rxjs';
 import { TranslatePipe } from '../shared/translate.pipe';
@@ -19,6 +19,7 @@ import * as XLSX from 'xlsx';
   imports: [RouterLink, TranslatePipe, LocalizedDatePipe, CurrencyFormatPipe],
   templateUrl: './dental-card.html',
   styleUrl: './dental-card.scss',
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export default class DentalCard implements OnInit {
   private route = inject(ActivatedRoute);

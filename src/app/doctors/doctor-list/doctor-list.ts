@@ -1,4 +1,4 @@
-import { Component, inject, signal, computed, OnInit } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject, signal, computed, OnInit } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { TranslatePipe } from '../../shared/translate.pipe';
 import { DoctorService } from '../../services/doctor.service';
@@ -9,6 +9,7 @@ import { Specialization } from '../../models/doctor.model';
   imports: [RouterLink, TranslatePipe],
   templateUrl: './doctor-list.html',
   styleUrl: './doctor-list.scss',
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export default class DoctorList implements OnInit {
   private doctorService = inject(DoctorService);

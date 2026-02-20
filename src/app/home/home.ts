@@ -15,6 +15,7 @@ import { TreatmentService } from '../services/treatment.service';
   imports: [RouterLink, TranslatePipe, LocalizedDatePipe, CurrencyFormatPipe],
   templateUrl: './home.html',
   styleUrl: './home.scss',
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export default class Home implements OnInit {
   private patientService = inject(PatientService);

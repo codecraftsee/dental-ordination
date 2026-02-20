@@ -1,4 +1,4 @@
-import { Component, inject, signal, computed, OnInit } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject, signal, computed, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import { TranslatePipe } from '../shared/translate.pipe';
 import { DiagnosisService } from '../services/diagnosis.service';
@@ -9,6 +9,7 @@ import { DiagnosisCategory, Diagnosis } from '../models/diagnosis.model';
   imports: [ReactiveFormsModule, TranslatePipe],
   templateUrl: './diagnoses.html',
   styleUrl: './diagnoses.scss',
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export default class Diagnoses implements OnInit {
   private fb = inject(FormBuilder);

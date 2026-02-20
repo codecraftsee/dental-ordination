@@ -1,4 +1,4 @@
-import { Component, inject, signal, computed, OnInit } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject, signal, computed, OnInit } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { TranslatePipe } from '../../shared/translate.pipe';
 import { LocalizedDatePipe } from '../../shared/localized-date.pipe';
@@ -9,6 +9,7 @@ import { PatientService } from '../../services/patient.service';
   imports: [RouterLink, TranslatePipe, LocalizedDatePipe],
   templateUrl: './patient-list.html',
   styleUrl: './patient-list.scss',
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export default class PatientList implements OnInit {
   private patientService = inject(PatientService);
