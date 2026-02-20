@@ -4,6 +4,14 @@ import { Observable, tap } from 'rxjs';
 import { environment } from '../../environments/environment';
 import { Patient, PatientCreate, PatientUpdate } from '../models/patient.model';
 
+export interface ImportResult {
+  patientsCreated: number;
+  patientsFound: number;
+  visitsCreated: number;
+  filesProcessed: number;
+  errors: string[];
+}
+
 @Injectable({ providedIn: 'root' })
 export class PatientService {
   private http = inject(HttpClient);
@@ -85,5 +93,16 @@ export class PatientService {
 
   isLoaded(): boolean {
     return this.loaded;
+  }
+
+  importXlsx(files: File[]): Observable<ImportResult> {
+    const formData = new FormData();
+    for (const file of files) {
+      formData.append('files', file);
+    }
+    return this.http.post<ImportResult>(
+      environment.apiUrl + '/api/import/xlsx',
+      formData,
+    );
   }
 }

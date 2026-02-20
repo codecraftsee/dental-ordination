@@ -17,6 +17,10 @@
   "home.newPatient": "Novi Pacijent",
   "home.newVisit": "Nova Poseta",
   "home.noRecentVisits": "Nema nedavnih poseta",
+  "home.importXlsx": "Uvezi XLSX",
+  "home.importing": "Uvoz u toku...",
+  "home.importSuccess": "Uvoz uspešno završen",
+  "home.importError": "Uvoz završen sa upozorenjima",
 
   "patients.title": "Pacijenti",
   "patients.search": "Pretraži pacijente...",
@@ -183,6 +187,8 @@
   "common.invalidEmail": "Unesite ispravnu email adresu",
   "common.minLength": "Minimalna dužina je {0} karaktera",
 
+  "nav.darkMode": "Prebaci na tamni mod",
+  "nav.lightMode": "Prebaci na svetli mod",
   "nav.logout": "Odjava",
 
   "login.title": "Prijava",

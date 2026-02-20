@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, inject, OnInit, signal } from '@angular/core';
+import { Component, ElementRef, inject, OnInit, signal, ViewChild } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { forkJoin } from 'rxjs';
 import { TranslatePipe } from '../shared/translate.pipe';
@@ -24,7 +24,12 @@ export default class Home implements OnInit {
   private diagnosisService = inject(DiagnosisService);
   private treatmentService = inject(TreatmentService);
 
+  @ViewChild('xlsxInput') xlsxInput!: ElementRef<HTMLInputElement>;
+
   loaded = signal(false);
+  importing = signal(false);
+  importMessage = signal('');
+  importError = signal(false);
   totalPatients = 0;
   totalDoctors = 0;
   visitsThisMonth = 0;
@@ -68,5 +73,36 @@ export default class Home implements OnInit {
   getTreatmentName(id: string | undefined): string {
     if (!id) return '';
     return this.treatmentService.getById(id)?.name || '';
+  }
+
+  triggerXlsxInput(): void {
+    this.xlsxInput.nativeElement.click();
+  }
+
+  onXlsxSelected(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    const files = input.files;
+    if (!files || files.length === 0) return;
+
+    this.importing.set(true);
+    this.importMessage.set('');
+    this.importError.set(false);
+
+    this.patientService.importXlsx(Array.from(files)).subscribe({
+      next: (result) => {
+        this.importing.set(false);
+        this.importError.set(result.errors.length > 0);
+        const msg = `Imported ${result.filesProcessed} file(s): ${result.patientsCreated} new patient(s), ${result.visitsCreated} visit(s).`;
+        this.importMessage.set(result.errors.length > 0 ? msg + ` ${result.errors.length} warning(s).` : msg);
+        this.ngOnInit();
+      },
+      error: (err) => {
+        this.importing.set(false);
+        this.importError.set(true);
+        this.importMessage.set('Import failed: ' + (err.error?.detail || err.message));
+      },
+    });
+
+    input.value = '';
   }
 }

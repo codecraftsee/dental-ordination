@@ -1,20 +1,28 @@
 @if (authService.isAuthenticated()) {
-  <nav class="navbar">
-    <div class="navbar-inner container">
-      <a class="navbar-brand" routerLink="/">{{ 'nav.brand' | translate }}</a>
-      <div class="navbar-links">
-        <a routerLink="/" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }">{{ 'nav.home' | translate }}</a>
-        <a routerLink="/patients" routerLinkActive="active">{{ 'nav.patients' | translate }}</a>
-        <a routerLink="/doctors" routerLinkActive="active">{{ 'nav.doctors' | translate }}</a>
-        <a routerLink="/visits" routerLinkActive="active">{{ 'nav.visits' | translate }}</a>
-        <a routerLink="/diagnoses" routerLinkActive="active">{{ 'nav.diagnoses' | translate }}</a>
-        <a routerLink="/treatments" routerLinkActive="active">{{ 'nav.treatments' | translate }}</a>
+  <div class="app-layout" [class.sidebar-collapsed]="sidebarCollapsed()">
+    <app-sidebar (collapsedChange)="sidebarCollapsed.set($event)" />
+
+    <header class="top-header">
+      <button class="hamburger" (click)="sidebar().toggle()" title="Toggle sidebar">
+        <span>☰</span>
+      </button>
+      <div class="header-actions">
         <app-language-switcher />
+        <button
+          class="btn-theme-toggle"
+          (click)="themeService.toggleTheme()"
+          [title]="(themeService.isDark() ? 'nav.lightMode' : 'nav.darkMode') | translate"
+        >
+          {{ themeService.isDark() ? '☀️' : '🌙' }}
+        </button>
         <button class="btn-logout" (click)="logout()">{{ 'nav.logout' | translate }}</button>
       </div>
-    </div>
-  </nav>
-}
-<main>
+    </header>
+
+    <main class="main-content">
+      <router-outlet />
+    </main>
+  </div>
+} @else {
   <router-outlet />
-</main>
+}
