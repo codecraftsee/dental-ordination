@@ -91,7 +91,7 @@ export default class Home implements OnInit {
       next: (result) => {
         this.importing.set(false);
         this.importError.set(result.errors.length > 0);
-        const msg = `Imported ${result.files_processed} file(s): ${result.patients_created} new patient(s), ${result.visits_created} visit(s).`;
+        const msg = `Imported ${result.filesProcessed} file(s): ${result.patientsCreated} new patient(s), ${result.visitsCreated} visit(s).`;
         this.importMessage.set(result.errors.length > 0 ? msg + ` ${result.errors.length} warning(s).` : msg);
         this.ngOnInit();
       },

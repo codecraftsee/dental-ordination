@@ -187,6 +187,8 @@
   "common.invalidEmail": "Please enter a valid email address",
   "common.minLength": "Minimum length is {0} characters",
 
+  "nav.darkMode": "Switch to dark mode",
+  "nav.lightMode": "Switch to light mode",
   "nav.logout": "Logout",
 
   "login.title": "Login",

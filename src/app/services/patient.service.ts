@@ -5,10 +5,10 @@ import { environment } from '../../environments/environment';
 import { Patient, PatientCreate, PatientUpdate } from '../models/patient.model';
 
 export interface ImportResult {
-  patients_created: number;
-  patients_found: number;
-  visits_created: number;
-  files_processed: number;
+  patientsCreated: number;
+  patientsFound: number;
+  visitsCreated: number;
+  filesProcessed: number;
   errors: string[];
 }
 

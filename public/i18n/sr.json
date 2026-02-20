@@ -187,6 +187,8 @@
   "common.invalidEmail": "Unesite ispravnu email adresu",
   "common.minLength": "Minimalna dužina je {0} karaktera",
 
+  "nav.darkMode": "Prebaci na tamni mod",
+  "nav.lightMode": "Prebaci na svetli mod",
   "nav.logout": "Odjava",
 
   "login.title": "Prijava",
