@@ -15,11 +15,14 @@ The home page SHALL be fully usable on screens as narrow as 360px.
 - **THEN** the action buttons SHALL stack vertically
 - **AND** each button SHALL span the full width
 
-#### Scenario: Recent visits table is scrollable
+#### Scenario: Recent visits table renders as cards on mobile
 
-- **WHEN** the viewport is narrower than the table's minimum width (620px)
-- **THEN** the table SHALL be horizontally scrollable within its container
-- **AND** the table SHALL NOT cause page-level horizontal overflow
+- **WHEN** the viewport is narrower than 768px
+- **THEN** the table header SHALL be hidden
+- **AND** each table row SHALL be displayed as a card (block layout)
+- **AND** each cell SHALL show its column label via a `data-label` attribute rendered with CSS `::before`
+- **AND** the price cell SHALL be visually emphasised (bold, primary colour)
+- **AND** the layout SHALL NOT cause horizontal overflow
 
 ### Requirement: Global mobile layout fixes
 

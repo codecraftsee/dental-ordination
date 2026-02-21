@@ -9,7 +9,7 @@
 ## 2. Home Page
 
 - [x] 2.1 `home.scss` — stats grid 2×2, actions stacked, reduced padding on mobile
-- [x] 2.2 `home.html` — wrap recent visits table in `.table-scroll` div
+- [x] 2.2 `home.html` / `home.scss` — card layout for visits table on mobile (thead hidden, each tr displayed as a card with data-label::before labels)
 
 ## 3. Global
 
