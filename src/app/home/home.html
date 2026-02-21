@@ -52,6 +52,7 @@
   <div class="recent-visits-section">
     <h2>{{ 'home.recentVisits' | translate }}</h2>
     @if (recentVisits.length > 0) {
+      <div class="table-scroll">
       <table class="data-table">
         <thead>
           <tr>
@@ -76,6 +77,7 @@
           }
         </tbody>
       </table>
+      </div>
     } @else {
       <div class="empty-state">
         <p class="empty-state-text">{{ 'home.noRecentVisits' | translate }}</p>

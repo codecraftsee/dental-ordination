@@ -114,6 +114,10 @@ a {
   max-width: var(--max-width);
   margin: 0 auto;
   padding: 0 var(--spacing-md);
+
+  @media (max-width: 767px) {
+    padding: 0;
+  }
 }
 
 // Buttons
