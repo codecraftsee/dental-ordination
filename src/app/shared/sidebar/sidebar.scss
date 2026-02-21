@@ -119,3 +119,32 @@
     line-height: 1;
   }
 }
+
+// Mobile: sidebar is a fixed overlay
+@media (max-width: 767px) {
+  .sidebar {
+    position: fixed;
+    left: 0;
+    top: 0;
+    height: 100vh;
+    z-index: 200;
+    width: var(--sidebar-width) !important;
+    transform: translateX(0);
+    transition: transform 0.25s ease;
+    box-shadow: 4px 0 20px rgba(0, 0, 0, 0.15);
+
+    &.collapsed {
+      transform: translateX(-100%);
+      width: var(--sidebar-width) !important;
+
+      .nav-item {
+        justify-content: flex-start;
+        padding: 10px 20px;
+      }
+    }
+  }
+
+  .collapse-btn {
+    display: none;
+  }
+}

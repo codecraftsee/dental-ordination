@@ -28,10 +28,17 @@ export class Sidebar implements OnInit {
   ];
 
   ngOnInit(): void {
-    const saved = localStorage.getItem('sidebar-collapsed');
-    if (saved === 'true') {
+    const isMobile = window.innerWidth < 768;
+    if (isMobile) {
+      // Always start closed on mobile
       this.collapsed.set(true);
       this.collapsedChange.emit(true);
+    } else {
+      const saved = localStorage.getItem('sidebar-collapsed');
+      if (saved === 'true') {
+        this.collapsed.set(true);
+        this.collapsedChange.emit(true);
+      }
     }
   }
 

@@ -1,5 +1,6 @@
-import { Component, inject, signal, viewChild, ChangeDetectionStrategy } from '@angular/core';
-import { RouterOutlet } from '@angular/router';
+import { Component, inject, signal, viewChild, ChangeDetectionStrategy, effect } from '@angular/core';
+import { Router, RouterOutlet, NavigationEnd } from '@angular/router';
+import { filter } from 'rxjs';
 import { TranslatePipe } from './shared/translate.pipe';
 import { LanguageSwitcher } from './shared/language-switcher/language-switcher';
 import { Sidebar } from './shared/sidebar/sidebar';
@@ -19,6 +20,17 @@ export class App {
   readonly sidebarCollapsed = signal<boolean>(false);
 
   readonly sidebar = viewChild.required(Sidebar);
+
+  constructor() {
+    // Close sidebar on navigation on mobile
+    inject(Router).events.pipe(
+      filter(e => e instanceof NavigationEnd),
+    ).subscribe(() => {
+      if (window.innerWidth < 768 && !this.sidebarCollapsed()) {
+        this.sidebar().toggle();
+      }
+    });
+  }
 
   logout(): void {
     this.authService.logout();
