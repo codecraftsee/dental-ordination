@@ -141,13 +141,17 @@
 
     tbody tr {
       display: block;
-      border: 1px solid var(--color-border);
+      background: var(--color-surface);
       border-radius: var(--radius-md);
-      margin-bottom: var(--spacing-sm);
-      padding: var(--spacing-sm) var(--spacing-md);
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1), 0 1px 3px rgba(0, 0, 0, 0.06);
+      margin-bottom: 12px;
+      padding: var(--spacing-md);
+      border-left: 3px solid var(--color-primary);
+      transition: box-shadow 0.2s, transform 0.15s;
 
       &:hover {
-        background: var(--color-surface-variant);
+        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.14), 0 2px 6px rgba(0, 0, 0, 0.08);
+        transform: translateY(-1px);
       }
     }
 
@@ -155,12 +159,13 @@
       display: flex;
       justify-content: space-between;
       align-items: flex-start;
-      padding: 5px 0;
+      gap: var(--spacing-sm);
+      padding: 7px 0;
       border: none;
       border-bottom: 1px solid var(--color-border);
       white-space: normal;
       width: auto;
-      font-size: 0.875rem;
+      font-size: 0.9rem;
 
       &:last-child {
         border-bottom: none;
@@ -172,15 +177,16 @@
         font-weight: 700;
         color: var(--color-text-secondary);
         text-transform: uppercase;
-        letter-spacing: 0.5px;
+        letter-spacing: 0.6px;
         flex-shrink: 0;
         min-width: 70px;
-        margin-right: var(--spacing-sm);
+        padding-top: 2px;
       }
 
       &.col-price {
         text-align: left;
         font-weight: 600;
+        color: var(--color-primary);
       }
     }
 
@@ -188,20 +194,24 @@
       display: flex;
       justify-content: space-between;
       align-items: center;
-      border: 1px solid var(--color-primary);
       border-radius: var(--radius-md);
+      border-left: 3px solid var(--color-primary);
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
       padding: var(--spacing-sm) var(--spacing-md);
       background: var(--color-surface-variant);
+      margin-bottom: 0;
 
       .tfoot-label {
         border: none;
         padding: 0;
+        font-size: 0.9rem;
       }
 
       .tfoot-total {
         border: none;
         padding: 0;
         font-size: 1rem;
+        color: var(--color-primary);
       }
 
       .tfoot-empty {
