@@ -20,7 +20,7 @@
   </div>
 
   @if (filteredDoctors().length > 0) {
-    <table class="data-table">
+    <table class="data-table data-table-card">
       <thead>
         <tr>
           <th>{{ 'doctors.name' | translate }}</th>
@@ -33,11 +33,11 @@
       <tbody>
         @for (doctor of filteredDoctors(); track doctor.id) {
           <tr>
-            <td><a [routerLink]="['/doctors', doctor.id]">Dr. {{ doctor.firstName }} {{ doctor.lastName }}</a></td>
-            <td><span class="badge badge-primary">{{ 'specialization.' + doctor.specialization | translate }}</span></td>
-            <td>{{ doctor.phone }}</td>
-            <td>{{ doctor.email }}</td>
-            <td>
+            <td [attr.data-label]="'doctors.name' | translate"><a [routerLink]="['/doctors', doctor.id]">Dr. {{ doctor.firstName }} {{ doctor.lastName }}</a></td>
+            <td [attr.data-label]="'doctors.specialization' | translate"><span class="badge badge-primary">{{ 'specialization.' + doctor.specialization | translate }}</span></td>
+            <td [attr.data-label]="'doctors.phone' | translate">{{ doctor.phone }}</td>
+            <td [attr.data-label]="'doctors.email' | translate">{{ doctor.email }}</td>
+            <td class="td-actions">
               <a [routerLink]="['/doctors', doctor.id]" class="btn btn-sm btn-outline">{{ 'common.view' | translate }}</a>
               <a [routerLink]="['/doctors', doctor.id, 'edit']" class="btn btn-sm btn-outline">{{ 'common.edit' | translate }}</a>
             </td>

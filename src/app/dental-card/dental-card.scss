@@ -104,6 +104,113 @@
   }
 }
 
+@media (max-width: 767px) {
+  .page {
+    padding-top: var(--spacing-md);
+    padding-bottom: var(--spacing-lg);
+  }
+
+  .header-actions {
+    flex-wrap: wrap;
+
+    .btn {
+      flex: 1;
+      min-width: 100px;
+      justify-content: center;
+    }
+  }
+
+  .karton {
+    padding: var(--spacing-md);
+    border-radius: var(--radius-md);
+  }
+
+  .karton-title {
+    font-size: 1.2rem;
+  }
+
+  .info-label {
+    width: 130px;
+  }
+
+  // Card layout for karton-table on mobile
+  .karton-table {
+    thead {
+      display: none;
+    }
+
+    tbody tr {
+      display: block;
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-md);
+      margin-bottom: var(--spacing-sm);
+      padding: var(--spacing-sm) var(--spacing-md);
+
+      &:hover {
+        background: var(--color-surface-variant);
+      }
+    }
+
+    td {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      padding: 5px 0;
+      border: none;
+      border-bottom: 1px solid var(--color-border);
+      white-space: normal;
+      width: auto;
+      font-size: 0.875rem;
+
+      &:last-child {
+        border-bottom: none;
+      }
+
+      &::before {
+        content: attr(data-label);
+        font-size: 0.7rem;
+        font-weight: 700;
+        color: var(--color-text-secondary);
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        flex-shrink: 0;
+        min-width: 70px;
+        margin-right: var(--spacing-sm);
+      }
+
+      &.col-price {
+        text-align: left;
+        font-weight: 600;
+      }
+    }
+
+    tfoot tr {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border: 1px solid var(--color-primary);
+      border-radius: var(--radius-md);
+      padding: var(--spacing-sm) var(--spacing-md);
+      background: var(--color-surface-variant);
+
+      .tfoot-label {
+        border: none;
+        padding: 0;
+      }
+
+      .tfoot-total {
+        border: none;
+        padding: 0;
+        font-size: 1rem;
+      }
+
+      .tfoot-empty {
+        display: none;
+      }
+    }
+  }
+}
+
 @media print {
   :host {
     display: block;

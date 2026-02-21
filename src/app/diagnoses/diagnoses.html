@@ -64,7 +64,7 @@
   }
 
   @if (filteredDiagnoses().length > 0) {
-    <table class="data-table">
+    <table class="data-table data-table-card">
       <thead>
         <tr>
           <th>{{ 'diagnoses.code' | translate }}</th>
@@ -77,11 +77,11 @@
       <tbody>
         @for (dg of filteredDiagnoses(); track dg.id) {
           <tr>
-            <td>{{ dg.code }}</td>
-            <td>{{ dg.name }}</td>
-            <td><span class="badge badge-info">{{ 'diagnosisCategory.' + dg.category | translate }}</span></td>
-            <td>{{ dg.description }}</td>
-            <td>
+            <td [attr.data-label]="'diagnoses.code' | translate">{{ dg.code }}</td>
+            <td [attr.data-label]="'diagnoses.name' | translate">{{ dg.name }}</td>
+            <td [attr.data-label]="'diagnoses.category' | translate"><span class="badge badge-info">{{ 'diagnosisCategory.' + dg.category | translate }}</span></td>
+            <td [attr.data-label]="'diagnoses.description' | translate">{{ dg.description }}</td>
+            <td class="td-actions">
               <button class="btn btn-sm btn-outline" (click)="openEditForm(dg)">{{ 'common.edit' | translate }}</button>
               <button class="btn btn-sm btn-outline-danger" (click)="deleteDiagnosis(dg.id)">{{ 'common.delete' | translate }}</button>
             </td>
