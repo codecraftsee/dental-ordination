@@ -104,6 +104,123 @@
   }
 }
 
+@media (max-width: 767px) {
+  .page {
+    padding-top: var(--spacing-md);
+    padding-bottom: var(--spacing-lg);
+  }
+
+  .header-actions {
+    flex-wrap: wrap;
+
+    .btn {
+      flex: 1;
+      min-width: 100px;
+      justify-content: center;
+    }
+  }
+
+  .karton {
+    padding: var(--spacing-md);
+    border-radius: var(--radius-md);
+  }
+
+  .karton-title {
+    font-size: 1.2rem;
+  }
+
+  .info-label {
+    width: 130px;
+  }
+
+  // Card layout for karton-table on mobile
+  .karton-table {
+    thead {
+      display: none;
+    }
+
+    tbody tr {
+      display: block;
+      background: var(--color-surface);
+      border-radius: var(--radius-md);
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1), 0 1px 3px rgba(0, 0, 0, 0.06);
+      margin-bottom: 12px;
+      padding: var(--spacing-md);
+      border-left: 3px solid var(--color-primary);
+      transition: box-shadow 0.2s, transform 0.15s;
+
+      &:hover {
+        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.14), 0 2px 6px rgba(0, 0, 0, 0.08);
+        transform: translateY(-1px);
+      }
+    }
+
+    td {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: var(--spacing-sm);
+      padding: 7px 0;
+      border: none;
+      border-bottom: 1px solid var(--color-border);
+      white-space: normal;
+      width: auto;
+      font-size: 0.9rem;
+
+      &:last-child {
+        border-bottom: none;
+      }
+
+      &::before {
+        content: attr(data-label);
+        font-size: 0.7rem;
+        font-weight: 700;
+        color: var(--color-text-secondary);
+        text-transform: uppercase;
+        letter-spacing: 0.6px;
+        flex-shrink: 0;
+        min-width: 70px;
+        padding-top: 2px;
+      }
+
+      &.col-price {
+        text-align: left;
+        font-weight: 600;
+        color: var(--color-primary);
+      }
+    }
+
+    tfoot tr {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-radius: var(--radius-md);
+      border-left: 3px solid var(--color-primary);
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+      padding: var(--spacing-sm) var(--spacing-md);
+      background: var(--color-surface-variant);
+      margin-bottom: 0;
+
+      .tfoot-label {
+        border: none;
+        padding: 0;
+        font-size: 0.9rem;
+      }
+
+      .tfoot-total {
+        border: none;
+        padding: 0;
+        font-size: 1rem;
+        color: var(--color-primary);
+      }
+
+      .tfoot-empty {
+        display: none;
+      }
+    }
+  }
+}
+
 @media print {
   :host {
     display: block;

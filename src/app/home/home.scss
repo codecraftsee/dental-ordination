@@ -45,3 +45,30 @@
     margin-bottom: var(--spacing-md);
   }
 }
+
+@media (max-width: 767px) {
+  .dashboard {
+    padding-top: var(--spacing-md);
+    padding-bottom: var(--spacing-lg);
+  }
+
+  .stats-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: var(--spacing-sm);
+    margin-bottom: var(--spacing-md);
+  }
+
+  .quick-actions {
+    margin-bottom: var(--spacing-md);
+  }
+
+  .actions-row {
+    flex-direction: column;
+    gap: var(--spacing-sm);
+
+    .btn {
+      width: 100%;
+      justify-content: center;
+    }
+  }
+}

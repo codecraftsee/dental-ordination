@@ -30,7 +30,7 @@
   </div>
 
   @if (filteredVisits().length > 0) {
-    <table class="data-table">
+    <table class="data-table data-table-card">
       <thead>
         <tr>
           <th>{{ 'visits.date' | translate }}</th>
@@ -46,14 +46,14 @@
       <tbody>
         @for (visit of filteredVisits(); track visit.id) {
           <tr>
-            <td>{{ visit.date | localizedDate:'mediumDate' }}</td>
-            <td><a [routerLink]="['/patients', visit.patientId]">{{ getPatientName(visit.patientId) }}</a></td>
-            <td><a [routerLink]="['/doctors', visit.doctorId]">{{ getDoctorName(visit.doctorId) }}</a></td>
-            <td>{{ visit.toothNumber || '-' }}</td>
-            <td>{{ getDiagnosisName(visit.diagnosisId) }}</td>
-            <td>{{ getTreatmentName(visit.treatmentId) }}</td>
-            <td>{{ visit.price | currencyFormat }}</td>
-            <td>
+            <td [attr.data-label]="'visits.date' | translate">{{ visit.date | localizedDate:'mediumDate' }}</td>
+            <td [attr.data-label]="'visits.patient' | translate"><a [routerLink]="['/patients', visit.patientId]">{{ getPatientName(visit.patientId) }}</a></td>
+            <td [attr.data-label]="'visits.doctor' | translate"><a [routerLink]="['/doctors', visit.doctorId]">{{ getDoctorName(visit.doctorId) }}</a></td>
+            <td [attr.data-label]="'visits.tooth' | translate">{{ visit.toothNumber || '-' }}</td>
+            <td [attr.data-label]="'visits.diagnosis' | translate">{{ getDiagnosisName(visit.diagnosisId) }}</td>
+            <td [attr.data-label]="'visits.treatment' | translate">{{ getTreatmentName(visit.treatmentId) }}</td>
+            <td [attr.data-label]="'visits.price' | translate">{{ visit.price | currencyFormat }}</td>
+            <td class="td-actions">
               <a [routerLink]="['/visits', visit.id]" class="btn btn-sm btn-outline">{{ 'common.view' | translate }}</a>
             </td>
           </tr>

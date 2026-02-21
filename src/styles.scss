@@ -114,6 +114,10 @@ a {
   max-width: var(--max-width);
   margin: 0 auto;
   padding: 0 var(--spacing-md);
+
+  @media (max-width: 767px) {
+    padding: 0;
+  }
 }
 
 // Buttons
@@ -567,6 +571,112 @@ a {
   --color-warning-bg: #2e2510;
   --color-danger-bg: #2e1a1a;
   --color-info-bg: #0f2535;
+}
+
+@media (max-width: 767px) {
+  .form-row {
+    grid-template-columns: 1fr;
+  }
+
+  .page-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .search-bar {
+    .form-control {
+      min-width: 0;
+    }
+  }
+
+
+  .section-title {
+    font-size: 1.25rem;
+  }
+
+  .stat-card {
+    padding: var(--spacing-md);
+  }
+
+  .detail-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .form-actions {
+    flex-wrap: wrap;
+
+    .btn {
+      flex: 1;
+      min-width: 120px;
+    }
+  }
+}
+
+// Mobile card layout — add .data-table-card to any table that should render as cards on mobile
+@media (max-width: 767px) {
+  .data-table-card {
+    thead {
+      display: none;
+    }
+
+    tbody tr {
+      display: block;
+      background: var(--color-surface);
+      border-radius: var(--radius-md);
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1), 0 1px 3px rgba(0, 0, 0, 0.06);
+      margin-bottom: 12px;
+      padding: var(--spacing-md);
+      border-left: 3px solid var(--color-primary);
+      transition: box-shadow 0.2s, transform 0.15s;
+
+      &:hover {
+        background: var(--color-surface);
+        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.14), 0 2px 6px rgba(0, 0, 0, 0.08);
+        transform: translateY(-1px);
+      }
+
+      &:last-child td {
+        border-bottom: 1px solid var(--color-border);
+      }
+    }
+
+    td {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: var(--spacing-sm);
+      padding: 7px 0;
+      border-bottom: 1px solid var(--color-border);
+      font-size: 0.9rem;
+
+      &:last-child {
+        border-bottom: none;
+      }
+
+      &::before {
+        content: attr(data-label);
+        font-size: 0.7rem;
+        font-weight: 700;
+        color: var(--color-text-secondary);
+        text-transform: uppercase;
+        letter-spacing: 0.6px;
+        flex-shrink: 0;
+        min-width: 90px;
+        padding-top: 2px;
+      }
+
+      &.td-actions {
+        flex-wrap: wrap;
+        gap: var(--spacing-xs);
+        padding-top: var(--spacing-sm);
+        border-bottom: none;
+
+        &::before {
+          display: none;
+        }
+      }
+    }
+  }
 }
 
 @media print {

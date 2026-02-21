@@ -69,19 +69,19 @@
           <tbody>
             @for (visit of visits(); track visit.id) {
               <tr>
-                <td class="col-date">{{ visit.date | localizedDate:'mediumDate' }}</td>
-                <td class="col-diagnosis">{{ formatDiagnosis(visit) }}</td>
-                <td class="col-treatment">{{ formatTreatment(visit) }}</td>
-                <td class="col-price">{{ visit.price ? (visit.price | currencyFormat) : '' }}</td>
-                <td class="col-doctor">{{ getDoctorName(visit.doctorId) }}</td>
+                <td class="col-date" [attr.data-label]="'dentalCard.date' | translate">{{ visit.date | localizedDate:'mediumDate' }}</td>
+                <td class="col-diagnosis" [attr.data-label]="'dentalCard.diagnosis' | translate">{{ formatDiagnosis(visit) }}</td>
+                <td class="col-treatment" [attr.data-label]="'dentalCard.treatment' | translate">{{ formatTreatment(visit) }}</td>
+                <td class="col-price" [attr.data-label]="'dentalCard.price' | translate">{{ visit.price ? (visit.price | currencyFormat) : '' }}</td>
+                <td class="col-doctor" [attr.data-label]="'dentalCard.doctor' | translate">{{ getDoctorName(visit.doctorId) }}</td>
               </tr>
             }
           </tbody>
           <tfoot>
             <tr>
-              <td colspan="3"><strong>{{ 'dentalCard.total' | translate }}</strong></td>
-              <td><strong>{{ totalCost() | currencyFormat }}</strong></td>
-              <td></td>
+              <td colspan="3" class="tfoot-label"><strong>{{ 'dentalCard.total' | translate }}</strong></td>
+              <td class="tfoot-total"><strong>{{ totalCost() | currencyFormat }}</strong></td>
+              <td class="tfoot-empty"></td>
             </tr>
           </tfoot>
         </table>

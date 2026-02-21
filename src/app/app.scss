@@ -90,3 +90,37 @@
   overflow: auto;
   min-height: 0;
 }
+
+// Sidebar overlay backdrop (mobile only)
+.sidebar-overlay {
+  display: none;
+}
+
+// Mobile
+@media (max-width: 767px) {
+  .app-layout {
+    grid-template-columns: 1fr;
+
+    &.sidebar-collapsed {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  .top-header {
+    grid-column: 1;
+  }
+
+  .main-content {
+    grid-column: 1;
+    padding: var(--spacing-md);
+  }
+
+  .sidebar-overlay {
+    display: block;
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.45);
+    z-index: 150;
+    backdrop-filter: blur(1px);
+  }
+}

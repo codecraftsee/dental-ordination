@@ -73,7 +73,7 @@
   }
 
   @if (filteredTreatments().length > 0) {
-    <table class="data-table">
+    <table class="data-table data-table-card">
       <thead>
         <tr>
           <th>{{ 'treatments.code' | translate }}</th>
@@ -87,12 +87,12 @@
       <tbody>
         @for (tx of filteredTreatments(); track tx.id) {
           <tr>
-            <td>{{ tx.code }}</td>
-            <td>{{ tx.name }}</td>
-            <td><span class="badge badge-primary">{{ 'treatmentCategory.' + tx.category | translate }}</span></td>
-            <td>{{ tx.defaultPrice | currencyFormat }}</td>
-            <td>{{ tx.description }}</td>
-            <td>
+            <td [attr.data-label]="'treatments.code' | translate">{{ tx.code }}</td>
+            <td [attr.data-label]="'treatments.name' | translate">{{ tx.name }}</td>
+            <td [attr.data-label]="'treatments.category' | translate"><span class="badge badge-primary">{{ 'treatmentCategory.' + tx.category | translate }}</span></td>
+            <td [attr.data-label]="'treatments.defaultPrice' | translate">{{ tx.defaultPrice | currencyFormat }}</td>
+            <td [attr.data-label]="'treatments.description' | translate">{{ tx.description }}</td>
+            <td class="td-actions">
               <button class="btn btn-sm btn-outline" (click)="openEditForm(tx)">{{ 'common.edit' | translate }}</button>
               <button class="btn btn-sm btn-outline-danger" (click)="deleteTreatment(tx.id)">{{ 'common.delete' | translate }}</button>
             </td>
