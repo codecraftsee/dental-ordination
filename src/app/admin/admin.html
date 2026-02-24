@@ -1,0 +1,61 @@
+<div class="container page">
+  <div class="page-header">
+    <h1 class="section-title">{{ 'admin.title' | translate }}</h1>
+  </div>
+
+  <div class="danger-zone">
+    <div class="danger-zone-header">
+      <span class="danger-icon">⚠️</span>
+      <div>
+        <h2 class="danger-title">{{ 'admin.dangerZone' | translate }}</h2>
+        <p class="danger-desc">{{ 'admin.dangerZoneDesc' | translate }}</p>
+      </div>
+    </div>
+
+    <div class="action-cards">
+      @for (action of actions; track action.key) {
+        <div class="action-card" [class.action-card--all]="action.danger">
+          <div class="action-card-header">
+            <h3 class="action-title">{{ action.titleKey | translate }}</h3>
+          </div>
+          <p class="action-desc">{{ action.descKey | translate }}</p>
+
+          <div class="confirm-row">
+            <label class="confirm-label">{{ 'admin.typeToConfirm' | translate }}</label>
+            <input
+              type="text"
+              class="form-control confirm-input"
+              [placeholder]="'admin.confirmPlaceholder' | translate"
+              [value]="action.confirmInput()"
+              (input)="action.confirmInput.set($any($event.target).value)"
+              [disabled]="action.loading()"
+              autocomplete="off"
+              spellcheck="false"
+            />
+            <button
+              class="btn btn-danger"
+              [disabled]="action.confirmInput() !== 'DELETE' || action.loading()"
+              (click)="execute(action)"
+            >
+              @if (action.loading()) {
+                {{ 'admin.deleting' | translate }}
+              } @else {
+                {{ action.titleKey | translate }}
+              }
+            </button>
+          </div>
+
+          @if (action.message()) {
+            <div class="action-message" [class.action-message--error]="action.isError()">
+              @if (action.isError()) {
+                {{ action.message() }}
+              } @else {
+                {{ action.message() | translate }}
+              }
+            </div>
+          }
+        </div>
+      }
+    </div>
+  </div>
+</div>

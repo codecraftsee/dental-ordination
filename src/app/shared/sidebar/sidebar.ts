@@ -25,6 +25,7 @@ export class Sidebar implements OnInit {
     { route: '/visits', label: 'nav.visits', icon: '📋', exact: false },
     { route: '/diagnoses', label: 'nav.diagnoses', icon: '🔬', exact: false },
     { route: '/treatments', label: 'nav.treatments', icon: '💊', exact: false },
+    { route: '/admin', label: 'nav.admin', icon: '⚙️', exact: false },
   ];
 
   ngOnInit(): void {

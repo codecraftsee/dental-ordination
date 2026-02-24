@@ -18,5 +18,6 @@ export const routes: Routes = [
   { path: 'visits', loadComponent: () => import('./visits/visit-list/visit-list'), canActivate: [authGuard] },
   { path: 'visits/new', loadComponent: () => import('./visits/visit-form/visit-form'), canActivate: [authGuard] },
   { path: 'visits/:id', loadComponent: () => import('./visits/visit-detail/visit-detail'), canActivate: [authGuard] },
+  { path: 'admin', loadComponent: () => import('./admin/admin'), canActivate: [authGuard] },
   { path: '**', redirectTo: '' },
 ];
