@@ -31,7 +31,7 @@ export default class PatientDetail implements OnInit {
   private treatmentService = inject(TreatmentService);
 
   patient = signal<Patient | undefined>(undefined);
-  recentVisits = signal<Visit[]>([]);
+  allVisits = signal<Visit[]>([]);
 
   ngOnInit(): void {
     const id = this.route.snapshot.paramMap.get('id');
@@ -49,10 +49,28 @@ export default class PatientDetail implements OnInit {
     ]).subscribe({
       next: ([patient]) => {
         this.patient.set(patient);
-        this.recentVisits.set(this.visitService.getByPatientId(id).slice(0, 5));
+        this.allVisits.set(this.visitService.getByPatientId(id));
       },
       error: () => this.router.navigate(['/patients']),
     });
+  }
+
+  getInitials(p: Patient): string {
+    return `${p.firstName[0]}${p.lastName[0]}`.toUpperCase();
+  }
+
+  getAge(dateOfBirth: string): number {
+    const birth = new Date(dateOfBirth);
+    const today = new Date();
+    let age = today.getFullYear() - birth.getFullYear();
+    const m = today.getMonth() - birth.getMonth();
+    if (m < 0 || (m === 0 && today.getDate() < birth.getDate())) age--;
+    return age;
+  }
+
+  getVisitsThisYear(): number {
+    const year = new Date().getFullYear().toString();
+    return this.allVisits().filter(v => v.date.startsWith(year)).length;
   }
 
   getDoctorName(id: string): string {
