@@ -1,12 +1,15 @@
 import { ChangeDetectionStrategy, Component, inject, signal, computed, OnInit } from '@angular/core';
 import { RouterLink } from '@angular/router';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatInputModule } from '@angular/material/input';
+import { MatSelectModule } from '@angular/material/select';
 import { TranslatePipe } from '../../shared/translate.pipe';
 import { LocalizedDatePipe } from '../../shared/localized-date.pipe';
 import { PatientService } from '../../services/patient.service';
 
 @Component({
   selector: 'app-patient-list',
-  imports: [RouterLink, TranslatePipe, LocalizedDatePipe],
+  imports: [RouterLink, TranslatePipe, LocalizedDatePipe, MatFormFieldModule, MatInputModule, MatSelectModule],
   templateUrl: './patient-list.html',
   styleUrl: './patient-list.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

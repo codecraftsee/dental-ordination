@@ -5,22 +5,24 @@
   </div>
 
   <div class="search-bar">
-    <input
-      type="text"
-      class="form-control"
-      [placeholder]="'diagnoses.search' | translate"
-      (input)="onSearch($event)"
-    />
-    <select class="form-control" (change)="onCategoryChange($event)">
-      <option value="">{{ 'diagnoses.filterCategory' | translate }}</option>
-      @for (cat of categories; track cat) {
-        <option [value]="cat">{{ 'diagnosisCategory.' + cat | translate }}</option>
-      }
-    </select>
+    <mat-form-field appearance="outline" class="search-field">
+      <mat-label>{{ 'diagnoses.search' | translate }}</mat-label>
+      <input matInput (input)="onSearch($event)" />
+    </mat-form-field>
+    <mat-form-field appearance="outline" class="filter-field">
+      <mat-label>{{ 'diagnoses.filterCategory' | translate }}</mat-label>
+      <mat-select (selectionChange)="categoryFilter.set($event.value)">
+        <mat-option value="">{{ 'diagnoses.filterCategory' | translate }}</mat-option>
+        @for (cat of categories; track cat) {
+          <mat-option [value]="cat">{{ 'diagnosisCategory.' + cat | translate }}</mat-option>
+        }
+      </mat-select>
+    </mat-form-field>
   </div>
 
   @if (showForm()) {
-    <div class="card mb-lg">
+    <mat-card class="mb-lg">
+      <mat-card-content>
       <h3>{{ (editingId() ? 'diagnoses.editTitle' : 'diagnoses.addTitle') | translate }}</h3>
       <form [formGroup]="form" (ngSubmit)="onSubmit()">
         <div class="form-row">
@@ -53,7 +55,8 @@
           <button type="button" class="btn btn-outline" (click)="cancelForm()">{{ 'common.cancel' | translate }}</button>
         </div>
       </form>
-    </div>
+      </mat-card-content>
+    </mat-card>
   }
 
   @if (filteredDiagnoses().length > 0) {

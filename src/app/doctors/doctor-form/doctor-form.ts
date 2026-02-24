@@ -4,13 +4,14 @@ import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
+import { MatCardModule } from '@angular/material/card';
 import { TranslatePipe } from '../../shared/translate.pipe';
 import { DoctorService } from '../../services/doctor.service';
 import { Specialization } from '../../models/doctor.model';
 
 @Component({
   selector: 'app-doctor-form',
-  imports: [ReactiveFormsModule, RouterLink, TranslatePipe, MatFormFieldModule, MatInputModule, MatSelectModule],
+  imports: [ReactiveFormsModule, RouterLink, TranslatePipe, MatFormFieldModule, MatInputModule, MatSelectModule, MatCardModule],
   templateUrl: './doctor-form.html',
   styleUrl: './doctor-form.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

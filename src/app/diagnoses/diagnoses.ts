@@ -3,13 +3,14 @@ import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angula
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
+import { MatCardModule } from '@angular/material/card';
 import { TranslatePipe } from '../shared/translate.pipe';
 import { DiagnosisService } from '../services/diagnosis.service';
 import { DiagnosisCategory, Diagnosis } from '../models/diagnosis.model';
 
 @Component({
   selector: 'app-diagnoses',
-  imports: [ReactiveFormsModule, TranslatePipe, MatFormFieldModule, MatInputModule, MatSelectModule],
+  imports: [ReactiveFormsModule, TranslatePipe, MatFormFieldModule, MatInputModule, MatSelectModule, MatCardModule],
   templateUrl: './diagnoses.html',
   styleUrl: './diagnoses.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

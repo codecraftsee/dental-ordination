@@ -14,7 +14,7 @@
 
     <div class="action-cards">
       @for (action of actions; track action.key) {
-        <div class="action-card" [class.action-card--all]="action.danger">
+        <mat-card [class.action-card--all]="action.danger">
           <div class="action-card-header">
             <h3 class="action-title">{{ action.titleKey | translate }}</h3>
           </div>
@@ -54,7 +54,7 @@
               }
             </div>
           }
-        </div>
+        </mat-card>
       }
     </div>
   </div>

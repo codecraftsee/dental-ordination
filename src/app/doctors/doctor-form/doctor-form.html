@@ -3,7 +3,8 @@
     <h1 class="section-title">{{ (isEditMode ? 'doctor.title.edit' : 'doctor.title.new') | translate }}</h1>
   </div>
 
-  <div class="card">
+  <mat-card>
+    <mat-card-content>
     <form [formGroup]="form" (ngSubmit)="onSubmit()">
       <div class="form-row">
         <mat-form-field appearance="outline">
@@ -57,5 +58,6 @@
         <a routerLink="/doctors" class="btn btn-outline">{{ 'common.cancel' | translate }}</a>
       </div>
     </form>
-  </div>
+    </mat-card-content>
+  </mat-card>
 </div>

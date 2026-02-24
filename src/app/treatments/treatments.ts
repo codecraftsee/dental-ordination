@@ -3,6 +3,7 @@ import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angula
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
+import { MatCardModule } from '@angular/material/card';
 import { TranslatePipe } from '../shared/translate.pipe';
 import { CurrencyFormatPipe } from '../shared/currency-format.pipe';
 import { TreatmentService } from '../services/treatment.service';
@@ -10,7 +11,7 @@ import { TreatmentCategory, Treatment } from '../models/treatment.model';
 
 @Component({
   selector: 'app-treatments',
-  imports: [ReactiveFormsModule, TranslatePipe, CurrencyFormatPipe, MatFormFieldModule, MatInputModule, MatSelectModule],
+  imports: [ReactiveFormsModule, TranslatePipe, CurrencyFormatPipe, MatFormFieldModule, MatInputModule, MatSelectModule, MatCardModule],
   templateUrl: './treatments.html',
   styleUrl: './treatments.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

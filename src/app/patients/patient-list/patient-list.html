@@ -5,23 +5,27 @@
   </div>
 
   <div class="search-bar">
-    <input
-      type="text"
-      class="form-control"
-      [placeholder]="'patients.search' | translate"
-      (input)="onSearch($event)"
-    />
-    <select class="form-control" (change)="onCityChange($event)">
-      <option value="">{{ 'patients.filterCity' | translate }}</option>
-      @for (city of cities(); track city) {
-        <option [value]="city">{{ city }}</option>
-      }
-    </select>
-    <select class="form-control" (change)="onGenderChange($event)">
-      <option value="">{{ 'patients.filterGender' | translate }}</option>
-      <option value="male">{{ 'patient.gender.male' | translate }}</option>
-      <option value="female">{{ 'patient.gender.female' | translate }}</option>
-    </select>
+    <mat-form-field appearance="outline" class="search-field">
+      <mat-label>{{ 'patients.search' | translate }}</mat-label>
+      <input matInput (input)="onSearch($event)" />
+    </mat-form-field>
+    <mat-form-field appearance="outline" class="filter-field">
+      <mat-label>{{ 'patients.filterCity' | translate }}</mat-label>
+      <mat-select (selectionChange)="cityFilter.set($event.value)">
+        <mat-option value="">{{ 'patients.filterCity' | translate }}</mat-option>
+        @for (city of cities(); track city) {
+          <mat-option [value]="city">{{ city }}</mat-option>
+        }
+      </mat-select>
+    </mat-form-field>
+    <mat-form-field appearance="outline" class="filter-field">
+      <mat-label>{{ 'patients.filterGender' | translate }}</mat-label>
+      <mat-select (selectionChange)="genderFilter.set($event.value)">
+        <mat-option value="">{{ 'patients.filterGender' | translate }}</mat-option>
+        <mat-option value="male">{{ 'patient.gender.male' | translate }}</mat-option>
+        <mat-option value="female">{{ 'patient.gender.female' | translate }}</mat-option>
+      </mat-select>
+    </mat-form-field>
   </div>
 
   @if (filteredPatients().length > 0) {

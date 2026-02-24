@@ -1,4 +1,5 @@
 import { ChangeDetectionStrategy, Component, inject, signal, WritableSignal } from '@angular/core';
+import { MatCardModule } from '@angular/material/card';
 import { Observable } from 'rxjs';
 import { TranslatePipe } from '../shared/translate.pipe';
 import { AdminService } from '../services/admin.service';
@@ -23,7 +24,7 @@ interface ActionState {
 
 @Component({
   selector: 'app-admin',
-  imports: [TranslatePipe],
+  imports: [TranslatePipe, MatCardModule],
   templateUrl: './admin.html',
   styleUrl: './admin.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
