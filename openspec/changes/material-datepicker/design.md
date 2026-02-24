@@ -72,6 +72,7 @@ The popup is customised via global CSS selectors to match the app:
 
 | Element | Override |
 |---|---|
+| **Popup background** | `--color-surface` (`!important`) — fixes transparent popup; Material's CDK overlay does not set a background by default |
 | Calendar header background | `--color-primary` |
 | Selected day background | `--color-primary` |
 | Today's date border | `--color-primary` |

@@ -58,6 +58,12 @@
 - **AND** the selected date SHALL be highlighted with `--color-primary`
 - **AND** today's date SHALL have a border in `--color-primary`
 
+#### Scenario: Calendar popup has an opaque background
+
+- **WHEN** the calendar popup is open
+- **THEN** the popup background SHALL be fully opaque using `--color-surface`
+- **AND** content behind the popup SHALL NOT be visible through it
+
 #### Scenario: Calendar popup has app-consistent shadow and radius
 
 - **WHEN** the calendar popup is open

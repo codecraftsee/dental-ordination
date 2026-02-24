@@ -26,6 +26,7 @@
 ## 4. Global styles
 
 - [x] 4.1 `src/styles.scss` — add Material datepicker overrides section: calendar header (`--color-primary`), selected day, today border, hover bg, popup shadow/radius/border
+- [x] 4.2 `src/styles.scss` — add `background: var(--color-surface) !important` to `.mat-datepicker-content` to fix transparent popup (Material CDK overlay does not apply a background by default)
 
 ## 5. Verify
 
