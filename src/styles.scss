@@ -535,15 +535,8 @@ a {
 // Radio group
 .radio-group {
   display: flex;
-  gap: var(--spacing-md);
-
-  label {
-    display: flex;
-    align-items: center;
-    gap: var(--spacing-xs);
-    cursor: pointer;
-    font-size: 0.9rem;
-  }
+  gap: var(--spacing-lg);
+  padding: 4px 0;
 }
 
 [data-theme='dark'] {
@@ -695,6 +688,54 @@ a {
 
   body {
     background: white;
+  }
+}
+
+// ── Angular Material form fields ─────────────────────────────────────────────
+
+.mat-mdc-form-field {
+  width: 100%;
+
+  --mdc-outlined-text-field-outline-color: var(--color-border);
+  --mdc-outlined-text-field-hover-outline-color: var(--color-primary-light);
+  --mdc-outlined-text-field-focus-outline-color: var(--color-primary);
+  --mdc-outlined-text-field-label-text-color: var(--color-text-secondary);
+  --mdc-outlined-text-field-hover-label-text-color: var(--color-text-secondary);
+  --mdc-outlined-text-field-focus-label-text-color: var(--color-primary);
+  --mdc-outlined-text-field-input-text-color: var(--color-text);
+  --mdc-outlined-text-field-container-shape: 8px;
+  --mdc-outlined-text-field-error-focus-outline-color: var(--color-danger, #e53935);
+  --mdc-outlined-text-field-error-outline-color: var(--color-danger, #e53935);
+  --mdc-outlined-text-field-error-label-text-color: var(--color-danger, #e53935);
+}
+
+// Select dropdown panel
+.mat-mdc-select-panel {
+  background: var(--color-surface) !important;
+}
+
+.mat-mdc-option {
+  color: var(--color-text);
+
+  &:hover:not(.mat-mdc-option-disabled) {
+    background: var(--color-sidebar-hover);
+  }
+
+  &.mat-mdc-option-active {
+    color: var(--color-primary);
+  }
+}
+
+// Radio buttons
+.mat-mdc-radio-button {
+  --mdc-radio-selected-icon-color: var(--color-primary);
+  --mdc-radio-selected-focus-icon-color: var(--color-primary);
+  --mdc-radio-selected-hover-icon-color: var(--color-primary);
+  --mdc-radio-selected-pressed-icon-color: var(--color-primary);
+  --mat-radio-checked-ripple-color: var(--color-primary);
+
+  .mdc-label {
+    color: var(--color-text);
   }
 }
 

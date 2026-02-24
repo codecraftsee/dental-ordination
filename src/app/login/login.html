@@ -7,21 +7,21 @@
     }
 
     <form [formGroup]="form" (ngSubmit)="onSubmit()">
-      <div class="form-group">
-        <label for="email">{{ 'login.email' | translate }}</label>
-        <input id="email" type="email" formControlName="email" autocomplete="email" />
-        @if (form.get('email')?.touched && form.get('email')?.invalid) {
-          <span class="field-error">{{ 'common.required' | translate }}</span>
+      <mat-form-field appearance="outline">
+        <mat-label>{{ 'login.email' | translate }}</mat-label>
+        <input matInput type="email" formControlName="email" autocomplete="email" />
+        @if (f['email'].errors?.['required']) {
+          <mat-error>{{ 'common.required' | translate }}</mat-error>
+        } @else if (f['email'].errors?.['email']) {
+          <mat-error>{{ 'common.invalidEmail' | translate }}</mat-error>
         }
-      </div>
+      </mat-form-field>
 
-      <div class="form-group">
-        <label for="password">{{ 'login.password' | translate }}</label>
-        <input id="password" type="password" formControlName="password" autocomplete="current-password" />
-        @if (form.get('password')?.touched && form.get('password')?.invalid) {
-          <span class="field-error">{{ 'common.required' | translate }}</span>
-        }
-      </div>
+      <mat-form-field appearance="outline">
+        <mat-label>{{ 'login.password' | translate }}</mat-label>
+        <input matInput type="password" formControlName="password" autocomplete="current-password" />
+        <mat-error>{{ 'common.required' | translate }}</mat-error>
+      </mat-form-field>
 
       <button type="submit" class="btn btn-primary btn-block" [disabled]="loading()">
         {{ (loading() ? 'login.loading' : 'login.submit') | translate }}

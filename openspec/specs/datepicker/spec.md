@@ -72,11 +72,11 @@
 
 ---
 
-### Requirement: Form layout is unchanged
+### Requirement: Datepicker integrates with Angular Material form field
 
-#### Scenario: Datepicker fits inside existing form layout
+#### Scenario: Datepicker toggle sits inside the outlined form field
 
-- **WHEN** the date field renders
-- **THEN** the input SHALL use the same `.form-control` class and height as other form inputs
-- **AND** the toggle button SHALL be positioned inside the input (not outside the form row)
-- **AND** the validation error message SHALL appear below the `.date-field` wrapper as before
+- **WHEN** the date field renders inside a `mat-form-field appearance="outline"`
+- **THEN** the `mat-datepicker-toggle` SHALL be placed via `matSuffix` inside the outlined border
+- **AND** the toggle button SHALL NOT require absolute positioning or a `.date-field` wrapper
+- **AND** the `mat-error` inside the form field SHALL display validation errors automatically when the control is touched and invalid

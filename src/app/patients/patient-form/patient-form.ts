@@ -1,6 +1,9 @@
 import { ChangeDetectionStrategy, Component, inject, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatInputModule } from '@angular/material/input';
+import { MatRadioModule } from '@angular/material/radio';
 import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatNativeDateModule } from '@angular/material/core';
 import { TranslatePipe } from '../../shared/translate.pipe';
@@ -8,7 +11,16 @@ import { PatientService } from '../../services/patient.service';
 
 @Component({
   selector: 'app-patient-form',
-  imports: [ReactiveFormsModule, RouterLink, TranslatePipe, MatDatepickerModule, MatNativeDateModule],
+  imports: [
+    ReactiveFormsModule,
+    RouterLink,
+    TranslatePipe,
+    MatFormFieldModule,
+    MatInputModule,
+    MatRadioModule,
+    MatDatepickerModule,
+    MatNativeDateModule,
+  ],
   templateUrl: './patient-form.html',
   styleUrl: './patient-form.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

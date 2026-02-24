@@ -6,96 +6,78 @@
   <div class="card">
     <form [formGroup]="form" (ngSubmit)="onSubmit()">
       <div class="form-row">
-        <div class="form-group">
-          <label class="form-label">{{ 'visit.patient' | translate }}</label>
-          <select class="form-control" formControlName="patientId">
-            <option value="">{{ 'visit.selectPatient' | translate }}</option>
+        <mat-form-field appearance="outline">
+          <mat-label>{{ 'visit.patient' | translate }}</mat-label>
+          <mat-select formControlName="patientId">
             @for (p of patients; track p.id) {
-              <option [value]="p.id">{{ p.firstName }} {{ p.lastName }}</option>
+              <mat-option [value]="p.id">{{ p.firstName }} {{ p.lastName }}</mat-option>
             }
-          </select>
-          @if (f['patientId'].invalid && f['patientId'].touched) {
-            <div class="form-error">{{ 'common.required' | translate }}</div>
-          }
-        </div>
-        <div class="form-group">
-          <label class="form-label">{{ 'visit.doctor' | translate }}</label>
-          <select class="form-control" formControlName="doctorId">
-            <option value="">{{ 'visit.selectDoctor' | translate }}</option>
+          </mat-select>
+          <mat-error>{{ 'common.required' | translate }}</mat-error>
+        </mat-form-field>
+        <mat-form-field appearance="outline">
+          <mat-label>{{ 'visit.doctor' | translate }}</mat-label>
+          <mat-select formControlName="doctorId">
             @for (d of doctors; track d.id) {
-              <option [value]="d.id">Dr. {{ d.firstName }} {{ d.lastName }}</option>
+              <mat-option [value]="d.id">Dr. {{ d.firstName }} {{ d.lastName }}</mat-option>
             }
-          </select>
-          @if (f['doctorId'].invalid && f['doctorId'].touched) {
-            <div class="form-error">{{ 'common.required' | translate }}</div>
-          }
-        </div>
+          </mat-select>
+          <mat-error>{{ 'common.required' | translate }}</mat-error>
+        </mat-form-field>
       </div>
 
       <div class="form-row">
-        <div class="form-group">
-          <label class="form-label">{{ 'visit.date' | translate }}</label>
-          <div class="date-field">
-            <input class="form-control" [matDatepicker]="datePicker" formControlName="date"
-              (click)="datePicker.open()" readonly />
-            <mat-datepicker-toggle class="date-toggle" [for]="datePicker"></mat-datepicker-toggle>
-            <mat-datepicker #datePicker></mat-datepicker>
-          </div>
-          @if (f['date'].invalid && f['date'].touched) {
-            <div class="form-error">{{ 'common.required' | translate }}</div>
-          }
-        </div>
-        <div class="form-group">
-          <label class="form-label">{{ 'visit.toothNumber' | translate }}</label>
-          <input type="number" class="form-control" formControlName="toothNumber" min="1" max="48" />
-        </div>
+        <mat-form-field appearance="outline">
+          <mat-label>{{ 'visit.date' | translate }}</mat-label>
+          <input matInput [matDatepicker]="datePicker" formControlName="date"
+            (click)="datePicker.open()" readonly />
+          <mat-datepicker-toggle matSuffix [for]="datePicker"></mat-datepicker-toggle>
+          <mat-datepicker #datePicker></mat-datepicker>
+          <mat-error>{{ 'common.required' | translate }}</mat-error>
+        </mat-form-field>
+        <mat-form-field appearance="outline">
+          <mat-label>{{ 'visit.toothNumber' | translate }}</mat-label>
+          <input matInput type="number" formControlName="toothNumber" min="1" max="48" />
+        </mat-form-field>
       </div>
 
       <div class="form-row">
-        <div class="form-group">
-          <label class="form-label">{{ 'visit.diagnosis' | translate }}</label>
-          <select class="form-control" formControlName="diagnosisId">
-            <option value="">{{ 'visit.selectDiagnosis' | translate }}</option>
+        <mat-form-field appearance="outline">
+          <mat-label>{{ 'visit.diagnosis' | translate }}</mat-label>
+          <mat-select formControlName="diagnosisId">
             @for (dg of diagnoses; track dg.id) {
-              <option [value]="dg.id">{{ dg.code }} - {{ dg.name }}</option>
+              <mat-option [value]="dg.id">{{ dg.code }} - {{ dg.name }}</mat-option>
             }
-          </select>
-          @if (f['diagnosisId'].invalid && f['diagnosisId'].touched) {
-            <div class="form-error">{{ 'common.required' | translate }}</div>
-          }
-        </div>
-        <div class="form-group">
-          <label class="form-label">{{ 'visit.diagnosisNotes' | translate }}</label>
-          <input type="text" class="form-control" formControlName="diagnosisNotes" />
-        </div>
+          </mat-select>
+          <mat-error>{{ 'common.required' | translate }}</mat-error>
+        </mat-form-field>
+        <mat-form-field appearance="outline">
+          <mat-label>{{ 'visit.diagnosisNotes' | translate }}</mat-label>
+          <input matInput type="text" formControlName="diagnosisNotes" />
+        </mat-form-field>
       </div>
 
       <div class="form-row">
-        <div class="form-group">
-          <label class="form-label">{{ 'visit.treatment' | translate }}</label>
-          <select class="form-control" formControlName="treatmentId">
-            <option value="">{{ 'visit.selectTreatment' | translate }}</option>
+        <mat-form-field appearance="outline">
+          <mat-label>{{ 'visit.treatment' | translate }}</mat-label>
+          <mat-select formControlName="treatmentId">
             @for (tx of treatments; track tx.id) {
-              <option [value]="tx.id">{{ tx.code }} - {{ tx.name }}</option>
+              <mat-option [value]="tx.id">{{ tx.code }} - {{ tx.name }}</mat-option>
             }
-          </select>
-          @if (f['treatmentId'].invalid && f['treatmentId'].touched) {
-            <div class="form-error">{{ 'common.required' | translate }}</div>
-          }
-        </div>
-        <div class="form-group">
-          <label class="form-label">{{ 'visit.treatmentNotes' | translate }}</label>
-          <input type="text" class="form-control" formControlName="treatmentNotes" />
-        </div>
+          </mat-select>
+          <mat-error>{{ 'common.required' | translate }}</mat-error>
+        </mat-form-field>
+        <mat-form-field appearance="outline">
+          <mat-label>{{ 'visit.treatmentNotes' | translate }}</mat-label>
+          <input matInput type="text" formControlName="treatmentNotes" />
+        </mat-form-field>
       </div>
 
-      <div class="form-group">
-        <label class="form-label">{{ 'visit.price' | translate }}</label>
-        <input type="number" class="form-control" formControlName="price" min="0" />
-        @if (f['price'].invalid && f['price'].touched) {
-          <div class="form-error">{{ 'common.required' | translate }}</div>
-        }
-      </div>
+      <mat-form-field appearance="outline">
+        <mat-label>{{ 'visit.price' | translate }}</mat-label>
+        <input matInput type="number" formControlName="price" min="0" />
+        <mat-error>{{ 'common.required' | translate }}</mat-error>
+      </mat-form-field>
 
       <div class="form-actions">
         <button type="submit" class="btn btn-primary">{{ 'common.save' | translate }}</button>

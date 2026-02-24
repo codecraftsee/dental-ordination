@@ -1,13 +1,16 @@
 import { ChangeDetectionStrategy, Component, inject, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatInputModule } from '@angular/material/input';
+import { MatSelectModule } from '@angular/material/select';
 import { TranslatePipe } from '../../shared/translate.pipe';
 import { DoctorService } from '../../services/doctor.service';
 import { Specialization } from '../../models/doctor.model';
 
 @Component({
   selector: 'app-doctor-form',
-  imports: [ReactiveFormsModule, RouterLink, TranslatePipe],
+  imports: [ReactiveFormsModule, RouterLink, TranslatePipe, MatFormFieldModule, MatInputModule, MatSelectModule],
   templateUrl: './doctor-form.html',
   styleUrl: './doctor-form.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

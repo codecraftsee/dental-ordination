@@ -24,37 +24,30 @@
       <h3>{{ (editingId() ? 'diagnoses.editTitle' : 'diagnoses.addTitle') | translate }}</h3>
       <form [formGroup]="form" (ngSubmit)="onSubmit()">
         <div class="form-row">
-          <div class="form-group">
-            <label class="form-label">{{ 'diagnoses.code' | translate }}</label>
-            <input type="text" class="form-control" formControlName="code" />
-            @if (f['code'].invalid && f['code'].touched) {
-              <div class="form-error">{{ 'common.required' | translate }}</div>
-            }
-          </div>
-          <div class="form-group">
-            <label class="form-label">{{ 'diagnoses.name' | translate }}</label>
-            <input type="text" class="form-control" formControlName="name" />
-            @if (f['name'].invalid && f['name'].touched) {
-              <div class="form-error">{{ 'common.required' | translate }}</div>
-            }
-          </div>
+          <mat-form-field appearance="outline">
+            <mat-label>{{ 'diagnoses.code' | translate }}</mat-label>
+            <input matInput type="text" formControlName="code" />
+            <mat-error>{{ 'common.required' | translate }}</mat-error>
+          </mat-form-field>
+          <mat-form-field appearance="outline">
+            <mat-label>{{ 'diagnoses.name' | translate }}</mat-label>
+            <input matInput type="text" formControlName="name" />
+            <mat-error>{{ 'common.required' | translate }}</mat-error>
+          </mat-form-field>
         </div>
-        <div class="form-group">
-          <label class="form-label">{{ 'diagnoses.category' | translate }}</label>
-          <select class="form-control" formControlName="category">
-            <option value="">{{ 'diagnoses.filterCategory' | translate }}</option>
+        <mat-form-field appearance="outline">
+          <mat-label>{{ 'diagnoses.category' | translate }}</mat-label>
+          <mat-select formControlName="category">
             @for (cat of categories; track cat) {
-              <option [value]="cat">{{ 'diagnosisCategory.' + cat | translate }}</option>
+              <mat-option [value]="cat">{{ 'diagnosisCategory.' + cat | translate }}</mat-option>
             }
-          </select>
-          @if (f['category'].invalid && f['category'].touched) {
-            <div class="form-error">{{ 'common.required' | translate }}</div>
-          }
-        </div>
-        <div class="form-group">
-          <label class="form-label">{{ 'diagnoses.description' | translate }}</label>
-          <textarea class="form-control" formControlName="description" rows="2"></textarea>
-        </div>
+          </mat-select>
+          <mat-error>{{ 'common.required' | translate }}</mat-error>
+        </mat-form-field>
+        <mat-form-field appearance="outline">
+          <mat-label>{{ 'diagnoses.description' | translate }}</mat-label>
+          <textarea matInput formControlName="description" rows="2"></textarea>
+        </mat-form-field>
         <div class="form-actions">
           <button type="submit" class="btn btn-primary">{{ 'common.save' | translate }}</button>
           <button type="button" class="btn btn-outline" (click)="cancelForm()">{{ 'common.cancel' | translate }}</button>

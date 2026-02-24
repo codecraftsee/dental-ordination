@@ -2,6 +2,9 @@ import { ChangeDetectionStrategy, Component, inject, OnInit, OnDestroy } from '@
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 import { Subscription, forkJoin } from 'rxjs';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatInputModule } from '@angular/material/input';
+import { MatSelectModule } from '@angular/material/select';
 import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatNativeDateModule } from '@angular/material/core';
 import { TranslatePipe } from '../../shared/translate.pipe';
@@ -13,7 +16,16 @@ import { TreatmentService } from '../../services/treatment.service';
 
 @Component({
   selector: 'app-visit-form',
-  imports: [ReactiveFormsModule, RouterLink, TranslatePipe, MatDatepickerModule, MatNativeDateModule],
+  imports: [
+    ReactiveFormsModule,
+    RouterLink,
+    TranslatePipe,
+    MatFormFieldModule,
+    MatInputModule,
+    MatSelectModule,
+    MatDatepickerModule,
+    MatNativeDateModule,
+  ],
   templateUrl: './visit-form.html',
   styleUrl: './visit-form.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
