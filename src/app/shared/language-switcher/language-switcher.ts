@@ -25,9 +25,9 @@ import { TranslateService, Lang } from '../../services/translate.service';
     }
 
     .lang-btn {
-      background: rgba(255, 255, 255, 0.1);
-      border: 1px solid rgba(255, 255, 255, 0.2);
-      color: rgba(255, 255, 255, 0.7);
+      background: var(--color-surface-variant);
+      border: 1px solid var(--color-border);
+      color: var(--color-navbar-text);
       padding: 4px 8px;
       font-size: 0.75rem;
       font-weight: 600;
@@ -43,14 +43,15 @@ import { TranslateService, Lang } from '../../services/translate.service';
       }
 
       &:hover {
-        background: rgba(255, 255, 255, 0.2);
+        background: var(--color-primary);
         color: #fff;
+        border-color: var(--color-primary);
       }
 
       &.active {
-        background: rgba(255, 255, 255, 0.25);
+        background: var(--color-primary);
         color: #fff;
-        border-color: rgba(255, 255, 255, 0.4);
+        border-color: var(--color-primary);
       }
     }
   `],
