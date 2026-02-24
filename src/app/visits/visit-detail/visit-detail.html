@@ -1,0 +1,61 @@
+@if (visit(); as v) {
+  <div class="container page">
+    <div class="page-header">
+      <h1 class="section-title">{{ 'visit.title.detail' | translate }}</h1>
+      <div>
+        <button class="btn btn-outline-danger" (click)="deleteVisit()">{{ 'common.delete' | translate }}</button>
+        <a routerLink="/visits" class="btn btn-outline">{{ 'common.back' | translate }}</a>
+      </div>
+    </div>
+
+    <div class="detail-card">
+      <div class="detail-grid">
+        <div class="detail-item">
+          <div class="detail-label">{{ 'visit.date' | translate }}</div>
+          <div class="detail-value">{{ v.date | localizedDate:'longDate' }}</div>
+        </div>
+        <div class="detail-item">
+          <div class="detail-label">{{ 'visit.patient' | translate }}</div>
+          <div class="detail-value">
+            <a [routerLink]="['/patients', v.patientId]">{{ getPatientName(v.patientId) }}</a>
+          </div>
+        </div>
+        <div class="detail-item">
+          <div class="detail-label">{{ 'visit.doctor' | translate }}</div>
+          <div class="detail-value">
+            <a [routerLink]="['/doctors', v.doctorId]">{{ getDoctorName(v.doctorId) }}</a>
+          </div>
+        </div>
+        <div class="detail-item">
+          <div class="detail-label">{{ 'visit.toothNumber' | translate }}</div>
+          <div class="detail-value">{{ v.toothNumber || '-' }}</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="detail-card">
+      <div class="detail-grid">
+        <div class="detail-item">
+          <div class="detail-label">{{ 'visit.diagnosis' | translate }}</div>
+          <div class="detail-value">{{ getDiagnosisCode(v.diagnosisId) }} - {{ getDiagnosisName(v.diagnosisId) }}</div>
+        </div>
+        <div class="detail-item">
+          <div class="detail-label">{{ 'visit.diagnosisNotes' | translate }}</div>
+          <div class="detail-value">{{ v.diagnosisNotes || '-' }}</div>
+        </div>
+        <div class="detail-item">
+          <div class="detail-label">{{ 'visit.treatment' | translate }}</div>
+          <div class="detail-value">{{ getTreatmentCode(v.treatmentId) }} - {{ getTreatmentName(v.treatmentId) }}</div>
+        </div>
+        <div class="detail-item">
+          <div class="detail-label">{{ 'visit.treatmentNotes' | translate }}</div>
+          <div class="detail-value">{{ v.treatmentNotes || '-' }}</div>
+        </div>
+        <div class="detail-item">
+          <div class="detail-label">{{ 'visit.price' | translate }}</div>
+          <div class="detail-value">{{ v.price | currencyFormat }}</div>
+        </div>
+      </div>
+    </div>
+  </div>
+}

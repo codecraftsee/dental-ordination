@@ -1,0 +1,263 @@
+.page {
+  padding-top: var(--spacing-xl);
+  padding-bottom: var(--spacing-2xl);
+}
+
+.header-actions {
+  display: flex;
+  gap: var(--spacing-sm);
+}
+
+.karton {
+  background: white;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  padding: var(--spacing-xl) var(--spacing-2xl);
+  margin-top: var(--spacing-lg);
+}
+
+.karton-title {
+  text-align: center;
+  font-size: 1.5rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: var(--spacing-lg);
+  color: var(--color-text);
+}
+
+.patient-info {
+  margin-bottom: var(--spacing-xl);
+  border-bottom: 2px solid var(--color-border);
+  padding-bottom: var(--spacing-lg);
+}
+
+.info-row {
+  display: flex;
+  padding: var(--spacing-xs) 0;
+  line-height: 1.6;
+}
+
+.info-label {
+  width: 200px;
+  flex-shrink: 0;
+  font-weight: 600;
+  color: var(--color-text-secondary);
+}
+
+.info-value {
+  color: var(--color-text);
+}
+
+.karton-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.9rem;
+
+  th,
+  td {
+    border: 1px solid var(--color-border);
+    padding: var(--spacing-sm) var(--spacing-md);
+    text-align: left;
+    vertical-align: top;
+  }
+
+  thead th {
+    background: var(--color-surface-variant);
+    font-weight: 700;
+    white-space: nowrap;
+  }
+
+  tbody tr:hover {
+    background: var(--color-surface-variant);
+  }
+
+  .col-date {
+    width: 110px;
+    white-space: nowrap;
+  }
+
+  .col-diagnosis {
+    width: 25%;
+  }
+
+  .col-treatment {
+    width: 30%;
+  }
+
+  .col-price {
+    width: 100px;
+    text-align: right;
+    white-space: nowrap;
+  }
+
+  .col-doctor {
+    width: 150px;
+    white-space: nowrap;
+  }
+
+  tfoot td {
+    border-top: 2px solid var(--color-primary);
+    padding: var(--spacing-sm) var(--spacing-md);
+    background: var(--color-surface-variant);
+    font-weight: 600;
+  }
+}
+
+@media (max-width: 767px) {
+  .page {
+    padding-top: var(--spacing-md);
+    padding-bottom: var(--spacing-lg);
+  }
+
+  .header-actions {
+    flex-wrap: wrap;
+
+    .btn {
+      flex: 1;
+      min-width: 100px;
+      justify-content: center;
+    }
+  }
+
+  .karton {
+    padding: var(--spacing-md);
+    border-radius: var(--radius-md);
+  }
+
+  .karton-title {
+    font-size: 1.2rem;
+  }
+
+  .info-label {
+    width: 130px;
+  }
+
+  // Card layout for karton-table on mobile
+  .karton-table {
+    thead {
+      display: none;
+    }
+
+    tbody tr {
+      display: block;
+      background: var(--color-surface);
+      border-radius: var(--radius-md);
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1), 0 1px 3px rgba(0, 0, 0, 0.06);
+      margin-bottom: 12px;
+      padding: var(--spacing-md);
+      border-left: 3px solid var(--color-primary);
+      transition: box-shadow 0.2s, transform 0.15s;
+
+      &:hover {
+        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.14), 0 2px 6px rgba(0, 0, 0, 0.08);
+        transform: translateY(-1px);
+      }
+    }
+
+    td {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: var(--spacing-sm);
+      padding: 7px 0;
+      border: none;
+      border-bottom: 1px solid var(--color-border);
+      white-space: normal;
+      width: auto;
+      font-size: 0.9rem;
+
+      &:last-child {
+        border-bottom: none;
+      }
+
+      &::before {
+        content: attr(data-label);
+        font-size: 0.7rem;
+        font-weight: 700;
+        color: var(--color-text-secondary);
+        text-transform: uppercase;
+        letter-spacing: 0.6px;
+        flex-shrink: 0;
+        min-width: 70px;
+        padding-top: 2px;
+      }
+
+      &.col-price {
+        text-align: left;
+        font-weight: 600;
+        color: var(--color-primary);
+      }
+    }
+
+    tfoot tr {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-radius: var(--radius-md);
+      border-left: 3px solid var(--color-primary);
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+      padding: var(--spacing-sm) var(--spacing-md);
+      background: var(--color-surface-variant);
+      margin-bottom: 0;
+
+      .tfoot-label {
+        border: none;
+        padding: 0;
+        font-size: 0.9rem;
+      }
+
+      .tfoot-total {
+        border: none;
+        padding: 0;
+        font-size: 1rem;
+        color: var(--color-primary);
+      }
+
+      .tfoot-empty {
+        display: none;
+      }
+    }
+  }
+}
+
+@media print {
+  :host {
+    display: block;
+  }
+
+  .no-print {
+    display: none !important;
+  }
+
+  .karton {
+    border: none;
+    border-radius: 0;
+    padding: 0;
+    margin: 0;
+    box-shadow: none;
+  }
+
+  .karton-title {
+    font-size: 1.3rem;
+    margin-bottom: 12px;
+  }
+
+  .info-row {
+    padding: 1px 0;
+    font-size: 0.85rem;
+  }
+
+  .info-label {
+    width: 160px;
+  }
+
+  .karton-table {
+    font-size: 0.8rem;
+
+    th,
+    td {
+      padding: 4px 6px;
+    }
+  }
+}

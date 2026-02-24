@@ -1,0 +1,97 @@
+<div class="container page">
+  <div class="page-header">
+    <h1 class="section-title">{{ 'diagnoses.title' | translate }}</h1>
+    <button class="btn btn-primary" (click)="openAddForm()">{{ 'diagnoses.addNew' | translate }}</button>
+  </div>
+
+  <div class="search-bar">
+    <input
+      type="text"
+      class="form-control"
+      [placeholder]="'diagnoses.search' | translate"
+      (input)="onSearch($event)"
+    />
+    <select class="form-control" (change)="onCategoryChange($event)">
+      <option value="">{{ 'diagnoses.filterCategory' | translate }}</option>
+      @for (cat of categories; track cat) {
+        <option [value]="cat">{{ 'diagnosisCategory.' + cat | translate }}</option>
+      }
+    </select>
+  </div>
+
+  @if (showForm()) {
+    <div class="card mb-lg">
+      <h3>{{ (editingId() ? 'diagnoses.editTitle' : 'diagnoses.addTitle') | translate }}</h3>
+      <form [formGroup]="form" (ngSubmit)="onSubmit()">
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">{{ 'diagnoses.code' | translate }}</label>
+            <input type="text" class="form-control" formControlName="code" />
+            @if (f['code'].invalid && f['code'].touched) {
+              <div class="form-error">{{ 'common.required' | translate }}</div>
+            }
+          </div>
+          <div class="form-group">
+            <label class="form-label">{{ 'diagnoses.name' | translate }}</label>
+            <input type="text" class="form-control" formControlName="name" />
+            @if (f['name'].invalid && f['name'].touched) {
+              <div class="form-error">{{ 'common.required' | translate }}</div>
+            }
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">{{ 'diagnoses.category' | translate }}</label>
+          <select class="form-control" formControlName="category">
+            <option value="">{{ 'diagnoses.filterCategory' | translate }}</option>
+            @for (cat of categories; track cat) {
+              <option [value]="cat">{{ 'diagnosisCategory.' + cat | translate }}</option>
+            }
+          </select>
+          @if (f['category'].invalid && f['category'].touched) {
+            <div class="form-error">{{ 'common.required' | translate }}</div>
+          }
+        </div>
+        <div class="form-group">
+          <label class="form-label">{{ 'diagnoses.description' | translate }}</label>
+          <textarea class="form-control" formControlName="description" rows="2"></textarea>
+        </div>
+        <div class="form-actions">
+          <button type="submit" class="btn btn-primary">{{ 'common.save' | translate }}</button>
+          <button type="button" class="btn btn-outline" (click)="cancelForm()">{{ 'common.cancel' | translate }}</button>
+        </div>
+      </form>
+    </div>
+  }
+
+  @if (filteredDiagnoses().length > 0) {
+    <table class="data-table data-table-card">
+      <thead>
+        <tr>
+          <th>{{ 'diagnoses.code' | translate }}</th>
+          <th>{{ 'diagnoses.name' | translate }}</th>
+          <th>{{ 'diagnoses.category' | translate }}</th>
+          <th>{{ 'diagnoses.description' | translate }}</th>
+          <th>{{ 'diagnoses.actions' | translate }}</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (dg of filteredDiagnoses(); track dg.id) {
+          <tr>
+            <td [attr.data-label]="'diagnoses.code' | translate">{{ dg.code }}</td>
+            <td [attr.data-label]="'diagnoses.name' | translate">{{ dg.name }}</td>
+            <td [attr.data-label]="'diagnoses.category' | translate"><span class="badge badge-info">{{ 'diagnosisCategory.' + dg.category | translate }}</span></td>
+            <td [attr.data-label]="'diagnoses.description' | translate">{{ dg.description }}</td>
+            <td class="td-actions">
+              <button class="btn btn-sm btn-outline" (click)="openEditForm(dg)">{{ 'common.edit' | translate }}</button>
+              <button class="btn btn-sm btn-outline-danger" (click)="deleteDiagnosis(dg.id)">{{ 'common.delete' | translate }}</button>
+            </td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  } @else {
+    <div class="empty-state">
+      <p class="empty-state-text">{{ 'diagnoses.noResults' | translate }}</p>
+    </div>
+  }
+</div>

@@ -1,0 +1,74 @@
+<div class="container page">
+  <div class="page-header">
+    <h1 class="section-title">{{ (isEditMode ? 'doctor.title.edit' : 'doctor.title.new') | translate }}</h1>
+  </div>
+
+  <div class="card">
+    <form [formGroup]="form" (ngSubmit)="onSubmit()">
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">{{ 'doctor.firstName' | translate }}</label>
+          <input type="text" class="form-control" formControlName="firstName" />
+          @if (f['firstName'].invalid && f['firstName'].touched) {
+            <div class="form-error">{{ 'common.required' | translate }}</div>
+          }
+        </div>
+        <div class="form-group">
+          <label class="form-label">{{ 'doctor.lastName' | translate }}</label>
+          <input type="text" class="form-control" formControlName="lastName" />
+          @if (f['lastName'].invalid && f['lastName'].touched) {
+            <div class="form-error">{{ 'common.required' | translate }}</div>
+          }
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">{{ 'doctor.specialization' | translate }}</label>
+          <select class="form-control" formControlName="specialization">
+            <option value="">{{ 'doctors.filterSpecialization' | translate }}</option>
+            @for (spec of specializations; track spec) {
+              <option [value]="spec">{{ 'specialization.' + spec | translate }}</option>
+            }
+          </select>
+          @if (f['specialization'].invalid && f['specialization'].touched) {
+            <div class="form-error">{{ 'common.required' | translate }}</div>
+          }
+        </div>
+        <div class="form-group">
+          <label class="form-label">{{ 'doctor.licenseNumber' | translate }}</label>
+          <input type="text" class="form-control" formControlName="licenseNumber" />
+          @if (f['licenseNumber'].invalid && f['licenseNumber'].touched) {
+            <div class="form-error">{{ 'common.required' | translate }}</div>
+          }
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">{{ 'doctor.phone' | translate }}</label>
+          <input type="tel" class="form-control" formControlName="phone" />
+          @if (f['phone'].invalid && f['phone'].touched) {
+            <div class="form-error">{{ 'common.required' | translate }}</div>
+          }
+        </div>
+        <div class="form-group">
+          <label class="form-label">{{ 'doctor.email' | translate }}</label>
+          <input type="email" class="form-control" formControlName="email" />
+          @if (f['email'].invalid && f['email'].touched) {
+            @if (f['email'].errors?.['required']) {
+              <div class="form-error">{{ 'common.required' | translate }}</div>
+            } @else if (f['email'].errors?.['email']) {
+              <div class="form-error">{{ 'common.invalidEmail' | translate }}</div>
+            }
+          }
+        </div>
+      </div>
+
+      <div class="form-actions">
+        <button type="submit" class="btn btn-primary">{{ 'common.save' | translate }}</button>
+        <a routerLink="/doctors" class="btn btn-outline">{{ 'common.cancel' | translate }}</a>
+      </div>
+    </form>
+  </div>
+</div>

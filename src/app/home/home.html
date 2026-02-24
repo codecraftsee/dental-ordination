@@ -1,0 +1,85 @@
+<div class="container dashboard">
+  <h1 class="section-title">{{ 'home.title' | translate }}</h1>
+
+  <div class="stats-grid">
+    <div class="stat-card">
+      <div class="stat-value">{{ totalPatients }}</div>
+      <div class="stat-label">{{ 'home.totalPatients' | translate }}</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-value">{{ totalDoctors }}</div>
+      <div class="stat-label">{{ 'home.totalDoctors' | translate }}</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-value">{{ visitsThisMonth }}</div>
+      <div class="stat-label">{{ 'home.visitsThisMonth' | translate }}</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-value">{{ totalVisits }}</div>
+      <div class="stat-label">{{ 'home.totalVisits' | translate }}</div>
+    </div>
+  </div>
+
+  <div class="quick-actions">
+    <h2>{{ 'home.quickActions' | translate }}</h2>
+    <div class="actions-row">
+      <a routerLink="/patients/new" class="btn btn-primary btn-lg">{{ 'home.newPatient' | translate }}</a>
+      <a routerLink="/visits/new" class="btn btn-success btn-lg">{{ 'home.newVisit' | translate }}</a>
+      <button class="btn btn-secondary btn-lg" (click)="triggerXlsxInput()" [disabled]="importing()">
+        @if (importing()) {
+          {{ 'home.importing' | translate }}
+        } @else {
+          {{ 'home.importXlsx' | translate }}
+        }
+      </button>
+      <input
+        #xlsxInput
+        type="file"
+        multiple
+        accept=".xlsx"
+        (change)="onXlsxSelected($event)"
+        style="display: none"
+      />
+    </div>
+  </div>
+
+  @if (importMessage()) {
+    <div class="import-message" [class.error]="importError()">
+      {{ importMessage() }}
+    </div>
+  }
+
+  <div class="recent-visits-section">
+    <h2>{{ 'home.recentVisits' | translate }}</h2>
+    @if (recentVisits.length > 0) {
+      <table class="data-table data-table-card">
+        <thead>
+          <tr>
+            <th>{{ 'visits.date' | translate }}</th>
+            <th>{{ 'visits.patient' | translate }}</th>
+            <th>{{ 'visits.doctor' | translate }}</th>
+            <th>{{ 'visits.diagnosis' | translate }}</th>
+            <th>{{ 'visits.treatment' | translate }}</th>
+            <th>{{ 'visits.price' | translate }}</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (visit of recentVisits; track visit.id) {
+            <tr>
+              <td [attr.data-label]="'visits.date' | translate">{{ visit.date | localizedDate:'mediumDate' }}</td>
+              <td [attr.data-label]="'visits.patient' | translate"><a [routerLink]="['/patients', visit.patientId]">{{ getPatientName(visit.patientId) }}</a></td>
+              <td [attr.data-label]="'visits.doctor' | translate">{{ getDoctorName(visit.doctorId) }}</td>
+              <td [attr.data-label]="'visits.diagnosis' | translate">{{ getDiagnosisName(visit.diagnosisId) }}</td>
+              <td [attr.data-label]="'visits.treatment' | translate">{{ getTreatmentName(visit.treatmentId) }}</td>
+              <td [attr.data-label]="'visits.price' | translate">{{ visit.price | currencyFormat }}</td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    } @else {
+      <div class="empty-state">
+        <p class="empty-state-text">{{ 'home.noRecentVisits' | translate }}</p>
+      </div>
+    }
+  </div>
+</div>

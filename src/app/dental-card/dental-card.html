@@ -1,0 +1,95 @@
+@if (patient(); as p) {
+  <div class="container page">
+    <div class="page-header no-print">
+      <h1 class="section-title">{{ 'dentalCard.title' | translate }}</h1>
+      <div class="header-actions">
+        <button class="btn btn-outline" (click)="printCard()">{{ 'dentalCard.print' | translate }}</button>
+        <button class="btn btn-primary" (click)="exportExcel()">{{ 'dentalCard.exportExcel' | translate }}</button>
+        <a [routerLink]="['/patients', p.id]" class="btn btn-outline">{{ 'common.back' | translate }}</a>
+      </div>
+    </div>
+
+    <div class="karton" id="dental-karton">
+      <h2 class="karton-title">{{ 'dentalCard.title' | translate }}</h2>
+
+      <div class="patient-info">
+        <div class="info-row">
+          <span class="info-label">{{ 'patient.gender' | translate }}:</span>
+          <span class="info-value">{{ (p.gender === 'male' ? 'patient.gender.male' : 'patient.gender.female') | translate }}</span>
+        </div>
+        <div class="info-row">
+          <span class="info-label">{{ 'patient.lastName' | translate }}:</span>
+          <span class="info-value">{{ p.lastName }}</span>
+        </div>
+        <div class="info-row">
+          <span class="info-label">{{ 'patient.firstName' | translate }}:</span>
+          <span class="info-value">{{ p.firstName }}</span>
+        </div>
+        <div class="info-row">
+          <span class="info-label">{{ 'patient.parentName' | translate }}:</span>
+          <span class="info-value">{{ p.parentName }}</span>
+        </div>
+        <div class="info-row">
+          <span class="info-label">{{ 'patient.dateOfBirth' | translate }}:</span>
+          <span class="info-value">{{ p.dateOfBirth | localizedDate:'mediumDate' }}</span>
+        </div>
+        <div class="info-row">
+          <span class="info-label">{{ 'patient.address' | translate }}:</span>
+          <span class="info-value">{{ p.address }}</span>
+        </div>
+        <div class="info-row">
+          <span class="info-label">{{ 'patient.city' | translate }}:</span>
+          <span class="info-value">{{ p.city }}</span>
+        </div>
+        <div class="info-row">
+          <span class="info-label">{{ 'patient.phone' | translate }}:</span>
+          <span class="info-value">{{ p.phone }}</span>
+        </div>
+        <div class="info-row">
+          <span class="info-label">{{ 'patient.email' | translate }}:</span>
+          <span class="info-value">{{ p.email }}</span>
+        </div>
+        <div class="info-row">
+          <span class="info-label">{{ 'dentalCard.recordDate' | translate }}:</span>
+          <span class="info-value">{{ today | localizedDate:'mediumDate' }}</span>
+        </div>
+      </div>
+
+      @if (visits().length > 0) {
+        <table class="karton-table">
+          <thead>
+            <tr>
+              <th class="col-date">{{ 'dentalCard.date' | translate }}</th>
+              <th class="col-diagnosis">{{ 'dentalCard.diagnosis' | translate }}</th>
+              <th class="col-treatment">{{ 'dentalCard.treatment' | translate }}</th>
+              <th class="col-price">{{ 'dentalCard.price' | translate }}</th>
+              <th class="col-doctor">{{ 'dentalCard.doctor' | translate }}</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (visit of visits(); track visit.id) {
+              <tr>
+                <td class="col-date" [attr.data-label]="'dentalCard.date' | translate">{{ visit.date | localizedDate:'mediumDate' }}</td>
+                <td class="col-diagnosis" [attr.data-label]="'dentalCard.diagnosis' | translate">{{ formatDiagnosis(visit) }}</td>
+                <td class="col-treatment" [attr.data-label]="'dentalCard.treatment' | translate">{{ formatTreatment(visit) }}</td>
+                <td class="col-price" [attr.data-label]="'dentalCard.price' | translate">{{ visit.price ? (visit.price | currencyFormat) : '' }}</td>
+                <td class="col-doctor" [attr.data-label]="'dentalCard.doctor' | translate">{{ getDoctorName(visit.doctorId) }}</td>
+              </tr>
+            }
+          </tbody>
+          <tfoot>
+            <tr>
+              <td colspan="3" class="tfoot-label"><strong>{{ 'dentalCard.total' | translate }}</strong></td>
+              <td class="tfoot-total"><strong>{{ totalCost() | currencyFormat }}</strong></td>
+              <td class="tfoot-empty"></td>
+            </tr>
+          </tfoot>
+        </table>
+      } @else {
+        <div class="empty-state">
+          <p class="empty-state-text">{{ 'dentalCard.noVisits' | translate }}</p>
+        </div>
+      }
+    </div>
+  </div>
+}

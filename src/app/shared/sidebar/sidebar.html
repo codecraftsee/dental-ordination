@@ -1,0 +1,30 @@
+<aside class="sidebar" [class.collapsed]="collapsed()">
+  <div class="sidebar-logo">
+    @if (!collapsed()) {
+      <span class="logo-text">{{ 'nav.brand' | translate }}</span>
+    } @else {
+      <span class="logo-icon">🦷</span>
+    }
+  </div>
+
+  <nav class="sidebar-nav">
+    @for (link of navLinks; track link.route) {
+      <a
+        class="nav-item"
+        [routerLink]="link.route"
+        routerLinkActive="active"
+        [routerLinkActiveOptions]="{ exact: link.exact }"
+        [title]="collapsed() ? (link.label | translate) : ''"
+      >
+        <span class="nav-icon">{{ link.icon }}</span>
+        @if (!collapsed()) {
+          <span class="nav-label">{{ link.label | translate }}</span>
+        }
+      </a>
+    }
+  </nav>
+
+  <button class="collapse-btn" (click)="toggle()" [title]="collapsed() ? 'Expand' : 'Collapse'">
+    <span class="collapse-icon">{{ collapsed() ? '›' : '‹' }}</span>
+  </button>
+</aside>

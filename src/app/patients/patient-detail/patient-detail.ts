@@ -1,0 +1,81 @@
+import { ChangeDetectionStrategy, Component, inject, signal, OnInit } from '@angular/core';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
+import { forkJoin } from 'rxjs';
+import { TranslatePipe } from '../../shared/translate.pipe';
+import { LocalizedDatePipe } from '../../shared/localized-date.pipe';
+import { CurrencyFormatPipe } from '../../shared/currency-format.pipe';
+import { TranslateService } from '../../services/translate.service';
+import { PatientService } from '../../services/patient.service';
+import { VisitService } from '../../services/visit.service';
+import { DoctorService } from '../../services/doctor.service';
+import { DiagnosisService } from '../../services/diagnosis.service';
+import { TreatmentService } from '../../services/treatment.service';
+import { Patient } from '../../models/patient.model';
+import { Visit } from '../../models/visit.model';
+
+@Component({
+  selector: 'app-patient-detail',
+  imports: [RouterLink, TranslatePipe, LocalizedDatePipe, CurrencyFormatPipe],
+  templateUrl: './patient-detail.html',
+  styleUrl: './patient-detail.scss',
+  changeDetection: ChangeDetectionStrategy.OnPush,
+})
+export default class PatientDetail implements OnInit {
+  private route = inject(ActivatedRoute);
+  private router = inject(Router);
+  private translateService = inject(TranslateService);
+  private patientService = inject(PatientService);
+  private visitService = inject(VisitService);
+  private doctorService = inject(DoctorService);
+  private diagnosisService = inject(DiagnosisService);
+  private treatmentService = inject(TreatmentService);
+
+  patient = signal<Patient | undefined>(undefined);
+  recentVisits = signal<Visit[]>([]);
+
+  ngOnInit(): void {
+    const id = this.route.snapshot.paramMap.get('id');
+    if (!id) {
+      this.router.navigate(['/patients']);
+      return;
+    }
+
+    forkJoin([
+      this.patientService.loadById(id),
+      this.visitService.loadAll({ patientId: id }),
+      this.doctorService.loadAll(),
+      this.diagnosisService.loadAll(),
+      this.treatmentService.loadAll(),
+    ]).subscribe({
+      next: ([patient]) => {
+        this.patient.set(patient);
+        this.recentVisits.set(this.visitService.getByPatientId(id).slice(0, 5));
+      },
+      error: () => this.router.navigate(['/patients']),
+    });
+  }
+
+  getDoctorName(id: string): string {
+    const d = this.doctorService.getById(id);
+    return d ? `Dr. ${d.firstName} ${d.lastName}` : '';
+  }
+
+  getDiagnosisName(id: string | undefined): string {
+    if (!id) return '';
+    return this.diagnosisService.getById(id)?.name || '';
+  }
+
+  getTreatmentName(id: string | undefined): string {
+    if (!id) return '';
+    return this.treatmentService.getById(id)?.name || '';
+  }
+
+  deletePatient(): void {
+    const p = this.patient();
+    if (p && confirm(this.translateService.translate('common.confirmDelete'))) {
+      this.patientService.delete(p.id).subscribe(() => {
+        this.router.navigate(['/patients']);
+      });
+    }
+  }
+}

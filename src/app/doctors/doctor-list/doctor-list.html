@@ -1,0 +1,53 @@
+<div class="container page">
+  <div class="page-header">
+    <h1 class="section-title">{{ 'doctors.title' | translate }}</h1>
+    <a routerLink="/doctors/new" class="btn btn-primary">{{ 'doctors.addNew' | translate }}</a>
+  </div>
+
+  <div class="search-bar">
+    <input
+      type="text"
+      class="form-control"
+      [placeholder]="'doctors.search' | translate"
+      (input)="onSearch($event)"
+    />
+    <select class="form-control" (change)="onSpecializationChange($event)">
+      <option value="">{{ 'doctors.filterSpecialization' | translate }}</option>
+      @for (spec of specializations; track spec) {
+        <option [value]="spec">{{ 'specialization.' + spec | translate }}</option>
+      }
+    </select>
+  </div>
+
+  @if (filteredDoctors().length > 0) {
+    <table class="data-table data-table-card">
+      <thead>
+        <tr>
+          <th>{{ 'doctors.name' | translate }}</th>
+          <th>{{ 'doctors.specialization' | translate }}</th>
+          <th>{{ 'doctors.phone' | translate }}</th>
+          <th>{{ 'doctors.email' | translate }}</th>
+          <th>{{ 'doctors.actions' | translate }}</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (doctor of filteredDoctors(); track doctor.id) {
+          <tr>
+            <td [attr.data-label]="'doctors.name' | translate"><a [routerLink]="['/doctors', doctor.id]">Dr. {{ doctor.firstName }} {{ doctor.lastName }}</a></td>
+            <td [attr.data-label]="'doctors.specialization' | translate"><span class="badge badge-primary">{{ 'specialization.' + doctor.specialization | translate }}</span></td>
+            <td [attr.data-label]="'doctors.phone' | translate">{{ doctor.phone }}</td>
+            <td [attr.data-label]="'doctors.email' | translate">{{ doctor.email }}</td>
+            <td class="td-actions">
+              <a [routerLink]="['/doctors', doctor.id]" class="btn btn-sm btn-outline">{{ 'common.view' | translate }}</a>
+              <a [routerLink]="['/doctors', doctor.id, 'edit']" class="btn btn-sm btn-outline">{{ 'common.edit' | translate }}</a>
+            </td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  } @else {
+    <div class="empty-state">
+      <p class="empty-state-text">{{ 'doctors.noResults' | translate }}</p>
+    </div>
+  }
+</div>
