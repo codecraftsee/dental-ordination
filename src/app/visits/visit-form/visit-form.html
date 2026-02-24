@@ -35,7 +35,12 @@
       <div class="form-row">
         <div class="form-group">
           <label class="form-label">{{ 'visit.date' | translate }}</label>
-          <input type="date" class="form-control" formControlName="date" />
+          <div class="date-field">
+            <input class="form-control" [matDatepicker]="datePicker" formControlName="date"
+              (click)="datePicker.open()" readonly />
+            <mat-datepicker-toggle class="date-toggle" [for]="datePicker"></mat-datepicker-toggle>
+            <mat-datepicker #datePicker></mat-datepicker>
+          </div>
           @if (f['date'].invalid && f['date'].touched) {
             <div class="form-error">{{ 'common.required' | translate }}</div>
           }

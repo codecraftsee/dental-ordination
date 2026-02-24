@@ -697,3 +697,59 @@ a {
     background: white;
   }
 }
+
+// ── Angular Material datepicker overrides ──────────────────────────────────────
+
+.mat-datepicker-toggle {
+  .mat-mdc-icon-button {
+    width: 36px;
+    height: 36px;
+    padding: 6px;
+    color: var(--color-text-secondary);
+
+    &:hover {
+      color: var(--color-primary);
+      background: var(--color-sidebar-hover);
+    }
+  }
+}
+
+.mat-datepicker-content {
+  box-shadow: var(--shadow-3);
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--color-border);
+
+  .mat-calendar {
+    font-family: var(--font-body);
+  }
+
+  .mat-calendar-header {
+    background: var(--color-primary);
+    border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+
+    .mat-calendar-controls {
+      color: #fff;
+    }
+
+    button {
+      color: #fff;
+
+      &:hover {
+        background: rgba(255, 255, 255, 0.15);
+      }
+    }
+  }
+
+  .mat-calendar-body-selected {
+    background: var(--color-primary);
+    color: #fff;
+  }
+
+  .mat-calendar-body-today:not(.mat-calendar-body-selected) {
+    border-color: var(--color-primary);
+  }
+
+  .mat-calendar-body-cell:hover .mat-calendar-body-cell-content:not(.mat-calendar-body-selected) {
+    background: var(--color-sidebar-hover);
+  }
+}
