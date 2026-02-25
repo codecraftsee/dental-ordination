@@ -12,6 +12,8 @@
       @for (link of navLinks; track link.route) {
         <a
           class="icon-rail-item"
+          matRipple
+          [matRippleCentered]="true"
           [routerLink]="link.route"
           routerLinkActive
           #rla="routerLinkActive"
