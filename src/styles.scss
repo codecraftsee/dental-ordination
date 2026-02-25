@@ -786,6 +786,16 @@ a {
 .mat-mdc-form-field {
   width: 100%;
 
+  // Fill appearance
+  --mdc-filled-text-field-container-color: var(--color-surface-variant);
+  --mdc-filled-text-field-hover-active-indicator-color: var(--color-primary);
+  --mdc-filled-text-field-focus-active-indicator-color: var(--color-primary);
+  --mdc-filled-text-field-label-text-color: var(--color-text-secondary);
+  --mdc-filled-text-field-focus-label-text-color: var(--color-primary);
+  --mdc-filled-text-field-input-text-color: var(--color-text);
+  --mdc-filled-text-field-container-shape: 4px;
+
+  // Outline appearance
   --mdc-outlined-text-field-outline-color: var(--color-border);
   --mdc-outlined-text-field-hover-outline-color: var(--color-primary-light);
   --mdc-outlined-text-field-focus-outline-color: var(--color-primary);

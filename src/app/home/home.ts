@@ -1,6 +1,7 @@
 import { ChangeDetectionStrategy, Component, ElementRef, inject, OnInit, signal, ViewChild } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { MatCardModule } from '@angular/material/card';
+import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { forkJoin } from 'rxjs';
 import { TranslatePipe } from '../shared/translate.pipe';
@@ -14,7 +15,7 @@ import { TreatmentService } from '../services/treatment.service';
 
 @Component({
   selector: 'app-home',
-  imports: [RouterLink, MatCardModule, MatIconModule, TranslatePipe, LocalizedDatePipe, CurrencyFormatPipe],
+  imports: [RouterLink, MatCardModule, MatButtonModule, MatIconModule, TranslatePipe, LocalizedDatePipe, CurrencyFormatPipe],
   templateUrl: './home.html',
   styleUrl: './home.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

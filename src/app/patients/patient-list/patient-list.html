@@ -8,12 +8,12 @@
   </div>
 
   <div class="search-bar">
-    <mat-form-field appearance="outline" class="search-field">
+    <mat-form-field appearance="fill" class="search-field">
       <mat-label>{{ 'patients.search' | translate }}</mat-label>
       <mat-icon matPrefix>search</mat-icon>
       <input matInput (input)="onSearch($event)" />
     </mat-form-field>
-    <mat-form-field appearance="outline" class="filter-field">
+    <mat-form-field appearance="fill" class="filter-field">
       <mat-label>{{ 'patients.filterCity' | translate }}</mat-label>
       <mat-select (selectionChange)="cityFilter.set($event.value)">
         <mat-option value="">{{ 'patients.filterCity' | translate }}</mat-option>
@@ -22,7 +22,7 @@
         }
       </mat-select>
     </mat-form-field>
-    <mat-form-field appearance="outline" class="filter-field">
+    <mat-form-field appearance="fill" class="filter-field">
       <mat-label>{{ 'patients.filterGender' | translate }}</mat-label>
       <mat-select (selectionChange)="genderFilter.set($event.value)">
         <mat-option value="">{{ 'patients.filterGender' | translate }}</mat-option>
