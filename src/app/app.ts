@@ -5,6 +5,7 @@ import { MatSidenavModule } from '@angular/material/sidenav';
 import { MatToolbarModule } from '@angular/material/toolbar';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
+import { MatIconRegistry } from '@angular/material/icon';
 import { TranslatePipe } from './shared/translate.pipe';
 import { LanguageSwitcher } from './shared/language-switcher/language-switcher';
 import { Sidebar } from './shared/sidebar/sidebar';
@@ -26,6 +27,9 @@ import { ThemeService } from './services/theme.service';
   templateUrl: './app.html',
   styleUrl: './app.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
+  host: {
+    '(window:resize)': 'onResize($event)',
+  },
 })
 export class App {
   readonly authService = inject(AuthService);
@@ -34,11 +38,9 @@ export class App {
   readonly isMobile = signal(window.innerWidth < 768);
   readonly sidenavOpen = signal(this.loadSidenavState());
 
-  host = {
-    '(window:resize)': 'onResize($event)',
-  };
-
   constructor() {
+    inject(MatIconRegistry).setDefaultFontSetClass('material-symbols-outlined');
+
     inject(Router).events.pipe(
       filter(e => e instanceof NavigationEnd),
     ).subscribe(() => {

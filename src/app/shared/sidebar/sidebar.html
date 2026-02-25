@@ -8,9 +8,12 @@
       <a
         mat-list-item
         [routerLink]="link.route"
-        [activated]="isActive(link.route, link.exact)"
+        routerLinkActive
+        #rla="routerLinkActive"
+        [routerLinkActiveOptions]="{ exact: link.exact }"
+        [activated]="rla.isActive"
       >
-        <mat-icon matListItemIcon fontSet="material-symbols-outlined">{{ link.icon }}</mat-icon>
+        <mat-icon matListItemIcon>{{ link.icon }}</mat-icon>
         <span matListItemTitle>{{ link.label | translate }}</span>
       </a>
     }
