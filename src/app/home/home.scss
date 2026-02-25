@@ -10,6 +10,85 @@
   margin-bottom: var(--spacing-xl);
 }
 
+// Stat widget cards
+mat-card.stat-card {
+  mat-card-content {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-md);
+    padding: var(--spacing-lg) !important;
+  }
+
+  .stat-icon-wrap {
+    width: 56px;
+    height: 56px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+
+    mat-icon {
+      font-size: 28px;
+      width: 28px;
+      height: 28px;
+    }
+  }
+
+  .stat-body {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+  }
+
+  .stat-value {
+    font-size: 1.875rem;
+    font-weight: 700;
+    line-height: 1.1;
+  }
+
+  .stat-label {
+    font-size: 0.8125rem;
+    color: var(--color-text-secondary);
+    margin-top: 2px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  &.stat-card--primary {
+    .stat-icon-wrap {
+      background: rgba(81, 86, 190, 0.1);
+      mat-icon { color: var(--color-primary); }
+    }
+    .stat-value { color: var(--color-primary); }
+  }
+
+  &.stat-card--info {
+    .stat-icon-wrap {
+      background: rgba(23, 162, 184, 0.1);
+      mat-icon { color: var(--color-info); }
+    }
+    .stat-value { color: var(--color-info); }
+  }
+
+  &.stat-card--highlight {
+    .stat-icon-wrap {
+      background: rgba(255, 168, 0, 0.1);
+      mat-icon { color: var(--color-highlight); }
+    }
+    .stat-value { color: var(--color-highlight); }
+  }
+
+  &.stat-card--danger {
+    .stat-icon-wrap {
+      background: rgba(220, 53, 69, 0.1);
+      mat-icon { color: var(--color-danger); }
+    }
+    .stat-value { color: var(--color-danger); }
+  }
+}
+
 .quick-actions {
   margin-bottom: var(--spacing-xl);
 
@@ -56,6 +135,28 @@
     grid-template-columns: repeat(2, 1fr);
     gap: var(--spacing-sm);
     margin-bottom: var(--spacing-md);
+  }
+
+  mat-card.stat-card {
+    mat-card-content {
+      padding: var(--spacing-md) !important;
+    }
+
+    .stat-icon-wrap {
+      width: 44px;
+      height: 44px;
+      border-radius: 10px;
+
+      mat-icon {
+        font-size: 22px;
+        width: 22px;
+        height: 22px;
+      }
+    }
+
+    .stat-value {
+      font-size: 1.5rem;
+    }
   }
 
   .quick-actions {

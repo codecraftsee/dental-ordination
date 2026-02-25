@@ -313,28 +313,6 @@ a {
   }
 }
 
-// Stat cards (mat-card based)
-mat-card.stat-card {
-  text-align: center;
-  border-top: 3px solid var(--color-primary);
-
-  mat-card-content {
-    padding: var(--spacing-lg) !important;
-  }
-
-  .stat-value {
-    font-size: 2rem;
-    font-weight: 700;
-    color: var(--color-primary);
-    line-height: 1.2;
-  }
-
-  .stat-label {
-    font-size: 0.85rem;
-    color: var(--color-text-secondary);
-    margin-top: var(--spacing-xs);
-  }
-}
 
 // Forms
 .form-group {
@@ -615,10 +593,6 @@ mat-card.stat-card {
 
   .section-title {
     font-size: 1.25rem;
-  }
-
-  mat-card.stat-card mat-card-content {
-    padding: var(--spacing-md) !important;
   }
 
   .detail-grid {
