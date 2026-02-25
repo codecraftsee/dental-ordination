@@ -819,6 +819,24 @@ a {
   }
 }
 
+// ── Angular Material table ────────────────────────────────────────────────────
+
+.mat-mdc-table {
+  --mat-table-background-color: var(--color-surface);
+  --mat-table-header-headline-color: var(--color-text);
+  --mat-table-row-item-label-text-color: var(--color-text);
+  --mat-table-row-item-outline-color: var(--color-border);
+  --mat-table-header-row-hover-state-layer-color: transparent;
+
+  .mat-mdc-header-row {
+    background: var(--color-surface-variant);
+  }
+
+  .mat-mdc-row:hover .mat-mdc-cell {
+    background: var(--color-sidebar-hover);
+  }
+}
+
 // ── Angular Material datepicker overrides ──────────────────────────────────────
 
 .mat-datepicker-toggle {
