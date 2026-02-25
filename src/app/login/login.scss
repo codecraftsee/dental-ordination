@@ -2,28 +2,30 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  min-height: calc(100vh - 60px);
+  min-height: 100vh;
   padding: var(--spacing-lg);
+  background: var(--color-background);
 }
 
 .login-card {
   width: 100%;
-  max-width: 400px;
-  background: var(--color-surface);
-  border-radius: var(--radius-lg);
-  box-shadow: var(--shadow-3);
-  padding: var(--spacing-xl);
+  max-width: 420px;
+  box-shadow: var(--shadow-3) !important;
 
-  h1 {
-    text-align: center;
-    margin-bottom: var(--spacing-lg);
-    color: var(--color-primary);
+  mat-card-content {
+    padding: var(--spacing-xl) !important;
+
+    h1 {
+      text-align: center;
+      margin-bottom: var(--spacing-lg);
+      color: var(--color-primary);
+    }
   }
 }
 
 .error-message {
-  background: #fef2f2;
-  color: #dc2626;
+  background: var(--color-danger-bg);
+  color: var(--color-danger);
   padding: var(--spacing-sm) var(--spacing-md);
   border-radius: var(--radius-sm);
   margin-bottom: var(--spacing-md);
