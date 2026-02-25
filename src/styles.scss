@@ -724,11 +724,15 @@ a {
 // ── Angular Material nav list ─────────────────────────────────────────────────
 
 .mat-mdc-nav-list {
+  padding: 8px !important;
+
+  --mat-list-active-indicator-shape: 50px;
+  --mat-list-active-indicator-color: var(--color-sidebar-active);
+
   .mat-mdc-list-item {
     color: var(--color-sidebar-text);
-    border-radius: 6px;
-    margin: 2px 8px;
-    width: calc(100% - 16px);
+    border-radius: 50px;
+    margin-bottom: 2px;
 
     &:hover {
       background: var(--color-sidebar-hover) !important;
