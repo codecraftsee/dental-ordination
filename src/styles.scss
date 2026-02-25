@@ -728,6 +728,8 @@ a {
 
   --mat-list-active-indicator-shape: 50px;
   --mat-list-active-indicator-color: var(--color-sidebar-active);
+  --mat-list-list-item-pressed-state-layer-color: var(--color-primary);
+  --mat-list-list-item-pressed-state-layer-opacity: 0.16;
 
   .mat-mdc-list-item {
     color: var(--color-sidebar-text);
