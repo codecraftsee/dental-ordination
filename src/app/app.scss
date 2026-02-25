@@ -1,11 +1,31 @@
 .app-container {
   height: 100vh;
 
-  // Animate the mini-drawer width change
-  .mat-drawer {
-    transition: width 0.25s ease;
-    overflow-x: hidden; // clip sidebar content during collapse transition
-    overflow-y: auto;
+  // On desktop we fully own the sidenav width and content margin so both
+  // animate in lockstep. Angular Material computes margin-left via JS only
+  // at open/close time, so we override with !important + CSS transitions.
+  @media (min-width: 768px) {
+    .mat-drawer {
+      width: 250px;
+      overflow-x: hidden;
+      overflow-y: auto;
+      transition: width 0.25s ease;
+    }
+
+    .mat-drawer-content {
+      margin-left: 250px !important;
+      transition: margin-left 0.25s ease;
+    }
+
+    &.sidenav-collapsed {
+      .mat-drawer {
+        width: 70px;
+      }
+
+      .mat-drawer-content {
+        margin-left: 70px !important;
+      }
+    }
   }
 }
 

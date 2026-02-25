@@ -1,10 +1,12 @@
 @if (authService.isAuthenticated()) {
-  <mat-sidenav-container class="app-container">
+  <mat-sidenav-container
+    class="app-container"
+    [class.sidenav-collapsed]="!isMobile() && sidebarCollapsed()"
+  >
     <mat-sidenav
       [mode]="isMobile() ? 'over' : 'side'"
       [opened]="isMobile() ? sidenavOpen() : true"
       (openedChange)="sidenavOpen.set($event)"
-      [style.width]="(!isMobile() && sidebarCollapsed()) ? '70px' : '250px'"
     >
       <app-sidebar [collapsed]="!isMobile() && sidebarCollapsed()" />
     </mat-sidenav>
