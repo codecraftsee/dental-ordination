@@ -4,7 +4,8 @@
   // Animate the mini-drawer width change
   .mat-drawer {
     transition: width 0.25s ease;
-    overflow: hidden;
+    overflow-x: hidden; // clip sidebar content during collapse transition
+    overflow-y: auto;
   }
 }
 

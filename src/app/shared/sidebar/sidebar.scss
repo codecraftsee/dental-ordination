@@ -3,15 +3,15 @@
   height: 100%;
   background: var(--color-sidebar);
   border-right: 1px solid var(--color-sidebar-border);
-  overflow: hidden;
 }
 
 .sidebar-inner {
   display: flex;
   flex-direction: column;
   height: 100%;
-  width: 250px; // matches the expanded sidenav width
 }
+
+// ── Logo area ─────────────────────────────────────────────────────────────────
 
 .sidebar-logo {
   height: var(--header-height);
@@ -31,7 +31,7 @@
     letter-spacing: 0.5px;
   }
 
-  .logo-icon {
+  mat-icon {
     color: var(--color-primary);
     font-size: 24px;
     width: 24px;
@@ -40,34 +40,53 @@
   }
 }
 
+:host.collapsed .sidebar-logo {
+  padding: 0;
+  justify-content: center;
+}
+
+// ── Expanded nav (mat-nav-list) ───────────────────────────────────────────────
+
 mat-nav-list {
   padding-top: 8px;
 }
 
-// ── Collapsed (icon-only) state ───────────────────────────────────────────────
+// ── Collapsed icon rail ───────────────────────────────────────────────────────
 
-:host.collapsed {
-  .sidebar-inner {
-    width: 70px;
-    align-items: center;
+.icon-rail {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 8px 0;
+  gap: 2px;
+}
+
+.icon-rail-item {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 46px;
+  height: 46px;
+  border-radius: 10px;
+  color: var(--color-sidebar-text);
+  text-decoration: none;
+  transition:
+    background 0.15s,
+    color 0.15s;
+
+  &:hover {
+    background: var(--color-sidebar-hover);
+    color: var(--color-sidebar-text-hover);
   }
 
-  .sidebar-logo {
-    padding: 0;
-    justify-content: center;
-    width: 70px;
+  &.active {
+    background: var(--color-sidebar-active);
+    color: var(--color-sidebar-active-text);
   }
 
-  mat-nav-list {
-    width: 70px;
-    padding-top: 8px;
-
-    .mat-mdc-list-item {
-      width: 46px;
-      margin: 2px 0;
-      padding: 0;
-      justify-content: center;
-      border-radius: 10px;
-    }
+  mat-icon {
+    font-size: 22px;
+    width: 22px;
+    height: 22px;
   }
 }

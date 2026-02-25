@@ -3,26 +3,43 @@
     @if (!collapsed()) {
       <span class="logo-text">{{ 'nav.brand' | translate }}</span>
     } @else {
-      <mat-icon class="logo-icon">medical_services</mat-icon>
+      <mat-icon>medical_services</mat-icon>
     }
   </div>
 
-  <mat-nav-list>
-    @for (link of navLinks; track link.route) {
-      <a
-        mat-list-item
-        [routerLink]="link.route"
-        routerLinkActive
-        #rla="routerLinkActive"
-        [routerLinkActiveOptions]="{ exact: link.exact }"
-        [activated]="rla.isActive"
-        [title]="collapsed() ? (link.label | translate) : ''"
-      >
-        <mat-icon matListItemIcon>{{ link.icon }}</mat-icon>
-        @if (!collapsed()) {
+  @if (collapsed()) {
+    <nav class="icon-rail" aria-label="Navigation">
+      @for (link of navLinks; track link.route) {
+        <a
+          class="icon-rail-item"
+          [routerLink]="link.route"
+          routerLinkActive
+          #rla="routerLinkActive"
+          [routerLinkActiveOptions]="{ exact: link.exact }"
+          [class.active]="rla.isActive"
+          [title]="link.label | translate"
+          [attr.aria-label]="link.label | translate"
+          [attr.aria-current]="rla.isActive ? 'page' : null"
+        >
+          <mat-icon>{{ link.icon }}</mat-icon>
+        </a>
+      }
+    </nav>
+  } @else {
+    <mat-nav-list>
+      @for (link of navLinks; track link.route) {
+        <a
+          mat-list-item
+          [routerLink]="link.route"
+          routerLinkActive
+          #rla="routerLinkActive"
+          [routerLinkActiveOptions]="{ exact: link.exact }"
+          [activated]="rla.isActive"
+        >
+          <mat-icon matListItemIcon>{{ link.icon }}</mat-icon>
           <span matListItemTitle>{{ link.label | translate }}</span>
-        }
-      </a>
-    }
-  </mat-nav-list>
+        </a>
+      }
+    </mat-nav-list>
+  }
 </div>
