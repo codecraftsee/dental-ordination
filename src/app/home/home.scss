@@ -13,6 +13,7 @@
 // Stat widget cards
 mat-card.stat-card {
   border: 1px solid var(--color-border) !important;
+  box-shadow: var(--shadow-2) !important;
 
   mat-card-content {
     display: flex;
