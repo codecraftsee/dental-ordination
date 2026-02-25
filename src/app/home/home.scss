@@ -14,6 +14,7 @@
 mat-card.stat-card {
   border-radius: var(--radius-lg) !important;
   overflow: hidden !important;
+  background: var(--color-surface) !important;
 
   mat-card-content {
     display: flex;
