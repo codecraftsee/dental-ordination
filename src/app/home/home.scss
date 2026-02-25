@@ -13,6 +13,7 @@
 // Stat widget cards
 mat-card.stat-card {
   border: 1px solid var(--color-border) !important;
+  border-left-width: 4px !important;
   box-shadow: var(--shadow-2) !important;
 
   mat-card-content {
@@ -60,6 +61,7 @@ mat-card.stat-card {
   }
 
   &.stat-card--primary {
+    border-left-color: var(--color-primary) !important;
     .stat-icon-wrap {
       background: rgba(81, 86, 190, 0.1);
       mat-icon { color: var(--color-primary); }
@@ -68,6 +70,7 @@ mat-card.stat-card {
   }
 
   &.stat-card--info {
+    border-left-color: var(--color-info) !important;
     .stat-icon-wrap {
       background: rgba(23, 162, 184, 0.1);
       mat-icon { color: var(--color-info); }
@@ -76,6 +79,7 @@ mat-card.stat-card {
   }
 
   &.stat-card--highlight {
+    border-left-color: var(--color-highlight) !important;
     .stat-icon-wrap {
       background: rgba(255, 168, 0, 0.1);
       mat-icon { color: var(--color-highlight); }
@@ -84,6 +88,7 @@ mat-card.stat-card {
   }
 
   &.stat-card--danger {
+    border-left-color: var(--color-danger) !important;
     .stat-icon-wrap {
       background: rgba(220, 53, 69, 0.1);
       mat-icon { color: var(--color-danger); }
