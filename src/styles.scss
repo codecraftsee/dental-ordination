@@ -313,14 +313,14 @@ a {
   }
 }
 
-// Stat cards
-.stat-card {
-  background: var(--color-surface);
-  border-radius: var(--radius-md);
-  box-shadow: var(--shadow-1);
-  padding: var(--spacing-lg);
+// Stat cards (mat-card based)
+mat-card.stat-card {
   text-align: center;
   border-top: 3px solid var(--color-primary);
+
+  mat-card-content {
+    padding: var(--spacing-lg) !important;
+  }
 
   .stat-value {
     font-size: 2rem;
@@ -617,8 +617,8 @@ a {
     font-size: 1.25rem;
   }
 
-  .stat-card {
-    padding: var(--spacing-md);
+  mat-card.stat-card mat-card-content {
+    padding: var(--spacing-md) !important;
   }
 
   .detail-grid {

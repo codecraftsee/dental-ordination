@@ -31,22 +31,30 @@
 
     <!-- STATS BAR -->
     <div class="stats-bar">
-      <div class="stat-card">
-        <div class="stat-value">{{ allVisits().length }}</div>
-        <div class="stat-label">{{ 'patient.totalVisits' | translate }}</div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-value">{{ getVisitsThisYear() }}</div>
-        <div class="stat-label">{{ 'patient.visitsThisYear' | translate }}</div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-value">{{ getAge(p.dateOfBirth) }}</div>
-        <div class="stat-label">{{ 'patient.age' | translate }}</div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-value stat-value--date">{{ p.dateOfBirth | localizedDate:'mediumDate' }}</div>
-        <div class="stat-label">{{ 'patient.dateOfBirth' | translate }}</div>
-      </div>
+      <mat-card class="stat-card">
+        <mat-card-content>
+          <div class="stat-value">{{ allVisits().length }}</div>
+          <div class="stat-label">{{ 'patient.totalVisits' | translate }}</div>
+        </mat-card-content>
+      </mat-card>
+      <mat-card class="stat-card">
+        <mat-card-content>
+          <div class="stat-value">{{ getVisitsThisYear() }}</div>
+          <div class="stat-label">{{ 'patient.visitsThisYear' | translate }}</div>
+        </mat-card-content>
+      </mat-card>
+      <mat-card class="stat-card">
+        <mat-card-content>
+          <div class="stat-value">{{ getAge(p.dateOfBirth) }}</div>
+          <div class="stat-label">{{ 'patient.age' | translate }}</div>
+        </mat-card-content>
+      </mat-card>
+      <mat-card class="stat-card">
+        <mat-card-content>
+          <div class="stat-value stat-value--date">{{ p.dateOfBirth | localizedDate:'mediumDate' }}</div>
+          <div class="stat-label">{{ 'patient.dateOfBirth' | translate }}</div>
+        </mat-card-content>
+      </mat-card>
     </div>
 
     <!-- INFO SECTION -->

@@ -2,22 +2,30 @@
   <h1 class="section-title">{{ 'home.title' | translate }}</h1>
 
   <div class="stats-grid">
-    <div class="stat-card">
-      <div class="stat-value">{{ totalPatients }}</div>
-      <div class="stat-label">{{ 'home.totalPatients' | translate }}</div>
-    </div>
-    <div class="stat-card">
-      <div class="stat-value">{{ totalDoctors }}</div>
-      <div class="stat-label">{{ 'home.totalDoctors' | translate }}</div>
-    </div>
-    <div class="stat-card">
-      <div class="stat-value">{{ visitsThisMonth }}</div>
-      <div class="stat-label">{{ 'home.visitsThisMonth' | translate }}</div>
-    </div>
-    <div class="stat-card">
-      <div class="stat-value">{{ totalVisits }}</div>
-      <div class="stat-label">{{ 'home.totalVisits' | translate }}</div>
-    </div>
+    <mat-card class="stat-card">
+      <mat-card-content>
+        <div class="stat-value">{{ totalPatients }}</div>
+        <div class="stat-label">{{ 'home.totalPatients' | translate }}</div>
+      </mat-card-content>
+    </mat-card>
+    <mat-card class="stat-card">
+      <mat-card-content>
+        <div class="stat-value">{{ totalDoctors }}</div>
+        <div class="stat-label">{{ 'home.totalDoctors' | translate }}</div>
+      </mat-card-content>
+    </mat-card>
+    <mat-card class="stat-card">
+      <mat-card-content>
+        <div class="stat-value">{{ visitsThisMonth }}</div>
+        <div class="stat-label">{{ 'home.visitsThisMonth' | translate }}</div>
+      </mat-card-content>
+    </mat-card>
+    <mat-card class="stat-card">
+      <mat-card-content>
+        <div class="stat-value">{{ totalVisits }}</div>
+        <div class="stat-label">{{ 'home.totalVisits' | translate }}</div>
+      </mat-card-content>
+    </mat-card>
   </div>
 
   <div class="quick-actions">

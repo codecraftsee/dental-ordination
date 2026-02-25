@@ -1,5 +1,6 @@
 import { ChangeDetectionStrategy, Component, ElementRef, inject, OnInit, signal, ViewChild } from '@angular/core';
 import { RouterLink } from '@angular/router';
+import { MatCardModule } from '@angular/material/card';
 import { forkJoin } from 'rxjs';
 import { TranslatePipe } from '../shared/translate.pipe';
 import { LocalizedDatePipe } from '../shared/localized-date.pipe';
@@ -12,7 +13,7 @@ import { TreatmentService } from '../services/treatment.service';
 
 @Component({
   selector: 'app-home',
-  imports: [RouterLink, TranslatePipe, LocalizedDatePipe, CurrencyFormatPipe],
+  imports: [RouterLink, MatCardModule, TranslatePipe, LocalizedDatePipe, CurrencyFormatPipe],
   templateUrl: './home.html',
   styleUrl: './home.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
