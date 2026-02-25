@@ -12,7 +12,7 @@
 
 // Stat widget cards
 mat-card.stat-card {
-  border-left-width: 4px !important;
+  border-top-width: 4px !important;
 
   mat-card-content {
     display: flex;
@@ -59,7 +59,7 @@ mat-card.stat-card {
   }
 
   &.stat-card--primary {
-    border-left-color: var(--color-primary) !important;
+    border-top-color: var(--color-primary) !important;
     .stat-icon-wrap {
       background: rgba(81, 86, 190, 0.1);
       mat-icon { color: var(--color-primary); }
@@ -68,7 +68,7 @@ mat-card.stat-card {
   }
 
   &.stat-card--info {
-    border-left-color: var(--color-info) !important;
+    border-top-color: var(--color-info) !important;
     .stat-icon-wrap {
       background: rgba(23, 162, 184, 0.1);
       mat-icon { color: var(--color-info); }
@@ -77,7 +77,7 @@ mat-card.stat-card {
   }
 
   &.stat-card--highlight {
-    border-left-color: var(--color-highlight) !important;
+    border-top-color: var(--color-highlight) !important;
     .stat-icon-wrap {
       background: rgba(255, 168, 0, 0.1);
       mat-icon { color: var(--color-highlight); }
@@ -86,7 +86,7 @@ mat-card.stat-card {
   }
 
   &.stat-card--danger {
-    border-left-color: var(--color-danger) !important;
+    border-top-color: var(--color-danger) !important;
     .stat-icon-wrap {
       background: rgba(220, 53, 69, 0.1);
       mat-icon { color: var(--color-danger); }
