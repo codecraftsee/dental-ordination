@@ -1,5 +1,11 @@
 .app-container {
   height: 100vh;
+
+  // Animate the mini-drawer width change
+  .mat-drawer {
+    transition: width 0.25s ease;
+    overflow: hidden;
+  }
 }
 
 .app-toolbar {

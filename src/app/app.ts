@@ -36,7 +36,12 @@ export class App {
   readonly themeService = inject(ThemeService);
 
   readonly isMobile = signal(window.innerWidth < 768);
-  readonly sidenavOpen = signal(this.loadSidenavState());
+
+  /** Desktop: sidebar is always visible, this controls mini vs full width. */
+  readonly sidebarCollapsed = signal(this.loadCollapsedState());
+
+  /** Mobile only: controls whether the overlay sidenav is open. */
+  readonly sidenavOpen = signal(false);
 
   constructor() {
     inject(MatIconRegistry).setDefaultFontSetClass('material-symbols-outlined');
@@ -59,10 +64,12 @@ export class App {
   }
 
   toggleSidenav(): void {
-    const next = !this.sidenavOpen();
-    this.sidenavOpen.set(next);
-    if (!this.isMobile()) {
-      localStorage.setItem('sidebar-collapsed', String(!next));
+    if (this.isMobile()) {
+      this.sidenavOpen.update(v => !v);
+    } else {
+      const next = !this.sidebarCollapsed();
+      this.sidebarCollapsed.set(next);
+      localStorage.setItem('sidebar-collapsed', String(next));
     }
   }
 
@@ -70,9 +77,8 @@ export class App {
     this.authService.logout();
   }
 
-  private loadSidenavState(): boolean {
-    if (window.innerWidth < 768) return false;
+  private loadCollapsedState(): boolean {
     const saved = localStorage.getItem('sidebar-collapsed');
-    return saved !== 'true';
+    return saved === 'true';
   }
 }

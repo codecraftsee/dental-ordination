@@ -1,4 +1,4 @@
-import { Component, ChangeDetectionStrategy } from '@angular/core';
+import { Component, ChangeDetectionStrategy, input } from '@angular/core';
 import { RouterLink, RouterLinkActive } from '@angular/router';
 import { MatListModule } from '@angular/material/list';
 import { MatIconModule } from '@angular/material/icon';
@@ -10,8 +10,13 @@ import { TranslatePipe } from '../translate.pipe';
   templateUrl: './sidebar.html',
   styleUrl: './sidebar.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
+  host: {
+    '[class.collapsed]': 'collapsed()',
+  },
 })
 export class Sidebar {
+  readonly collapsed = input<boolean>(false);
+
   readonly navLinks = [
     { route: '/', label: 'nav.home', icon: 'home', exact: true },
     { route: '/patients', label: 'nav.patients', icon: 'people', exact: false },

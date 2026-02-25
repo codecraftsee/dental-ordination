@@ -2,10 +2,11 @@
   <mat-sidenav-container class="app-container">
     <mat-sidenav
       [mode]="isMobile() ? 'over' : 'side'"
-      [opened]="sidenavOpen()"
+      [opened]="isMobile() ? sidenavOpen() : true"
       (openedChange)="sidenavOpen.set($event)"
+      [style.width]="(!isMobile() && sidebarCollapsed()) ? '70px' : '250px'"
     >
-      <app-sidebar />
+      <app-sidebar [collapsed]="!isMobile() && sidebarCollapsed()" />
     </mat-sidenav>
 
     <mat-sidenav-content>

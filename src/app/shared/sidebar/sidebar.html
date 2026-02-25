@@ -1,6 +1,10 @@
 <div class="sidebar-inner">
   <div class="sidebar-logo">
-    <span class="logo-text">{{ 'nav.brand' | translate }}</span>
+    @if (!collapsed()) {
+      <span class="logo-text">{{ 'nav.brand' | translate }}</span>
+    } @else {
+      <mat-icon class="logo-icon">medical_services</mat-icon>
+    }
   </div>
 
   <mat-nav-list>
@@ -12,9 +16,12 @@
         #rla="routerLinkActive"
         [routerLinkActiveOptions]="{ exact: link.exact }"
         [activated]="rla.isActive"
+        [title]="collapsed() ? (link.label | translate) : ''"
       >
         <mat-icon matListItemIcon>{{ link.icon }}</mat-icon>
-        <span matListItemTitle>{{ link.label | translate }}</span>
+        @if (!collapsed()) {
+          <span matListItemTitle>{{ link.label | translate }}</span>
+        }
       </a>
     }
   </mat-nav-list>
