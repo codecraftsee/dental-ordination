@@ -51,15 +51,15 @@
   <div class="quick-actions">
     <h2>{{ 'home.quickActions' | translate }}</h2>
     <div class="actions-row">
-      <a routerLink="/patients/new" mat-flat-button color="primary">
+      <a routerLink="/patients/new" matButton="elevated" color="primary">
         <mat-icon>person_add</mat-icon>
         {{ 'home.newPatient' | translate }}
       </a>
-      <a routerLink="/visits/new" mat-flat-button color="accent">
+      <a routerLink="/visits/new" matButton="elevated" color="accent">
         <mat-icon>calendar_today</mat-icon>
         {{ 'home.newVisit' | translate }}
       </a>
-      <button mat-stroked-button (click)="triggerXlsxInput()" [disabled]="importing()">
+      <button matButton="elevated" class="btn-amber" (click)="triggerXlsxInput()" [disabled]="importing()">
         <mat-icon>upload_file</mat-icon>
         @if (importing()) {
           {{ 'home.importing' | translate }}

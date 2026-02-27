@@ -8,6 +8,8 @@ import { MatSelectModule } from '@angular/material/select';
 import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatNativeDateModule } from '@angular/material/core';
 import { MatCardModule } from '@angular/material/card';
+import { MatButtonModule } from '@angular/material/button';
+import { MatIconModule } from '@angular/material/icon';
 import { TranslatePipe } from '../../shared/translate.pipe';
 import { VisitService } from '../../services/visit.service';
 import { PatientService } from '../../services/patient.service';
@@ -27,6 +29,8 @@ import { TreatmentService } from '../../services/treatment.service';
     MatDatepickerModule,
     MatNativeDateModule,
     MatCardModule,
+    MatButtonModule,
+    MatIconModule,
   ],
   templateUrl: './visit-form.html',
   styleUrl: './visit-form.scss',

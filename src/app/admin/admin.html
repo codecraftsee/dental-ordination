@@ -33,10 +33,11 @@
               spellcheck="false"
             />
             <button
-              class="btn btn-danger"
+              matButton="elevated" color="warn"
               [disabled]="action.confirmInput() !== 'DELETE' || action.loading()"
               (click)="execute(action)"
             >
+              <mat-icon>delete_forever</mat-icon>
               @if (action.loading()) {
                 {{ 'admin.deleting' | translate }}
               } @else {

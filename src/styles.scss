@@ -695,6 +695,118 @@ a {
   }
 }
 
+// ── Angular Material buttons ──────────────────────────────────────────────────
+
+[matButton='elevated'] {
+  border-radius: 30px !important;
+  font-size: 0.8125rem !important;
+  font-weight: 500 !important;
+  letter-spacing: 0.3px !important;
+
+  &[color='primary'] {
+    background: var(--color-primary) !important;
+    color: #fff !important;
+    box-shadow: 0 2px 6px rgba(81, 86, 190, 0.3) !important;
+
+    &:hover {
+      background: var(--color-primary-dark) !important;
+      box-shadow: 0 4px 12px rgba(81, 86, 190, 0.4) !important;
+    }
+  }
+
+  &[color='accent'] {
+    background: #1bc5bd !important;
+    color: #fff !important;
+    box-shadow: 0 2px 6px rgba(27, 197, 189, 0.35) !important;
+
+    &:hover {
+      background: #16a89f !important;
+      box-shadow: 0 4px 12px rgba(27, 197, 189, 0.45) !important;
+    }
+  }
+
+  &.btn-amber {
+    background: #ffa800 !important;
+    color: #fff !important;
+    box-shadow: 0 2px 6px rgba(255, 168, 0, 0.35) !important;
+
+    &:hover {
+      background: #e09500 !important;
+      box-shadow: 0 4px 12px rgba(255, 168, 0, 0.45) !important;
+    }
+  }
+
+  &[color='warn'] {
+    background: #f64e60 !important;
+    color: #fff !important;
+    box-shadow: 0 2px 6px rgba(246, 78, 96, 0.35) !important;
+
+    &:hover {
+      background: #ee2d41 !important;
+      box-shadow: 0 4px 12px rgba(246, 78, 96, 0.45) !important;
+    }
+  }
+}
+
+[matButton='outlined'] {
+  border-radius: 30px !important;
+  font-size: 0.8125rem !important;
+  font-weight: 500 !important;
+  letter-spacing: 0.3px !important;
+  color: var(--color-primary) !important;
+  border-color: var(--color-primary) !important;
+
+  &:hover {
+    background: rgba(81, 86, 190, 0.08) !important;
+  }
+
+  &.btn-danger-outlined {
+    color: #f64e60 !important;
+    border-color: #f64e60 !important;
+
+    &:hover {
+      background: rgba(246, 78, 96, 0.08) !important;
+    }
+  }
+}
+
+[matButton] {
+  font-size: 0.8125rem !important;
+}
+
+[mat-icon-button] {
+  color: var(--color-text-secondary);
+
+  &:hover {
+    color: var(--color-primary);
+    background: var(--color-sidebar-hover) !important;
+  }
+}
+
+.icon-btn--primary {
+  color: var(--color-primary) !important;
+  border-color: var(--color-primary) !important;
+  &:hover { background: rgba(81, 86, 190, 0.1) !important; }
+}
+
+.icon-btn--warning {
+  color: #ffa800 !important;
+  border-color: #ffa800 !important;
+  &:hover { background: rgba(255, 168, 0, 0.1) !important; }
+}
+
+.icon-btn--success {
+  color: #1bc5bd !important;
+  border-color: #1bc5bd !important;
+  &:hover { background: rgba(27, 197, 189, 0.1) !important; }
+}
+
+.icon-btn--danger {
+  color: #f64e60 !important;
+  border-color: #f64e60 !important;
+  &:hover { background: rgba(246, 78, 96, 0.1) !important; }
+}
+
 // ── Angular Material shell ────────────────────────────────────────────────────
 
 .mat-drawer {
@@ -855,6 +967,18 @@ a {
   .mat-mdc-row:hover .mat-mdc-cell {
     background: var(--color-sidebar-hover);
   }
+}
+
+// ── Angular Material tooltip ──────────────────────────────────────────────────
+
+.mat-mdc-tooltip .mdc-tooltip__surface {
+  background-color: var(--color-text) !important;
+  color: var(--color-surface) !important;
+  border-radius: 6px !important;
+  font-size: 0.75rem !important;
+  font-weight: 500 !important;
+  padding: 5px 10px !important;
+  box-shadow: var(--shadow-2) !important;
 }
 
 // ── Angular Material datepicker overrides ──────────────────────────────────────

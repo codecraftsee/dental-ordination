@@ -81,8 +81,8 @@
       </mat-form-field>
 
       <div class="form-actions">
-        <button type="submit" class="btn btn-primary">{{ 'common.save' | translate }}</button>
-        <a routerLink="/visits" class="btn btn-outline">{{ 'common.cancel' | translate }}</a>
+        <button type="submit" matButton="elevated" color="primary"><mat-icon>save</mat-icon>{{ 'common.save' | translate }}</button>
+        <a routerLink="/visits" matButton="outlined"><mat-icon>close</mat-icon>{{ 'common.cancel' | translate }}</a>
       </div>
     </form>
     </mat-card-content>

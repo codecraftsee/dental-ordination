@@ -21,10 +21,10 @@
           </div>
         </div>
         <div class="profile-actions">
-          <a [routerLink]="['/patients', p.id, 'dental-card']" class="btn btn-primary">{{ 'patients.viewDentalCard' | translate }}</a>
-          <a [routerLink]="['/patients', p.id, 'edit']" class="btn btn-outline">{{ 'common.edit' | translate }}</a>
-          <button class="btn btn-outline-danger" (click)="deletePatient()">{{ 'common.delete' | translate }}</button>
-          <a routerLink="/patients" class="btn btn-outline">{{ 'common.back' | translate }}</a>
+          <a [routerLink]="['/patients', p.id, 'dental-card']" matButton="elevated" color="primary"><mat-icon>assignment</mat-icon>{{ 'patients.viewDentalCard' | translate }}</a>
+          <a [routerLink]="['/patients', p.id, 'edit']" matButton="outlined"><mat-icon>edit</mat-icon>{{ 'common.edit' | translate }}</a>
+          <button matButton="outlined" class="btn-danger-outlined" (click)="deletePatient()"><mat-icon>delete</mat-icon>{{ 'common.delete' | translate }}</button>
+          <a routerLink="/patients" matButton="outlined"><mat-icon>arrow_back</mat-icon>{{ 'common.back' | translate }}</a>
         </div>
       </mat-card-content>
     </mat-card>

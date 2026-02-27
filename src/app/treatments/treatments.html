@@ -1,7 +1,7 @@
 <div class="container page">
   <div class="page-header">
     <h1 class="section-title">{{ 'treatments.title' | translate }}</h1>
-    <button class="btn btn-primary" (click)="openAddForm()">{{ 'treatments.addNew' | translate }}</button>
+    <button matButton="elevated" color="primary" (click)="openAddForm()"><mat-icon>add</mat-icon>{{ 'treatments.addNew' | translate }}</button>
   </div>
 
   <div class="search-bar">
@@ -58,8 +58,8 @@
           <textarea matInput formControlName="description" rows="2"></textarea>
         </mat-form-field>
         <div class="form-actions">
-          <button type="submit" class="btn btn-primary">{{ 'common.save' | translate }}</button>
-          <button type="button" class="btn btn-outline" (click)="cancelForm()">{{ 'common.cancel' | translate }}</button>
+          <button type="submit" matButton="elevated" color="primary"><mat-icon>save</mat-icon>{{ 'common.save' | translate }}</button>
+          <button type="button" matButton="outlined" (click)="cancelForm()"><mat-icon>close</mat-icon>{{ 'common.cancel' | translate }}</button>
         </div>
       </form>
       </mat-card-content>
@@ -87,8 +87,8 @@
             <td [attr.data-label]="'treatments.defaultPrice' | translate">{{ tx.defaultPrice | currencyFormat }}</td>
             <td [attr.data-label]="'treatments.description' | translate">{{ tx.description }}</td>
             <td class="td-actions">
-              <button class="btn btn-sm btn-outline" (click)="openEditForm(tx)">{{ 'common.edit' | translate }}</button>
-              <button class="btn btn-sm btn-outline-danger" (click)="deleteTreatment(tx.id)">{{ 'common.delete' | translate }}</button>
+              <button matButton="outlined" (click)="openEditForm(tx)"><mat-icon>edit</mat-icon>{{ 'common.edit' | translate }}</button>
+              <button matButton="outlined" class="btn-danger-outlined" (click)="deleteTreatment(tx.id)"><mat-icon>delete</mat-icon>{{ 'common.delete' | translate }}</button>
             </td>
           </tr>
         }

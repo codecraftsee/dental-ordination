@@ -3,8 +3,8 @@
     <div class="page-header">
       <h1 class="section-title">{{ 'visit.title.detail' | translate }}</h1>
       <div>
-        <button class="btn btn-outline-danger" (click)="deleteVisit()">{{ 'common.delete' | translate }}</button>
-        <a routerLink="/visits" class="btn btn-outline">{{ 'common.back' | translate }}</a>
+        <button matButton="outlined" class="btn-danger-outlined" (click)="deleteVisit()"><mat-icon>delete</mat-icon>{{ 'common.delete' | translate }}</button>
+        <a routerLink="/visits" matButton="outlined"><mat-icon>arrow_back</mat-icon>{{ 'common.back' | translate }}</a>
       </div>
     </div>
 

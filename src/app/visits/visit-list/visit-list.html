@@ -1,7 +1,7 @@
 <div class="container page">
   <div class="page-header">
     <h1 class="section-title">{{ 'visits.title' | translate }}</h1>
-    <a routerLink="/visits/new" class="btn btn-primary">{{ 'visits.addNew' | translate }}</a>
+    <a routerLink="/visits/new" matButton="elevated" color="primary"><mat-icon>add</mat-icon>{{ 'visits.addNew' | translate }}</a>
   </div>
 
   <div class="search-bar">
@@ -64,7 +64,7 @@
             <td [attr.data-label]="'visits.treatment' | translate">{{ getTreatmentName(visit.treatmentId) }}</td>
             <td [attr.data-label]="'visits.price' | translate">{{ visit.price | currencyFormat }}</td>
             <td class="td-actions">
-              <a [routerLink]="['/visits', visit.id]" class="btn btn-sm btn-outline">{{ 'common.view' | translate }}</a>
+              <a [routerLink]="['/visits', visit.id]" matButton="outlined"><mat-icon>visibility</mat-icon>{{ 'common.view' | translate }}</a>
             </td>
           </tr>
         }

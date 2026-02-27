@@ -1,7 +1,7 @@
 <div class="container page">
   <div class="page-header">
     <h1 class="section-title">{{ 'diagnoses.title' | translate }}</h1>
-    <button class="btn btn-primary" (click)="openAddForm()">{{ 'diagnoses.addNew' | translate }}</button>
+    <button matButton="elevated" color="primary" (click)="openAddForm()"><mat-icon>add</mat-icon>{{ 'diagnoses.addNew' | translate }}</button>
   </div>
 
   <div class="search-bar">
@@ -51,8 +51,8 @@
           <textarea matInput formControlName="description" rows="2"></textarea>
         </mat-form-field>
         <div class="form-actions">
-          <button type="submit" class="btn btn-primary">{{ 'common.save' | translate }}</button>
-          <button type="button" class="btn btn-outline" (click)="cancelForm()">{{ 'common.cancel' | translate }}</button>
+          <button type="submit" matButton="elevated" color="primary"><mat-icon>save</mat-icon>{{ 'common.save' | translate }}</button>
+          <button type="button" matButton="outlined" (click)="cancelForm()"><mat-icon>close</mat-icon>{{ 'common.cancel' | translate }}</button>
         </div>
       </form>
       </mat-card-content>
@@ -78,8 +78,8 @@
             <td [attr.data-label]="'diagnoses.category' | translate"><span class="badge badge-info">{{ 'diagnosisCategory.' + dg.category | translate }}</span></td>
             <td [attr.data-label]="'diagnoses.description' | translate">{{ dg.description }}</td>
             <td class="td-actions">
-              <button class="btn btn-sm btn-outline" (click)="openEditForm(dg)">{{ 'common.edit' | translate }}</button>
-              <button class="btn btn-sm btn-outline-danger" (click)="deleteDiagnosis(dg.id)">{{ 'common.delete' | translate }}</button>
+              <button matButton="outlined" (click)="openEditForm(dg)"><mat-icon>edit</mat-icon>{{ 'common.edit' | translate }}</button>
+              <button matButton="outlined" class="btn-danger-outlined" (click)="deleteDiagnosis(dg.id)"><mat-icon>delete</mat-icon>{{ 'common.delete' | translate }}</button>
             </td>
           </tr>
         }

@@ -1,6 +1,8 @@
 import { ChangeDetectionStrategy, Component, inject, signal, OnInit } from '@angular/core';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { MatCardModule } from '@angular/material/card';
+import { MatButtonModule } from '@angular/material/button';
+import { MatIconModule } from '@angular/material/icon';
 import { forkJoin } from 'rxjs';
 import { TranslatePipe } from '../../shared/translate.pipe';
 import { LocalizedDatePipe } from '../../shared/localized-date.pipe';
@@ -16,7 +18,7 @@ import { Visit } from '../../models/visit.model';
 
 @Component({
   selector: 'app-doctor-detail',
-  imports: [RouterLink, TranslatePipe, LocalizedDatePipe, CurrencyFormatPipe, MatCardModule],
+  imports: [RouterLink, TranslatePipe, LocalizedDatePipe, CurrencyFormatPipe, MatCardModule, MatButtonModule, MatIconModule],
   templateUrl: './doctor-detail.html',
   styleUrl: './doctor-detail.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

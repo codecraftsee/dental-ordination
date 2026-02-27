@@ -25,7 +25,8 @@
         >
           <mat-icon>{{ themeService.isDark() ? 'light_mode' : 'dark_mode' }}</mat-icon>
         </button>
-        <button mat-stroked-button class="logout-btn" (click)="logout()">
+        <button matButton="outlined" class="logout-btn" (click)="logout()">
+          <mat-icon>logout</mat-icon>
           {{ 'nav.logout' | translate }}
         </button>
       </mat-toolbar>

@@ -11,14 +11,14 @@
   box-shadow: var(--shadow-1);
 
   .mat-column-actions {
-    width: 140px;
-    text-align: right;
+    width: 120px;
   }
 
   .actions-cell {
     display: flex;
     justify-content: flex-end;
     align-items: center;
+    gap: 2px;
   }
 }
 

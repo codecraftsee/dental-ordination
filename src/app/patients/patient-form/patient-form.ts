@@ -7,6 +7,8 @@ import { MatRadioModule } from '@angular/material/radio';
 import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatNativeDateModule } from '@angular/material/core';
 import { MatCardModule } from '@angular/material/card';
+import { MatButtonModule } from '@angular/material/button';
+import { MatIconModule } from '@angular/material/icon';
 import { TranslatePipe } from '../../shared/translate.pipe';
 import { PatientService } from '../../services/patient.service';
 
@@ -22,6 +24,8 @@ import { PatientService } from '../../services/patient.service';
     MatDatepickerModule,
     MatNativeDateModule,
     MatCardModule,
+    MatButtonModule,
+    MatIconModule,
   ],
   templateUrl: './patient-form.html',
   styleUrl: './patient-form.scss',

@@ -3,9 +3,9 @@
     <div class="page-header">
       <h1 class="section-title">{{ 'doctor.details' | translate }}</h1>
       <div>
-        <a [routerLink]="['/doctors', doc.id, 'edit']" class="btn btn-outline">{{ 'common.edit' | translate }}</a>
-        <button class="btn btn-outline-danger" (click)="deleteDoctor()">{{ 'common.delete' | translate }}</button>
-        <a routerLink="/doctors" class="btn btn-outline">{{ 'common.back' | translate }}</a>
+        <a [routerLink]="['/doctors', doc.id, 'edit']" matButton="outlined"><mat-icon>edit</mat-icon>{{ 'common.edit' | translate }}</a>
+        <button matButton="outlined" class="btn-danger-outlined" (click)="deleteDoctor()"><mat-icon>delete</mat-icon>{{ 'common.delete' | translate }}</button>
+        <a routerLink="/doctors" matButton="outlined"><mat-icon>arrow_back</mat-icon>{{ 'common.back' | translate }}</a>
       </div>
     </div>
 
