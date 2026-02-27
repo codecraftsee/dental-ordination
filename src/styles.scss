@@ -894,7 +894,7 @@ a {
 }
 
 .mat-mdc-card.form-card {
-  background: #ffffff !important;
+  background: var(--color-surface) !important;
   border-top: 3px solid var(--color-primary) !important;
   border-left: none !important;
   border-right: none !important;
