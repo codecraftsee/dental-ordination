@@ -3,7 +3,7 @@
     <h1 class="section-title">{{ (isEditMode ? 'patient.title.edit' : 'patient.title.new') | translate }}</h1>
   </div>
 
-  <mat-card>
+  <mat-card class="form-card">
     <mat-card-content>
     <form [formGroup]="form" (ngSubmit)="onSubmit()">
       <div class="form-row">

@@ -893,6 +893,16 @@ a {
   }
 }
 
+.mat-mdc-card.form-card {
+  background: #ffffff !important;
+  border-top: 3px solid var(--color-primary) !important;
+  border-left: none !important;
+  border-right: none !important;
+  border-bottom: none !important;
+  box-shadow: 0 4px 24px rgba(81, 86, 190, 0.12), 0 2px 8px rgba(0, 0, 0, 0.06) !important;
+  border-radius: var(--radius-lg) !important;
+}
+
 // ── Angular Material form fields ─────────────────────────────────────────────
 
 .mat-mdc-form-field {
