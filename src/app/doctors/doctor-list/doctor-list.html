@@ -1,22 +1,23 @@
 <div class="container page">
   <div class="page-header">
     <h1 class="section-title">{{ 'doctors.title' | translate }}</h1>
-    <a routerLink="/doctors/new" class="btn btn-primary">{{ 'doctors.addNew' | translate }}</a>
+    <a routerLink="/doctors/new" matButton="elevated" color="primary"><mat-icon>person_add</mat-icon>{{ 'doctors.addNew' | translate }}</a>
   </div>
 
   <div class="search-bar">
-    <input
-      type="text"
-      class="form-control"
-      [placeholder]="'doctors.search' | translate"
-      (input)="onSearch($event)"
-    />
-    <select class="form-control" (change)="onSpecializationChange($event)">
-      <option value="">{{ 'doctors.filterSpecialization' | translate }}</option>
-      @for (spec of specializations; track spec) {
-        <option [value]="spec">{{ 'specialization.' + spec | translate }}</option>
-      }
-    </select>
+    <mat-form-field appearance="outline" class="search-field">
+      <mat-label>{{ 'doctors.search' | translate }}</mat-label>
+      <input matInput (input)="onSearch($event)" />
+    </mat-form-field>
+    <mat-form-field appearance="outline" class="filter-field">
+      <mat-label>{{ 'doctors.filterSpecialization' | translate }}</mat-label>
+      <mat-select (selectionChange)="specializationFilter.set($event.value)">
+        <mat-option value="">{{ 'doctors.filterSpecialization' | translate }}</mat-option>
+        @for (spec of specializations; track spec) {
+          <mat-option [value]="spec">{{ 'specialization.' + spec | translate }}</mat-option>
+        }
+      </mat-select>
+    </mat-form-field>
   </div>
 
   @if (filteredDoctors().length > 0) {
@@ -38,8 +39,8 @@
             <td [attr.data-label]="'doctors.phone' | translate">{{ doctor.phone }}</td>
             <td [attr.data-label]="'doctors.email' | translate">{{ doctor.email }}</td>
             <td class="td-actions">
-              <a [routerLink]="['/doctors', doctor.id]" class="btn btn-sm btn-outline">{{ 'common.view' | translate }}</a>
-              <a [routerLink]="['/doctors', doctor.id, 'edit']" class="btn btn-sm btn-outline">{{ 'common.edit' | translate }}</a>
+              <a [routerLink]="['/doctors', doctor.id]" matButton="outlined"><mat-icon>visibility</mat-icon>{{ 'common.view' | translate }}</a>
+              <a [routerLink]="['/doctors', doctor.id, 'edit']" matButton="outlined"><mat-icon>edit</mat-icon>{{ 'common.edit' | translate }}</a>
             </td>
           </tr>
         }

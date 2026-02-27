@@ -2,6 +2,14 @@ import { ChangeDetectionStrategy, Component, inject, OnInit, OnDestroy } from '@
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 import { Subscription, forkJoin } from 'rxjs';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatInputModule } from '@angular/material/input';
+import { MatSelectModule } from '@angular/material/select';
+import { MatDatepickerModule } from '@angular/material/datepicker';
+import { MatNativeDateModule } from '@angular/material/core';
+import { MatCardModule } from '@angular/material/card';
+import { MatButtonModule } from '@angular/material/button';
+import { MatIconModule } from '@angular/material/icon';
 import { TranslatePipe } from '../../shared/translate.pipe';
 import { VisitService } from '../../services/visit.service';
 import { PatientService } from '../../services/patient.service';
@@ -11,7 +19,19 @@ import { TreatmentService } from '../../services/treatment.service';
 
 @Component({
   selector: 'app-visit-form',
-  imports: [ReactiveFormsModule, RouterLink, TranslatePipe],
+  imports: [
+    ReactiveFormsModule,
+    RouterLink,
+    TranslatePipe,
+    MatFormFieldModule,
+    MatInputModule,
+    MatSelectModule,
+    MatDatepickerModule,
+    MatNativeDateModule,
+    MatCardModule,
+    MatButtonModule,
+    MatIconModule,
+  ],
   templateUrl: './visit-form.html',
   styleUrl: './visit-form.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -37,7 +57,7 @@ export default class VisitForm implements OnInit, OnDestroy {
     this.form = this.fb.group({
       patientId: ['', Validators.required],
       doctorId: ['', Validators.required],
-      date: [new Date().toISOString().split('T')[0], Validators.required],
+      date: [new Date(), Validators.required],
       toothNumber: [null],
       diagnosisId: ['', Validators.required],
       diagnosisNotes: [''],
@@ -80,10 +100,18 @@ export default class VisitForm implements OnInit, OnDestroy {
     const formValue = this.form.value;
     this.visitService.create({
       ...formValue,
+      date: this.formatDate(formValue.date),
       toothNumber: formValue.toothNumber ? Number(formValue.toothNumber) : null,
       price: Number(formValue.price),
     }).subscribe(visit => {
       this.router.navigate(['/visits', visit.id]);
     });
+  }
+
+  private formatDate(date: Date): string {
+    const y = date.getFullYear();
+    const m = String(date.getMonth() + 1).padStart(2, '0');
+    const d = String(date.getDate()).padStart(2, '0');
+    return `${y}-${m}-${d}`;
   }
 }

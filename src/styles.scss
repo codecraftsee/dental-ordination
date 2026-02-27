@@ -137,6 +137,25 @@ a {
   text-decoration: none;
   line-height: 1.5;
   white-space: nowrap;
+  position: relative;
+  overflow: hidden;
+
+  // CSS ripple on click
+  &::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: rgba(255, 255, 255, 0.25);
+    border-radius: inherit;
+    opacity: 0;
+    transition: opacity 0.3s;
+    pointer-events: none;
+  }
+
+  &:active::after {
+    opacity: 1;
+    transition: none;
+  }
 
   &:hover {
     box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
@@ -294,28 +313,6 @@ a {
   }
 }
 
-// Stat cards
-.stat-card {
-  background: var(--color-surface);
-  border-radius: var(--radius-md);
-  box-shadow: var(--shadow-1);
-  padding: var(--spacing-lg);
-  text-align: center;
-  border-top: 3px solid var(--color-primary);
-
-  .stat-value {
-    font-size: 2rem;
-    font-weight: 700;
-    color: var(--color-primary);
-    line-height: 1.2;
-  }
-
-  .stat-label {
-    font-size: 0.85rem;
-    color: var(--color-text-secondary);
-    margin-top: var(--spacing-xs);
-  }
-}
 
 // Forms
 .form-group {
@@ -437,8 +434,9 @@ a {
 .search-bar {
   display: flex;
   gap: var(--spacing-sm);
-  margin-bottom: var(--spacing-lg);
+  margin-bottom: var(--spacing-sm);
   flex-wrap: wrap;
+  align-items: flex-start;
 
   .form-control {
     flex: 1;
@@ -448,6 +446,16 @@ a {
   select.form-control {
     flex: 0 0 auto;
     width: auto;
+    min-width: 180px;
+  }
+
+  .search-field {
+    flex: 1;
+    min-width: 200px;
+  }
+
+  .filter-field {
+    flex: 0 0 auto;
     min-width: 180px;
   }
 }
@@ -535,15 +543,8 @@ a {
 // Radio group
 .radio-group {
   display: flex;
-  gap: var(--spacing-md);
-
-  label {
-    display: flex;
-    align-items: center;
-    gap: var(--spacing-xs);
-    cursor: pointer;
-    font-size: 0.9rem;
-  }
+  gap: var(--spacing-lg);
+  padding: 4px 0;
 }
 
 [data-theme='dark'] {
@@ -592,10 +593,6 @@ a {
 
   .section-title {
     font-size: 1.25rem;
-  }
-
-  .stat-card {
-    padding: var(--spacing-md);
   }
 
   .detail-grid {
@@ -695,5 +692,348 @@ a {
 
   body {
     background: white;
+  }
+}
+
+// ── Angular Material buttons ──────────────────────────────────────────────────
+
+[matButton='elevated'] {
+  border-radius: 30px !important;
+  font-size: 0.8125rem !important;
+  font-weight: 500 !important;
+  letter-spacing: 0.3px !important;
+
+  &[color='primary'] {
+    background: var(--color-primary) !important;
+    color: #fff !important;
+    box-shadow: 0 2px 6px rgba(81, 86, 190, 0.3) !important;
+
+    &:hover {
+      background: var(--color-primary-dark) !important;
+      box-shadow: 0 4px 12px rgba(81, 86, 190, 0.4) !important;
+    }
+  }
+
+  &[color='accent'] {
+    background: #1bc5bd !important;
+    color: #fff !important;
+    box-shadow: 0 2px 6px rgba(27, 197, 189, 0.35) !important;
+
+    &:hover {
+      background: #16a89f !important;
+      box-shadow: 0 4px 12px rgba(27, 197, 189, 0.45) !important;
+    }
+  }
+
+  &.btn-amber {
+    background: #ffa800 !important;
+    color: #fff !important;
+    box-shadow: 0 2px 6px rgba(255, 168, 0, 0.35) !important;
+
+    &:hover {
+      background: #e09500 !important;
+      box-shadow: 0 4px 12px rgba(255, 168, 0, 0.45) !important;
+    }
+  }
+
+  &[color='warn'] {
+    background: #f64e60 !important;
+    color: #fff !important;
+    box-shadow: 0 2px 6px rgba(246, 78, 96, 0.35) !important;
+
+    &:hover {
+      background: #ee2d41 !important;
+      box-shadow: 0 4px 12px rgba(246, 78, 96, 0.45) !important;
+    }
+  }
+}
+
+[matButton='outlined'] {
+  border-radius: 30px !important;
+  font-size: 0.8125rem !important;
+  font-weight: 500 !important;
+  letter-spacing: 0.3px !important;
+  color: var(--color-primary) !important;
+  border-color: var(--color-primary) !important;
+
+  &:hover {
+    background: rgba(81, 86, 190, 0.08) !important;
+  }
+
+  &.btn-danger-outlined {
+    color: #f64e60 !important;
+    border-color: #f64e60 !important;
+
+    &:hover {
+      background: rgba(246, 78, 96, 0.08) !important;
+    }
+  }
+}
+
+[matButton] {
+  font-size: 0.8125rem !important;
+}
+
+[mat-icon-button] {
+  color: var(--color-text-secondary);
+
+  &:hover {
+    color: var(--color-primary);
+    background: var(--color-sidebar-hover) !important;
+  }
+}
+
+.icon-btn--primary {
+  color: var(--color-primary) !important;
+  border-color: var(--color-primary) !important;
+  &:hover { background: rgba(81, 86, 190, 0.1) !important; }
+}
+
+.icon-btn--warning {
+  color: #ffa800 !important;
+  border-color: #ffa800 !important;
+  &:hover { background: rgba(255, 168, 0, 0.1) !important; }
+}
+
+.icon-btn--success {
+  color: #1bc5bd !important;
+  border-color: #1bc5bd !important;
+  &:hover { background: rgba(27, 197, 189, 0.1) !important; }
+}
+
+.icon-btn--danger {
+  color: #f64e60 !important;
+  border-color: #f64e60 !important;
+  &:hover { background: rgba(246, 78, 96, 0.1) !important; }
+}
+
+// ── Angular Material shell ────────────────────────────────────────────────────
+
+.mat-drawer {
+  background: var(--color-sidebar) !important;
+  border-right: 1px solid var(--color-sidebar-border) !important;
+  width: 250px;
+}
+
+.mat-drawer-container {
+  background: var(--color-background) !important;
+}
+
+.mat-toolbar {
+  background: var(--color-navbar) !important;
+  color: var(--color-navbar-text) !important;
+  border-bottom: 1px solid var(--color-navbar-border) !important;
+  height: var(--header-height) !important;
+  min-height: var(--header-height) !important;
+  box-shadow: var(--shadow-1);
+
+  .mat-icon-button,
+  [mat-icon-button] {
+    color: var(--color-navbar-text);
+  }
+}
+
+// ── Angular Material nav list ─────────────────────────────────────────────────
+
+.mat-mdc-nav-list {
+  padding: 8px !important;
+
+  --mat-list-active-indicator-shape: 50px;
+  --mat-list-active-indicator-color: var(--color-sidebar-active);
+  --mat-list-list-item-pressed-state-layer-color: var(--color-primary);
+  --mat-list-list-item-pressed-state-layer-opacity: 0.16;
+
+  .mat-mdc-list-item {
+    color: var(--color-sidebar-text);
+    border-radius: 50px;
+    margin-bottom: 2px;
+
+    &:hover {
+      background: var(--color-sidebar-hover) !important;
+      color: var(--color-sidebar-text-hover);
+    }
+
+    &.mdc-list-item--activated {
+      background: var(--color-sidebar-active) !important;
+      color: var(--color-sidebar-active-text) !important;
+
+      .mat-icon {
+        color: var(--color-sidebar-active-text) !important;
+      }
+    }
+
+    .mat-icon {
+      color: var(--color-sidebar-text);
+      font-size: 22px;
+      width: 22px;
+      height: 22px;
+    }
+
+    .mat-ripple-element {
+      background-color: rgba(81, 86, 190, 0.16) !important;
+    }
+  }
+}
+
+// ── Angular Material card ─────────────────────────────────────────────────────
+
+.mat-mdc-card {
+  --mdc-elevated-card-container-color: var(--color-surface);
+  --mdc-elevated-card-container-shape: var(--radius-md);
+  box-shadow: var(--shadow-1) !important;
+  border: 1px solid var(--color-border);
+  margin-bottom: var(--spacing-lg);
+
+  .mat-mdc-card-content {
+    padding: var(--spacing-lg) !important;
+
+    &:last-child {
+      padding-bottom: var(--spacing-lg) !important;
+    }
+  }
+}
+
+// ── Angular Material form fields ─────────────────────────────────────────────
+
+.mat-mdc-form-field {
+  width: 100%;
+
+  // Fill appearance
+  --mdc-filled-text-field-container-color: var(--color-surface-variant);
+  --mdc-filled-text-field-hover-active-indicator-color: var(--color-primary);
+  --mdc-filled-text-field-focus-active-indicator-color: var(--color-primary);
+  --mdc-filled-text-field-label-text-color: var(--color-text-secondary);
+  --mdc-filled-text-field-focus-label-text-color: var(--color-primary);
+  --mdc-filled-text-field-input-text-color: var(--color-text);
+  --mdc-filled-text-field-container-shape: 4px;
+
+  // Outline appearance
+  --mdc-outlined-text-field-outline-color: var(--color-border);
+  --mdc-outlined-text-field-hover-outline-color: var(--color-primary-light);
+  --mdc-outlined-text-field-focus-outline-color: var(--color-primary);
+  --mdc-outlined-text-field-label-text-color: var(--color-text-secondary);
+  --mdc-outlined-text-field-hover-label-text-color: var(--color-text-secondary);
+  --mdc-outlined-text-field-focus-label-text-color: var(--color-primary);
+  --mdc-outlined-text-field-input-text-color: var(--color-text);
+  --mdc-outlined-text-field-container-shape: 8px;
+  --mdc-outlined-text-field-error-focus-outline-color: var(--color-danger, #e53935);
+  --mdc-outlined-text-field-error-outline-color: var(--color-danger, #e53935);
+  --mdc-outlined-text-field-error-label-text-color: var(--color-danger, #e53935);
+}
+
+// Select dropdown panel
+.mat-mdc-select-panel {
+  background: var(--color-surface) !important;
+}
+
+.mat-mdc-option {
+  color: var(--color-text);
+
+  &:hover:not(.mat-mdc-option-disabled) {
+    background: var(--color-sidebar-hover);
+  }
+
+  &.mat-mdc-option-active {
+    color: var(--color-primary);
+  }
+}
+
+// Radio buttons
+.mat-mdc-radio-button {
+  --mdc-radio-selected-icon-color: var(--color-primary);
+  --mdc-radio-selected-focus-icon-color: var(--color-primary);
+  --mdc-radio-selected-hover-icon-color: var(--color-primary);
+  --mdc-radio-selected-pressed-icon-color: var(--color-primary);
+  --mat-radio-checked-ripple-color: var(--color-primary);
+
+  .mdc-label {
+    color: var(--color-text);
+  }
+}
+
+// ── Angular Material table ────────────────────────────────────────────────────
+
+.mat-mdc-table {
+  --mat-table-background-color: var(--color-surface);
+  --mat-table-header-headline-color: var(--color-text);
+  --mat-table-row-item-label-text-color: var(--color-text);
+  --mat-table-row-item-outline-color: var(--color-border);
+  --mat-table-header-row-hover-state-layer-color: transparent;
+
+  .mat-mdc-header-row {
+    background: var(--color-surface-variant);
+  }
+
+  .mat-mdc-row:hover .mat-mdc-cell {
+    background: var(--color-sidebar-hover);
+  }
+}
+
+// ── Angular Material tooltip ──────────────────────────────────────────────────
+
+.mat-mdc-tooltip .mdc-tooltip__surface {
+  background-color: var(--color-text) !important;
+  color: var(--color-surface) !important;
+  border-radius: 6px !important;
+  font-size: 0.75rem !important;
+  font-weight: 500 !important;
+  padding: 5px 10px !important;
+  box-shadow: var(--shadow-2) !important;
+}
+
+// ── Angular Material datepicker overrides ──────────────────────────────────────
+
+.mat-datepicker-toggle {
+  .mat-mdc-icon-button {
+    width: 36px;
+    height: 36px;
+    padding: 6px;
+    color: var(--color-text-secondary);
+
+    &:hover {
+      color: var(--color-primary);
+      background: var(--color-sidebar-hover);
+    }
+  }
+}
+
+.mat-datepicker-content {
+  background: var(--color-surface) !important;
+  box-shadow: var(--shadow-3);
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--color-border);
+
+  .mat-calendar {
+    font-family: var(--font-body);
+  }
+
+  .mat-calendar-header {
+    background: var(--color-primary);
+    border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+
+    .mat-calendar-controls {
+      color: #fff;
+    }
+
+    button {
+      color: #fff;
+
+      &:hover {
+        background: rgba(255, 255, 255, 0.15);
+      }
+    }
+  }
+
+  .mat-calendar-body-selected {
+    background: var(--color-primary);
+    color: #fff;
+  }
+
+  .mat-calendar-body-today:not(.mat-calendar-body-selected) {
+    border-color: var(--color-primary);
+  }
+
+  .mat-calendar-body-cell:hover .mat-calendar-body-cell-content:not(.mat-calendar-body-selected) {
+    background: var(--color-sidebar-hover);
   }
 }

@@ -1,75 +1,69 @@
 <div class="container page">
   <div class="page-header">
     <h1 class="section-title">{{ 'treatments.title' | translate }}</h1>
-    <button class="btn btn-primary" (click)="openAddForm()">{{ 'treatments.addNew' | translate }}</button>
+    <button matButton="elevated" color="primary" (click)="openAddForm()"><mat-icon>add</mat-icon>{{ 'treatments.addNew' | translate }}</button>
   </div>
 
   <div class="search-bar">
-    <input
-      type="text"
-      class="form-control"
-      [placeholder]="'treatments.search' | translate"
-      (input)="onSearch($event)"
-    />
-    <select class="form-control" (change)="onCategoryChange($event)">
-      <option value="">{{ 'treatments.filterCategory' | translate }}</option>
-      @for (cat of categories; track cat) {
-        <option [value]="cat">{{ 'treatmentCategory.' + cat | translate }}</option>
-      }
-    </select>
+    <mat-form-field appearance="outline" class="search-field">
+      <mat-label>{{ 'treatments.search' | translate }}</mat-label>
+      <input matInput (input)="onSearch($event)" />
+    </mat-form-field>
+    <mat-form-field appearance="outline" class="filter-field">
+      <mat-label>{{ 'treatments.filterCategory' | translate }}</mat-label>
+      <mat-select (selectionChange)="categoryFilter.set($event.value)">
+        <mat-option value="">{{ 'treatments.filterCategory' | translate }}</mat-option>
+        @for (cat of categories; track cat) {
+          <mat-option [value]="cat">{{ 'treatmentCategory.' + cat | translate }}</mat-option>
+        }
+      </mat-select>
+    </mat-form-field>
   </div>
 
   @if (showForm()) {
-    <div class="card mb-lg">
+    <mat-card class="mb-lg">
+      <mat-card-content>
       <h3>{{ (editingId() ? 'treatments.editTitle' : 'treatments.addTitle') | translate }}</h3>
       <form [formGroup]="form" (ngSubmit)="onSubmit()">
         <div class="form-row">
-          <div class="form-group">
-            <label class="form-label">{{ 'treatments.code' | translate }}</label>
-            <input type="text" class="form-control" formControlName="code" />
-            @if (f['code'].invalid && f['code'].touched) {
-              <div class="form-error">{{ 'common.required' | translate }}</div>
-            }
-          </div>
-          <div class="form-group">
-            <label class="form-label">{{ 'treatments.name' | translate }}</label>
-            <input type="text" class="form-control" formControlName="name" />
-            @if (f['name'].invalid && f['name'].touched) {
-              <div class="form-error">{{ 'common.required' | translate }}</div>
-            }
-          </div>
+          <mat-form-field appearance="outline">
+            <mat-label>{{ 'treatments.code' | translate }}</mat-label>
+            <input matInput type="text" formControlName="code" />
+            <mat-error>{{ 'common.required' | translate }}</mat-error>
+          </mat-form-field>
+          <mat-form-field appearance="outline">
+            <mat-label>{{ 'treatments.name' | translate }}</mat-label>
+            <input matInput type="text" formControlName="name" />
+            <mat-error>{{ 'common.required' | translate }}</mat-error>
+          </mat-form-field>
         </div>
         <div class="form-row">
-          <div class="form-group">
-            <label class="form-label">{{ 'treatments.category' | translate }}</label>
-            <select class="form-control" formControlName="category">
-              <option value="">{{ 'treatments.filterCategory' | translate }}</option>
+          <mat-form-field appearance="outline">
+            <mat-label>{{ 'treatments.category' | translate }}</mat-label>
+            <mat-select formControlName="category">
               @for (cat of categories; track cat) {
-                <option [value]="cat">{{ 'treatmentCategory.' + cat | translate }}</option>
+                <mat-option [value]="cat">{{ 'treatmentCategory.' + cat | translate }}</mat-option>
               }
-            </select>
-            @if (f['category'].invalid && f['category'].touched) {
-              <div class="form-error">{{ 'common.required' | translate }}</div>
-            }
-          </div>
-          <div class="form-group">
-            <label class="form-label">{{ 'treatments.defaultPrice' | translate }}</label>
-            <input type="number" class="form-control" formControlName="defaultPrice" />
-            @if (f['defaultPrice'].invalid && f['defaultPrice'].touched) {
-              <div class="form-error">{{ 'common.required' | translate }}</div>
-            }
-          </div>
+            </mat-select>
+            <mat-error>{{ 'common.required' | translate }}</mat-error>
+          </mat-form-field>
+          <mat-form-field appearance="outline">
+            <mat-label>{{ 'treatments.defaultPrice' | translate }}</mat-label>
+            <input matInput type="number" formControlName="defaultPrice" />
+            <mat-error>{{ 'common.required' | translate }}</mat-error>
+          </mat-form-field>
         </div>
-        <div class="form-group">
-          <label class="form-label">{{ 'treatments.description' | translate }}</label>
-          <textarea class="form-control" formControlName="description" rows="2"></textarea>
-        </div>
+        <mat-form-field appearance="outline">
+          <mat-label>{{ 'treatments.description' | translate }}</mat-label>
+          <textarea matInput formControlName="description" rows="2"></textarea>
+        </mat-form-field>
         <div class="form-actions">
-          <button type="submit" class="btn btn-primary">{{ 'common.save' | translate }}</button>
-          <button type="button" class="btn btn-outline" (click)="cancelForm()">{{ 'common.cancel' | translate }}</button>
+          <button type="submit" matButton="elevated" color="primary"><mat-icon>save</mat-icon>{{ 'common.save' | translate }}</button>
+          <button type="button" matButton="outlined" (click)="cancelForm()"><mat-icon>close</mat-icon>{{ 'common.cancel' | translate }}</button>
         </div>
       </form>
-    </div>
+      </mat-card-content>
+    </mat-card>
   }
 
   @if (filteredTreatments().length > 0) {
@@ -93,8 +87,8 @@
             <td [attr.data-label]="'treatments.defaultPrice' | translate">{{ tx.defaultPrice | currencyFormat }}</td>
             <td [attr.data-label]="'treatments.description' | translate">{{ tx.description }}</td>
             <td class="td-actions">
-              <button class="btn btn-sm btn-outline" (click)="openEditForm(tx)">{{ 'common.edit' | translate }}</button>
-              <button class="btn btn-sm btn-outline-danger" (click)="deleteTreatment(tx.id)">{{ 'common.delete' | translate }}</button>
+              <button matButton="outlined" (click)="openEditForm(tx)"><mat-icon>edit</mat-icon>{{ 'common.edit' | translate }}</button>
+              <button matButton="outlined" class="btn-danger-outlined" (click)="deleteTreatment(tx.id)"><mat-icon>delete</mat-icon>{{ 'common.delete' | translate }}</button>
             </td>
           </tr>
         }

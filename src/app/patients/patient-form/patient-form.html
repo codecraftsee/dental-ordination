@@ -3,98 +3,81 @@
     <h1 class="section-title">{{ (isEditMode ? 'patient.title.edit' : 'patient.title.new') | translate }}</h1>
   </div>
 
-  <div class="card">
+  <mat-card>
+    <mat-card-content>
     <form [formGroup]="form" (ngSubmit)="onSubmit()">
       <div class="form-row">
-        <div class="form-group">
-          <label class="form-label">{{ 'patient.firstName' | translate }}</label>
-          <input type="text" class="form-control" formControlName="firstName" />
-          @if (f['firstName'].invalid && f['firstName'].touched) {
-            <div class="form-error">{{ 'common.required' | translate }}</div>
-          }
-        </div>
-        <div class="form-group">
-          <label class="form-label">{{ 'patient.lastName' | translate }}</label>
-          <input type="text" class="form-control" formControlName="lastName" />
-          @if (f['lastName'].invalid && f['lastName'].touched) {
-            <div class="form-error">{{ 'common.required' | translate }}</div>
-          }
-        </div>
+        <mat-form-field appearance="fill">
+          <mat-label>{{ 'patient.firstName' | translate }}</mat-label>
+          <input matInput type="text" formControlName="firstName" />
+          <mat-error>{{ 'common.required' | translate }}</mat-error>
+        </mat-form-field>
+        <mat-form-field appearance="fill">
+          <mat-label>{{ 'patient.lastName' | translate }}</mat-label>
+          <input matInput type="text" formControlName="lastName" />
+          <mat-error>{{ 'common.required' | translate }}</mat-error>
+        </mat-form-field>
       </div>
 
       <div class="form-row">
-        <div class="form-group">
-          <label class="form-label">{{ 'patient.parentName' | translate }}</label>
-          <input type="text" class="form-control" formControlName="parentName" />
-          @if (f['parentName'].invalid && f['parentName'].touched) {
-            <div class="form-error">{{ 'common.required' | translate }}</div>
-          }
-        </div>
+        <mat-form-field appearance="fill">
+          <mat-label>{{ 'patient.parentName' | translate }}</mat-label>
+          <input matInput type="text" formControlName="parentName" />
+          <mat-error>{{ 'common.required' | translate }}</mat-error>
+        </mat-form-field>
         <div class="form-group">
           <label class="form-label">{{ 'patient.gender' | translate }}</label>
-          <div class="radio-group">
-            <label>
-              <input type="radio" formControlName="gender" value="male" />
-              {{ 'patient.gender.male' | translate }}
-            </label>
-            <label>
-              <input type="radio" formControlName="gender" value="female" />
-              {{ 'patient.gender.female' | translate }}
-            </label>
-          </div>
+          <mat-radio-group formControlName="gender" class="radio-group">
+            <mat-radio-button value="male">{{ 'patient.gender.male' | translate }}</mat-radio-button>
+            <mat-radio-button value="female">{{ 'patient.gender.female' | translate }}</mat-radio-button>
+          </mat-radio-group>
         </div>
       </div>
 
       <div class="form-row">
-        <div class="form-group">
-          <label class="form-label">{{ 'patient.dateOfBirth' | translate }}</label>
-          <input type="date" class="form-control" formControlName="dateOfBirth" />
-          @if (f['dateOfBirth'].invalid && f['dateOfBirth'].touched) {
-            <div class="form-error">{{ 'common.required' | translate }}</div>
-          }
-        </div>
-        <div class="form-group">
-          <label class="form-label">{{ 'patient.phone' | translate }}</label>
-          <input type="tel" class="form-control" formControlName="phone" />
-          @if (f['phone'].invalid && f['phone'].touched) {
-            <div class="form-error">{{ 'common.required' | translate }}</div>
-          }
-        </div>
+        <mat-form-field appearance="fill">
+          <mat-label>{{ 'patient.dateOfBirth' | translate }}</mat-label>
+          <input matInput [matDatepicker]="dobPicker" formControlName="dateOfBirth"
+            (click)="dobPicker.open()" readonly />
+          <mat-datepicker-toggle matSuffix [for]="dobPicker"></mat-datepicker-toggle>
+          <mat-datepicker #dobPicker startView="multi-year"></mat-datepicker>
+          <mat-error>{{ 'common.required' | translate }}</mat-error>
+        </mat-form-field>
+        <mat-form-field appearance="fill">
+          <mat-label>{{ 'patient.phone' | translate }}</mat-label>
+          <input matInput type="tel" formControlName="phone" />
+          <mat-error>{{ 'common.required' | translate }}</mat-error>
+        </mat-form-field>
       </div>
 
-      <div class="form-group">
-        <label class="form-label">{{ 'patient.address' | translate }}</label>
-        <input type="text" class="form-control" formControlName="address" />
-        @if (f['address'].invalid && f['address'].touched) {
-          <div class="form-error">{{ 'common.required' | translate }}</div>
-        }
-      </div>
+      <mat-form-field appearance="fill">
+        <mat-label>{{ 'patient.address' | translate }}</mat-label>
+        <input matInput type="text" formControlName="address" />
+        <mat-error>{{ 'common.required' | translate }}</mat-error>
+      </mat-form-field>
 
       <div class="form-row">
-        <div class="form-group">
-          <label class="form-label">{{ 'patient.city' | translate }}</label>
-          <input type="text" class="form-control" formControlName="city" />
-          @if (f['city'].invalid && f['city'].touched) {
-            <div class="form-error">{{ 'common.required' | translate }}</div>
+        <mat-form-field appearance="fill">
+          <mat-label>{{ 'patient.city' | translate }}</mat-label>
+          <input matInput type="text" formControlName="city" />
+          <mat-error>{{ 'common.required' | translate }}</mat-error>
+        </mat-form-field>
+        <mat-form-field appearance="fill">
+          <mat-label>{{ 'patient.email' | translate }}</mat-label>
+          <input matInput type="email" formControlName="email" />
+          @if (f['email'].errors?.['required']) {
+            <mat-error>{{ 'common.required' | translate }}</mat-error>
+          } @else if (f['email'].errors?.['email']) {
+            <mat-error>{{ 'common.invalidEmail' | translate }}</mat-error>
           }
-        </div>
-        <div class="form-group">
-          <label class="form-label">{{ 'patient.email' | translate }}</label>
-          <input type="email" class="form-control" formControlName="email" />
-          @if (f['email'].invalid && f['email'].touched) {
-            @if (f['email'].errors?.['required']) {
-              <div class="form-error">{{ 'common.required' | translate }}</div>
-            } @else if (f['email'].errors?.['email']) {
-              <div class="form-error">{{ 'common.invalidEmail' | translate }}</div>
-            }
-          }
-        </div>
+        </mat-form-field>
       </div>
 
       <div class="form-actions">
-        <button type="submit" class="btn btn-primary">{{ 'common.save' | translate }}</button>
-        <a routerLink="/patients" class="btn btn-outline">{{ 'common.cancel' | translate }}</a>
+        <button type="submit" matButton="elevated" color="primary"><mat-icon>save</mat-icon>{{ 'common.save' | translate }}</button>
+        <a routerLink="/patients" matButton="outlined"><mat-icon>close</mat-icon>{{ 'common.cancel' | translate }}</a>
       </div>
     </form>
-  </div>
+    </mat-card-content>
+  </mat-card>
 </div>

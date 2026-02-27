@@ -2,30 +2,65 @@
   <h1 class="section-title">{{ 'home.title' | translate }}</h1>
 
   <div class="stats-grid">
-    <div class="stat-card">
-      <div class="stat-value">{{ totalPatients }}</div>
-      <div class="stat-label">{{ 'home.totalPatients' | translate }}</div>
-    </div>
-    <div class="stat-card">
-      <div class="stat-value">{{ totalDoctors }}</div>
-      <div class="stat-label">{{ 'home.totalDoctors' | translate }}</div>
-    </div>
-    <div class="stat-card">
-      <div class="stat-value">{{ visitsThisMonth }}</div>
-      <div class="stat-label">{{ 'home.visitsThisMonth' | translate }}</div>
-    </div>
-    <div class="stat-card">
-      <div class="stat-value">{{ totalVisits }}</div>
-      <div class="stat-label">{{ 'home.totalVisits' | translate }}</div>
-    </div>
+    <mat-card class="stat-card stat-card--primary">
+      <mat-card-content>
+        <div class="stat-icon-wrap">
+          <mat-icon>people</mat-icon>
+        </div>
+        <div class="stat-body">
+          <div class="stat-value">{{ totalPatients }}</div>
+          <div class="stat-label">{{ 'home.totalPatients' | translate }}</div>
+        </div>
+      </mat-card-content>
+    </mat-card>
+    <mat-card class="stat-card stat-card--info">
+      <mat-card-content>
+        <div class="stat-icon-wrap">
+          <mat-icon>stethoscope</mat-icon>
+        </div>
+        <div class="stat-body">
+          <div class="stat-value">{{ totalDoctors }}</div>
+          <div class="stat-label">{{ 'home.totalDoctors' | translate }}</div>
+        </div>
+      </mat-card-content>
+    </mat-card>
+    <mat-card class="stat-card stat-card--highlight">
+      <mat-card-content>
+        <div class="stat-icon-wrap">
+          <mat-icon>today</mat-icon>
+        </div>
+        <div class="stat-body">
+          <div class="stat-value">{{ visitsThisMonth }}</div>
+          <div class="stat-label">{{ 'home.visitsThisMonth' | translate }}</div>
+        </div>
+      </mat-card-content>
+    </mat-card>
+    <mat-card class="stat-card stat-card--danger">
+      <mat-card-content>
+        <div class="stat-icon-wrap">
+          <mat-icon>bar_chart</mat-icon>
+        </div>
+        <div class="stat-body">
+          <div class="stat-value">{{ totalVisits }}</div>
+          <div class="stat-label">{{ 'home.totalVisits' | translate }}</div>
+        </div>
+      </mat-card-content>
+    </mat-card>
   </div>
 
   <div class="quick-actions">
     <h2>{{ 'home.quickActions' | translate }}</h2>
     <div class="actions-row">
-      <a routerLink="/patients/new" class="btn btn-primary btn-lg">{{ 'home.newPatient' | translate }}</a>
-      <a routerLink="/visits/new" class="btn btn-success btn-lg">{{ 'home.newVisit' | translate }}</a>
-      <button class="btn btn-secondary btn-lg" (click)="triggerXlsxInput()" [disabled]="importing()">
+      <a routerLink="/patients/new" matButton="elevated" color="primary">
+        <mat-icon>person_add</mat-icon>
+        {{ 'home.newPatient' | translate }}
+      </a>
+      <a routerLink="/visits/new" matButton="elevated" color="accent">
+        <mat-icon>calendar_today</mat-icon>
+        {{ 'home.newVisit' | translate }}
+      </a>
+      <button matButton="elevated" class="btn-amber" (click)="triggerXlsxInput()" [disabled]="importing()">
+        <mat-icon>upload_file</mat-icon>
         @if (importing()) {
           {{ 'home.importing' | translate }}
         } @else {

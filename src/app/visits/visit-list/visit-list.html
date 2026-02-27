@@ -1,32 +1,42 @@
 <div class="container page">
   <div class="page-header">
     <h1 class="section-title">{{ 'visits.title' | translate }}</h1>
-    <a routerLink="/visits/new" class="btn btn-primary">{{ 'visits.addNew' | translate }}</a>
+    <a routerLink="/visits/new" matButton="elevated" color="primary"><mat-icon>add</mat-icon>{{ 'visits.addNew' | translate }}</a>
   </div>
 
   <div class="search-bar">
-    <input
-      type="text"
-      class="form-control"
-      [placeholder]="'visits.search' | translate"
-      (input)="onSearch($event)"
-    />
-    <select class="form-control" (change)="onPatientChange($event)">
-      <option value="">{{ 'visits.filterPatient' | translate }}</option>
-      @for (p of patients(); track p.id) {
-        <option [value]="p.id">{{ p.firstName }} {{ p.lastName }}</option>
-      }
-    </select>
-    <select class="form-control" (change)="onDoctorChange($event)">
-      <option value="">{{ 'visits.filterDoctor' | translate }}</option>
-      @for (d of doctors(); track d.id) {
-        <option [value]="d.id">Dr. {{ d.firstName }} {{ d.lastName }}</option>
-      }
-    </select>
+    <mat-form-field appearance="outline" class="search-field">
+      <mat-label>{{ 'visits.search' | translate }}</mat-label>
+      <input matInput (input)="onSearch($event)" />
+    </mat-form-field>
+    <mat-form-field appearance="outline" class="filter-field">
+      <mat-label>{{ 'visits.filterPatient' | translate }}</mat-label>
+      <mat-select (selectionChange)="patientFilter.set($event.value)">
+        <mat-option value="">{{ 'visits.filterPatient' | translate }}</mat-option>
+        @for (p of patients(); track p.id) {
+          <mat-option [value]="p.id">{{ p.firstName }} {{ p.lastName }}</mat-option>
+        }
+      </mat-select>
+    </mat-form-field>
+    <mat-form-field appearance="outline" class="filter-field">
+      <mat-label>{{ 'visits.filterDoctor' | translate }}</mat-label>
+      <mat-select (selectionChange)="doctorFilter.set($event.value)">
+        <mat-option value="">{{ 'visits.filterDoctor' | translate }}</mat-option>
+        @for (d of doctors(); track d.id) {
+          <mat-option [value]="d.id">Dr. {{ d.firstName }} {{ d.lastName }}</mat-option>
+        }
+      </mat-select>
+    </mat-form-field>
   </div>
   <div class="search-bar">
-    <input type="date" class="form-control" [placeholder]="'visits.filterDateFrom' | translate" (change)="onDateFromChange($event)" />
-    <input type="date" class="form-control" [placeholder]="'visits.filterDateTo' | translate" (change)="onDateToChange($event)" />
+    <mat-form-field appearance="outline" class="filter-field">
+      <mat-label>{{ 'visits.filterDateFrom' | translate }}</mat-label>
+      <input matInput type="date" (change)="onDateFromChange($event)" />
+    </mat-form-field>
+    <mat-form-field appearance="outline" class="filter-field">
+      <mat-label>{{ 'visits.filterDateTo' | translate }}</mat-label>
+      <input matInput type="date" (change)="onDateToChange($event)" />
+    </mat-form-field>
   </div>
 
   @if (filteredVisits().length > 0) {
@@ -54,7 +64,7 @@
             <td [attr.data-label]="'visits.treatment' | translate">{{ getTreatmentName(visit.treatmentId) }}</td>
             <td [attr.data-label]="'visits.price' | translate">{{ visit.price | currencyFormat }}</td>
             <td class="td-actions">
-              <a [routerLink]="['/visits', visit.id]" class="btn btn-sm btn-outline">{{ 'common.view' | translate }}</a>
+              <a [routerLink]="['/visits', visit.id]" matButton="outlined"><mat-icon>visibility</mat-icon>{{ 'common.view' | translate }}</a>
             </td>
           </tr>
         }

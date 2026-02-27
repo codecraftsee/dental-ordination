@@ -1,126 +1,56 @@
-.app-layout {
-  display: grid;
-  grid-template-columns: var(--sidebar-width) 1fr;
-  grid-template-rows: var(--header-height) 1fr;
-  min-height: 100vh;
-  transition: grid-template-columns 0.25s ease;
+.app-container {
+  height: 100vh;
 
-  &.sidebar-collapsed {
-    grid-template-columns: var(--sidebar-width-collapsed) 1fr;
+  // On desktop we fully own the sidenav width and content margin so both
+  // animate in lockstep. Angular Material computes margin-left via JS only
+  // at open/close time, so we override with !important + CSS transitions.
+  @media (min-width: 768px) {
+    .mat-drawer {
+      width: 250px;
+      overflow-x: hidden;
+      overflow-y: auto;
+      transition: width 0.25s ease;
+    }
+
+    .mat-drawer-content {
+      margin-left: 250px !important;
+      transition: margin-left 0.25s ease;
+    }
+
+    &.sidenav-collapsed {
+      .mat-drawer {
+        width: 70px;
+      }
+
+      .mat-drawer-content {
+        margin-left: 70px !important;
+      }
+    }
   }
 }
 
-.top-header {
-  grid-column: 2;
-  grid-row: 1;
-  background: var(--color-navbar);
-  color: var(--color-navbar-text);
-  height: var(--header-height);
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 0 var(--spacing-md);
-  border-bottom: 1px solid var(--color-navbar-border);
-  box-shadow: var(--shadow-1);
+.app-toolbar {
   position: sticky;
   top: 0;
-  z-index: 50;
+  z-index: 100;
 }
 
-.hamburger {
-  background: transparent;
-  border: none;
-  color: var(--color-navbar-text);
-  font-size: 1.25rem;
-  cursor: pointer;
-  padding: var(--spacing-xs) var(--spacing-sm);
-  border-radius: var(--radius-sm);
-  line-height: 1;
-  transition: background 0.15s, color 0.15s;
-
-  &:hover {
-    background: var(--color-sidebar-hover);
-    color: var(--color-text);
-  }
+.toolbar-spacer {
+  flex: 1;
 }
 
-.header-actions {
-  display: flex;
-  align-items: center;
-  gap: var(--spacing-sm);
-}
-
-.btn-theme-toggle {
-  background: transparent;
-  border: none;
-  cursor: pointer;
-  font-size: 1.1rem;
-  padding: var(--spacing-xs) var(--spacing-sm);
-  border-radius: var(--radius-sm);
-  line-height: 1;
-  transition: background 0.15s;
-
-  &:hover {
-    background: var(--color-sidebar-hover);
-  }
-}
-
-.btn-logout {
-  background: var(--color-surface-variant);
-  color: var(--color-navbar-text);
-  border: 1px solid var(--color-border);
-  padding: 5px 14px;
-  border-radius: 30px;
+.logout-btn {
+  margin-left: var(--spacing-xs);
   font-size: 0.8125rem;
-  cursor: pointer;
-  transition: background 0.15s, color 0.15s, border-color 0.15s;
-
-  &:hover {
-    background: #f64e60;
-    color: #fff;
-    border-color: #f64e60;
-  }
+  border-radius: 30px !important;
 }
 
 .main-content {
-  grid-column: 2;
-  grid-row: 2;
   padding: var(--spacing-lg);
   background: var(--color-background);
-  overflow: auto;
-  min-height: 0;
-}
+  min-height: calc(100vh - var(--header-height));
 
-// Sidebar overlay backdrop (mobile only)
-.sidebar-overlay {
-  display: none;
-}
-
-// Mobile
-@media (max-width: 767px) {
-  .app-layout {
-    grid-template-columns: 1fr;
-
-    &.sidebar-collapsed {
-      grid-template-columns: 1fr;
-    }
-  }
-
-  .top-header {
-    grid-column: 1;
-  }
-
-  .main-content {
-    grid-column: 1;
+  @media (max-width: 767px) {
     padding: var(--spacing-md);
-  }
-
-  .sidebar-overlay {
-    display: block;
-    position: fixed;
-    inset: 0;
-    background: rgba(0, 0, 0, 0.45);
-    z-index: 150;
-    backdrop-filter: blur(1px);
   }
 }

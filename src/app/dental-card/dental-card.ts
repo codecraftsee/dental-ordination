@@ -12,11 +12,13 @@ import { DiagnosisService } from '../services/diagnosis.service';
 import { TreatmentService } from '../services/treatment.service';
 import { Patient } from '../models/patient.model';
 import { Visit } from '../models/visit.model';
+import { MatButtonModule } from '@angular/material/button';
+import { MatIconModule } from '@angular/material/icon';
 import * as XLSX from 'xlsx';
 
 @Component({
   selector: 'app-dental-card',
-  imports: [RouterLink, TranslatePipe, LocalizedDatePipe, CurrencyFormatPipe],
+  imports: [RouterLink, TranslatePipe, LocalizedDatePipe, CurrencyFormatPipe, MatButtonModule, MatIconModule],
   templateUrl: './dental-card.html',
   styleUrl: './dental-card.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
