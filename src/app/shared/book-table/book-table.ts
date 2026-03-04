@@ -42,11 +42,14 @@ export class BookTableComponent {
   isMobile = signal(false);
   currentIndex = signal(0);
   animating = signal(false);
-  animationDirection = signal<'forward' | 'backward' | null>(null);
+  flipState = signal<'idle' | 'flip-forward' | 'flip-backward'>('idle');
 
+  /** The page currently displayed (base layer) */
   currentItem = computed(() => this.data()[this.currentIndex()] ?? null);
-  prevItem = computed(() => this.data()[this.currentIndex() - 1] ?? null);
+  /** During forward flip: the next page is revealed underneath */
   nextItem = computed(() => this.data()[this.currentIndex() + 1] ?? null);
+  /** During backward flip: the previous page flips back into view */
+  prevItem = computed(() => this.data()[this.currentIndex() - 1] ?? null);
   hasPrev = computed(() => this.currentIndex() > 0);
   hasNext = computed(() => this.currentIndex() < this.data().length - 1);
   pageLabel = computed(() => `${this.currentIndex() + 1} / ${this.data().length}`);
@@ -73,13 +76,27 @@ export class BookTableComponent {
 
   goNext(): void {
     if (this.hasNext() && !this.animating()) {
-      this.triggerAnimation('forward', this.currentIndex() + 1);
+      this.animating.set(true);
+      this.flipState.set('flip-forward');
+
+      setTimeout(() => {
+        this.currentIndex.update(i => i + 1);
+        this.flipState.set('idle');
+        this.animating.set(false);
+      }, 600);
     }
   }
 
   goPrev(): void {
     if (this.hasPrev() && !this.animating()) {
-      this.triggerAnimation('backward', this.currentIndex() - 1);
+      this.animating.set(true);
+      this.flipState.set('flip-backward');
+
+      setTimeout(() => {
+        this.currentIndex.update(i => i - 1);
+        this.flipState.set('idle');
+        this.animating.set(false);
+      }, 600);
     }
   }
 
@@ -99,21 +116,5 @@ export class BookTableComponent {
         this.goPrev();
       }
     }
-  }
-
-  onAnimationEnd(): void {
-    this.animating.set(false);
-    this.animationDirection.set(null);
-  }
-
-  private triggerAnimation(direction: 'forward' | 'backward', targetIndex: number): void {
-    this.animationDirection.set(direction);
-    this.animating.set(true);
-
-    setTimeout(() => {
-      this.currentIndex.set(targetIndex);
-      this.animating.set(false);
-      this.animationDirection.set(null);
-    }, 500);
   }
 }
