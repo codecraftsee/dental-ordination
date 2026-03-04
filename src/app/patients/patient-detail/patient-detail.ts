@@ -1,7 +1,8 @@
-import { ChangeDetectionStrategy, Component, inject, signal, OnInit } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject, signal, viewChild, effect, OnInit } from '@angular/core';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { MatCardModule } from '@angular/material/card';
-import { MatTableModule } from '@angular/material/table';
+import { MatTableModule, MatTableDataSource } from '@angular/material/table';
+import { MatPaginator, MatPaginatorModule } from '@angular/material/paginator';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { forkJoin } from 'rxjs';
@@ -19,7 +20,7 @@ import { Visit } from '../../models/visit.model';
 
 @Component({
   selector: 'app-patient-detail',
-  imports: [RouterLink, TranslatePipe, LocalizedDatePipe, CurrencyFormatPipe, MatCardModule, MatTableModule, MatButtonModule, MatIconModule],
+  imports: [RouterLink, TranslatePipe, LocalizedDatePipe, CurrencyFormatPipe, MatCardModule, MatTableModule, MatPaginatorModule, MatButtonModule, MatIconModule],
   templateUrl: './patient-detail.html',
   styleUrl: './patient-detail.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -34,9 +35,21 @@ export default class PatientDetail implements OnInit {
   private diagnosisService = inject(DiagnosisService);
   private treatmentService = inject(TreatmentService);
 
+  private paginator = viewChild(MatPaginator);
+
   visitColumns = ['date', 'doctor', 'tooth', 'diagnosis', 'treatment', 'price'];
   patient = signal<Patient | undefined>(undefined);
   allVisits = signal<Visit[]>([]);
+  visitsDataSource = new MatTableDataSource<Visit>();
+
+  constructor() {
+    effect(() => {
+      const pag = this.paginator();
+      if (pag) {
+        this.visitsDataSource.paginator = pag;
+      }
+    });
+  }
 
   ngOnInit(): void {
     const id = this.route.snapshot.paramMap.get('id');
@@ -54,7 +67,9 @@ export default class PatientDetail implements OnInit {
     ]).subscribe({
       next: ([patient]) => {
         this.patient.set(patient);
-        this.allVisits.set(this.visitService.getByPatientId(id));
+        const patientVisits = this.visitService.getByPatientId(id);
+        this.allVisits.set(patientVisits);
+        this.visitsDataSource.data = patientVisits;
       },
       error: () => this.router.navigate(['/patients']),
     });

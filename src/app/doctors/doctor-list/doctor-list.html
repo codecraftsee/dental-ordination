@@ -25,7 +25,7 @@
     </mat-card-content>
   </mat-card>
 
-  <table mat-table [dataSource]="filteredDoctors()" class="doctors-table">
+  <table mat-table [dataSource]="dataSource" class="doctors-table" [class.no-paginator]="filteredDoctors().length <= 5">
 
     <ng-container matColumnDef="name">
       <th mat-header-cell *matHeaderCellDef>{{ 'doctors.name' | translate }}</th>
@@ -74,4 +74,7 @@
     </tr>
 
   </table>
+  @if (filteredDoctors().length > 5) {
+    <mat-paginator [pageSizeOptions]="[5, 10, 25]" [pageSize]="10" showFirstLastButtons></mat-paginator>
+  }
 </div>

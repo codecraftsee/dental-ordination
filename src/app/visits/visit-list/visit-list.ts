@@ -1,9 +1,10 @@
-import { ChangeDetectionStrategy, Component, inject, signal, computed, OnInit } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject, signal, computed, effect, viewChild, OnInit } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
-import { MatTableModule } from '@angular/material/table';
+import { MatTableModule, MatTableDataSource } from '@angular/material/table';
+import { MatPaginator, MatPaginatorModule } from '@angular/material/paginator';
 import { MatCardModule } from '@angular/material/card';
 import { MatDatepickerModule, MatDatepickerInputEvent } from '@angular/material/datepicker';
 import { MatNativeDateModule } from '@angular/material/core';
@@ -19,10 +20,11 @@ import { PatientService } from '../../services/patient.service';
 import { DoctorService } from '../../services/doctor.service';
 import { DiagnosisService } from '../../services/diagnosis.service';
 import { TreatmentService } from '../../services/treatment.service';
+import { Visit } from '../../models/visit.model';
 
 @Component({
   selector: 'app-visit-list',
-  imports: [RouterLink, TranslatePipe, LocalizedDatePipe, CurrencyFormatPipe, MatFormFieldModule, MatInputModule, MatSelectModule, MatTableModule, MatCardModule, MatDatepickerModule, MatNativeDateModule, MatButtonModule, MatIconModule, MatTooltipModule],
+  imports: [RouterLink, TranslatePipe, LocalizedDatePipe, CurrencyFormatPipe, MatFormFieldModule, MatInputModule, MatSelectModule, MatTableModule, MatPaginatorModule, MatCardModule, MatDatepickerModule, MatNativeDateModule, MatButtonModule, MatIconModule, MatTooltipModule],
   templateUrl: './visit-list.html',
   styleUrl: './visit-list.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -33,8 +35,10 @@ export default class VisitList implements OnInit {
   private doctorService = inject(DoctorService);
   private diagnosisService = inject(DiagnosisService);
   private treatmentService = inject(TreatmentService);
+  private paginator = viewChild(MatPaginator);
 
   displayedColumns = ['date', 'patient', 'doctor', 'tooth', 'diagnosis', 'treatment', 'price', 'actions'];
+  dataSource = new MatTableDataSource<Visit>();
   searchQuery = signal('');
   patientFilter = signal<string>('');
   doctorFilter = signal<string>('');
@@ -73,6 +77,19 @@ export default class VisitList implements OnInit {
       this.doctorNames(),
     );
   });
+
+  constructor() {
+    effect(() => {
+      const pag = this.paginator();
+      if (pag) {
+        this.dataSource.paginator = pag;
+      }
+    });
+
+    effect(() => {
+      this.dataSource.data = this.filteredVisits();
+    });
+  }
 
   ngOnInit(): void {
     forkJoin([

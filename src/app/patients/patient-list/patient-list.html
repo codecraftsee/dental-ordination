@@ -35,7 +35,7 @@
       </div>
     </mat-card-content>
   </mat-card>
-  <table mat-table [dataSource]="filteredPatients()" class="patients-table">
+  <table mat-table [dataSource]="dataSource" class="patients-table" [class.no-paginator]="filteredPatients().length <= 5">
 
     <ng-container matColumnDef="name">
       <th mat-header-cell *matHeaderCellDef>{{ 'patients.name' | translate }}</th>
@@ -90,4 +90,7 @@
     </tr>
 
   </table>
+  @if (filteredPatients().length > 5) {
+    <mat-paginator [pageSizeOptions]="[5, 10, 25]" [pageSize]="10" showFirstLastButtons></mat-paginator>
+  }
 </div>

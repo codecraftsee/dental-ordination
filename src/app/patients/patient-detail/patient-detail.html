@@ -169,7 +169,7 @@
     <div class="visit-history-section">
       <h2 class="section-subtitle">{{ 'patient.recentVisits' | translate }}</h2>
 
-      <table mat-table [dataSource]="allVisits()" class="visits-table">
+      <table mat-table [dataSource]="visitsDataSource" class="visits-table" [class.no-paginator]="allVisits().length <= 5">
 
         <ng-container matColumnDef="date">
           <th mat-header-cell *matHeaderCellDef>{{ 'visits.date' | translate }}</th>
@@ -217,6 +217,9 @@
         </tr>
 
       </table>
+      @if (allVisits().length > 5) {
+        <mat-paginator [pageSizeOptions]="[5, 10, 25]" [pageSize]="10" showFirstLastButtons></mat-paginator>
+      }
     </div>
 
   </div>

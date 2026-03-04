@@ -25,7 +25,7 @@
     </mat-card-content>
   </mat-card>
 
-  <table mat-table [dataSource]="filteredTreatments()" class="treatments-table">
+  <table mat-table [dataSource]="dataSource" class="treatments-table" [class.no-paginator]="filteredTreatments().length <= 5">
 
     <ng-container matColumnDef="code">
       <th mat-header-cell *matHeaderCellDef>{{ 'treatments.code' | translate }}</th>
@@ -80,4 +80,7 @@
     </tr>
 
   </table>
+  @if (filteredTreatments().length > 5) {
+    <mat-paginator [pageSizeOptions]="[5, 10, 25]" [pageSize]="10" showFirstLastButtons></mat-paginator>
+  }
 </div>

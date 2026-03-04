@@ -25,8 +25,9 @@
 
 .patients-table {
   width: 100%;
+  table-layout: fixed;
   border: 1px solid var(--color-border);
-  border-radius: var(--radius-md);
+  border-radius: var(--radius-md) var(--radius-md) 0 0;
   overflow: hidden;
   box-shadow: var(--shadow-1);
 
@@ -41,7 +42,6 @@
     gap: 2px;
   }
 }
-
 @media (max-width: 767px) {
   .page {
     padding-top: var(--spacing-md);
