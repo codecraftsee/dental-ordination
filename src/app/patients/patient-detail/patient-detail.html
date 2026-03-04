@@ -4,55 +4,77 @@
     <!-- PROFILE HEADER -->
     <mat-card class="profile-card">
       <mat-card-content>
-        <div class="profile-main">
-          <div class="avatar">
-            <span class="avatar-initials">{{ getInitials(p) }}</span>
-          </div>
-          <div class="profile-info">
-            <h2 class="profile-name">{{ p.firstName }} {{ p.lastName }}</h2>
-            <div class="profile-meta">
-              <span class="badge" [class]="p.gender === 'male' ? 'badge-info' : 'badge-success'">
-                {{ 'patient.gender.' + p.gender | translate }}
-              </span>
-              <span class="profile-registered">
-                {{ 'patient.registeredOn' | translate }}: {{ p.createdAt | localizedDate:'mediumDate' }}
-              </span>
+        <div class="profile-top">
+          <div class="profile-main">
+            <div class="avatar">
+              <span class="avatar-initials">{{ getInitials(p) }}</span>
+            </div>
+            <div class="profile-info">
+              <h2 class="profile-name">{{ p.firstName }} {{ p.lastName }}</h2>
+              <div class="profile-meta">
+                <span class="badge" [class]="p.gender === 'male' ? 'badge-info' : 'badge-success'">
+                  {{ 'patient.gender.' + p.gender | translate }}
+                </span>
+                <span class="profile-registered">
+                  {{ 'patient.registeredOn' | translate }}: {{ p.createdAt | localizedDate:'mediumDate' }}
+                </span>
+              </div>
             </div>
           </div>
-        </div>
-        <div class="profile-actions">
-          <a [routerLink]="['/patients', p.id, 'dental-card']" matButton="elevated" color="primary"><mat-icon>assignment</mat-icon>{{ 'patients.viewDentalCard' | translate }}</a>
-          <a [routerLink]="['/patients', p.id, 'edit']" matButton="outlined"><mat-icon>edit</mat-icon>{{ 'common.edit' | translate }}</a>
-          <button matButton="outlined" class="btn-danger-outlined" (click)="deletePatient()"><mat-icon>delete</mat-icon>{{ 'common.delete' | translate }}</button>
-          <a routerLink="/patients" matButton="outlined"><mat-icon>arrow_back</mat-icon>{{ 'common.back' | translate }}</a>
+          <div class="profile-actions">
+            <a [routerLink]="['/patients', p.id, 'dental-card']" matButton="elevated" color="primary"><mat-icon>assignment</mat-icon>{{ 'patients.viewDentalCard' | translate }}</a>
+            <a [routerLink]="['/patients', p.id, 'edit']" matButton="outlined"><mat-icon>edit</mat-icon>{{ 'common.edit' | translate }}</a>
+            <button matButton="outlined" class="btn-danger-outlined" (click)="deletePatient()"><mat-icon>delete</mat-icon>{{ 'common.delete' | translate }}</button>
+            <a routerLink="/patients" matButton="outlined"><mat-icon>arrow_back</mat-icon>{{ 'common.back' | translate }}</a>
+          </div>
         </div>
       </mat-card-content>
     </mat-card>
 
     <!-- STATS BAR -->
     <div class="stats-bar">
-      <mat-card class="stat-card">
+      <mat-card class="stat-card stat-card--primary">
         <mat-card-content>
-          <div class="stat-value">{{ allVisits().length }}</div>
-          <div class="stat-label">{{ 'patient.totalVisits' | translate }}</div>
+          <div class="stat-icon-wrap">
+            <mat-icon>bar_chart</mat-icon>
+          </div>
+          <div class="stat-body">
+            <div class="stat-value">{{ allVisits().length }}</div>
+            <div class="stat-label">{{ 'patient.totalVisits' | translate }}</div>
+          </div>
         </mat-card-content>
       </mat-card>
-      <mat-card class="stat-card">
+      <mat-card class="stat-card stat-card--info">
         <mat-card-content>
-          <div class="stat-value">{{ getVisitsThisYear() }}</div>
-          <div class="stat-label">{{ 'patient.visitsThisYear' | translate }}</div>
+          <div class="stat-icon-wrap">
+            <mat-icon>today</mat-icon>
+          </div>
+          <div class="stat-body">
+            <div class="stat-value">{{ getVisitsThisYear() }}</div>
+            <div class="stat-label">{{ 'patient.visitsThisYear' | translate }}</div>
+          </div>
         </mat-card-content>
       </mat-card>
-      <mat-card class="stat-card">
+      <mat-card class="stat-card stat-card--highlight">
         <mat-card-content>
-          <div class="stat-value">{{ getAge(p.dateOfBirth) }}</div>
-          <div class="stat-label">{{ 'patient.age' | translate }}</div>
+          <div class="stat-icon-wrap">
+            <mat-icon>person</mat-icon>
+          </div>
+          <div class="stat-body">
+            <div class="stat-value">{{ getAge(p.dateOfBirth) }}</div>
+            <div class="stat-label">{{ 'patient.age' | translate }}</div>
+          </div>
         </mat-card-content>
       </mat-card>
-      <mat-card class="stat-card">
+      <mat-card class="stat-card stat-card--danger">
         <mat-card-content>
-          <div class="stat-value stat-value--date">{{ p.dateOfBirth | localizedDate:'mediumDate' }}</div>
-          <div class="stat-label">{{ 'patient.dateOfBirth' | translate }}</div>
+          <div class="stat-icon-wrap">
+            <mat-icon>cake</mat-icon>
+          </div>
+          <div class="stat-body">
+            <div class="stat-value stat-value--date">{{ p.dateOfBirth | localizedDate:'mediumDate' }}</div>
+            <div class="stat-label">{{ 'patient.dateOfBirth' | translate }}</div>
+          </div>
         </mat-card-content>
       </mat-card>
     </div>
@@ -61,30 +83,33 @@
     <div class="info-section">
 
       <!-- CONTACT CARD -->
-      <mat-card class="contact-card">
+      <mat-card class="info-card info-card--info">
         <mat-card-content>
-          <h3 class="card-section-title">{{ 'patient.contactInfo' | translate }}</h3>
+          <h3 class="card-section-title">
+            <mat-icon class="card-section-icon">contact_phone</mat-icon>
+            {{ 'patient.contactInfo' | translate }}
+          </h3>
           @if (p.phone) {
             <div class="contact-row">
-              <span class="contact-icon">📞</span>
+              <mat-icon class="contact-icon">phone</mat-icon>
               <span class="contact-value">{{ p.phone }}</span>
             </div>
           }
           @if (p.email) {
             <div class="contact-row">
-              <span class="contact-icon">📧</span>
+              <mat-icon class="contact-icon">email</mat-icon>
               <span class="contact-value">{{ p.email }}</span>
             </div>
           }
           @if (p.address) {
             <div class="contact-row">
-              <span class="contact-icon">📍</span>
+              <mat-icon class="contact-icon">location_on</mat-icon>
               <span class="contact-value">{{ p.address }}</span>
             </div>
           }
           @if (p.city) {
             <div class="contact-row">
-              <span class="contact-icon">🏙️</span>
+              <mat-icon class="contact-icon">location_city</mat-icon>
               <span class="contact-value">{{ p.city }}</span>
             </div>
           }
@@ -95,41 +120,44 @@
       </mat-card>
 
       <!-- PERSONAL INFO CARD -->
-      <mat-card>
+      <mat-card class="info-card info-card--primary">
         <mat-card-content>
-          <h3 class="card-section-title">{{ 'patient.personalInfo' | translate }}</h3>
-          <div class="detail-grid">
-            <div class="detail-item">
-              <div class="detail-label">{{ 'patient.firstName' | translate }}</div>
-              <div class="detail-value">{{ p.firstName }}</div>
+          <h3 class="card-section-title">
+            <mat-icon class="card-section-icon">person</mat-icon>
+            {{ 'patient.personalInfo' | translate }}
+          </h3>
+          <div class="personal-grid">
+            <div class="personal-row">
+              <span class="personal-label">{{ 'patient.firstName' | translate }}</span>
+              <span class="personal-value">{{ p.firstName }}</span>
             </div>
-            <div class="detail-item">
-              <div class="detail-label">{{ 'patient.lastName' | translate }}</div>
-              <div class="detail-value">{{ p.lastName }}</div>
+            <div class="personal-row">
+              <span class="personal-label">{{ 'patient.lastName' | translate }}</span>
+              <span class="personal-value">{{ p.lastName }}</span>
             </div>
-            <div class="detail-item">
-              <div class="detail-label">{{ 'patient.parentName' | translate }}</div>
-              <div class="detail-value">{{ p.parentName || '—' }}</div>
+            <div class="personal-row">
+              <span class="personal-label">{{ 'patient.parentName' | translate }}</span>
+              <span class="personal-value">{{ p.parentName || '—' }}</span>
             </div>
-            <div class="detail-item">
-              <div class="detail-label">{{ 'patient.gender' | translate }}</div>
-              <div class="detail-value">{{ 'patient.gender.' + p.gender | translate }}</div>
+            <div class="personal-row">
+              <span class="personal-label">{{ 'patient.gender' | translate }}</span>
+              <span class="personal-value">{{ 'patient.gender.' + p.gender | translate }}</span>
             </div>
-            <div class="detail-item">
-              <div class="detail-label">{{ 'patient.dateOfBirth' | translate }}</div>
-              <div class="detail-value">{{ p.dateOfBirth | localizedDate:'mediumDate' }}</div>
+            <div class="personal-row">
+              <span class="personal-label">{{ 'patient.dateOfBirth' | translate }}</span>
+              <span class="personal-value">{{ p.dateOfBirth | localizedDate:'mediumDate' }}</span>
             </div>
-            <div class="detail-item">
-              <div class="detail-label">{{ 'patient.city' | translate }}</div>
-              <div class="detail-value">{{ p.city || '—' }}</div>
+            <div class="personal-row">
+              <span class="personal-label">{{ 'patient.city' | translate }}</span>
+              <span class="personal-value">{{ p.city || '—' }}</span>
             </div>
-            <div class="detail-item">
-              <div class="detail-label">{{ 'patient.address' | translate }}</div>
-              <div class="detail-value">{{ p.address || '—' }}</div>
+            <div class="personal-row">
+              <span class="personal-label">{{ 'patient.address' | translate }}</span>
+              <span class="personal-value">{{ p.address || '—' }}</span>
             </div>
-            <div class="detail-item">
-              <div class="detail-label">{{ 'patient.registeredOn' | translate }}</div>
-              <div class="detail-value">{{ p.createdAt | localizedDate:'mediumDate' }}</div>
+            <div class="personal-row">
+              <span class="personal-label">{{ 'patient.registeredOn' | translate }}</span>
+              <span class="personal-value">{{ p.createdAt | localizedDate:'mediumDate' }}</span>
             </div>
           </div>
         </mat-card-content>
@@ -140,36 +168,55 @@
     <!-- VISIT HISTORY -->
     <div class="visit-history-section">
       <h2 class="section-subtitle">{{ 'patient.recentVisits' | translate }}</h2>
-      @if (allVisits().length > 0) {
-        <table class="data-table data-table-card">
-          <thead>
-            <tr>
-              <th>{{ 'visits.date' | translate }}</th>
-              <th>{{ 'visits.doctor' | translate }}</th>
-              <th>{{ 'visits.tooth' | translate }}</th>
-              <th>{{ 'visits.diagnosis' | translate }}</th>
-              <th>{{ 'visits.treatment' | translate }}</th>
-              <th>{{ 'visits.price' | translate }}</th>
-            </tr>
-          </thead>
-          <tbody>
-            @for (visit of allVisits(); track visit.id) {
-              <tr>
-                <td [attr.data-label]="'visits.date' | translate"><a [routerLink]="['/visits', visit.id]">{{ visit.date | localizedDate:'mediumDate' }}</a></td>
-                <td [attr.data-label]="'visits.doctor' | translate"><a [routerLink]="['/doctors', visit.doctorId]">{{ getDoctorName(visit.doctorId) }}</a></td>
-                <td [attr.data-label]="'visits.tooth' | translate">{{ visit.toothNumber || '—' }}</td>
-                <td [attr.data-label]="'visits.diagnosis' | translate">{{ getDiagnosisName(visit.diagnosisId) }}</td>
-                <td [attr.data-label]="'visits.treatment' | translate">{{ getTreatmentName(visit.treatmentId) }}</td>
-                <td [attr.data-label]="'visits.price' | translate">{{ visit.price | currencyFormat }}</td>
-              </tr>
-            }
-          </tbody>
-        </table>
-      } @else {
-        <div class="empty-state">
-          <p class="empty-state-text">{{ 'patient.noVisits' | translate }}</p>
-        </div>
-      }
+
+      <table mat-table [dataSource]="allVisits()" class="visits-table">
+
+        <ng-container matColumnDef="date">
+          <th mat-header-cell *matHeaderCellDef>{{ 'visits.date' | translate }}</th>
+          <td mat-cell *matCellDef="let v">
+            <a [routerLink]="['/visits', v.id]">{{ v.date | localizedDate:'mediumDate' }}</a>
+          </td>
+        </ng-container>
+
+        <ng-container matColumnDef="doctor">
+          <th mat-header-cell *matHeaderCellDef>{{ 'visits.doctor' | translate }}</th>
+          <td mat-cell *matCellDef="let v">
+            <a [routerLink]="['/doctors', v.doctorId]">{{ getDoctorName(v.doctorId) }}</a>
+          </td>
+        </ng-container>
+
+        <ng-container matColumnDef="tooth">
+          <th mat-header-cell *matHeaderCellDef>{{ 'visits.tooth' | translate }}</th>
+          <td mat-cell *matCellDef="let v">{{ v.toothNumber || '—' }}</td>
+        </ng-container>
+
+        <ng-container matColumnDef="diagnosis">
+          <th mat-header-cell *matHeaderCellDef>{{ 'visits.diagnosis' | translate }}</th>
+          <td mat-cell *matCellDef="let v">{{ getDiagnosisName(v.diagnosisId) }}</td>
+        </ng-container>
+
+        <ng-container matColumnDef="treatment">
+          <th mat-header-cell *matHeaderCellDef>{{ 'visits.treatment' | translate }}</th>
+          <td mat-cell *matCellDef="let v">{{ getTreatmentName(v.treatmentId) }}</td>
+        </ng-container>
+
+        <ng-container matColumnDef="price">
+          <th mat-header-cell *matHeaderCellDef>{{ 'visits.price' | translate }}</th>
+          <td mat-cell *matCellDef="let v">{{ v.price | currencyFormat }}</td>
+        </ng-container>
+
+        <tr mat-header-row *matHeaderRowDef="visitColumns"></tr>
+        <tr mat-row *matRowDef="let row; columns: visitColumns"></tr>
+
+        <tr class="mat-mdc-no-data-row" *matNoDataRow>
+          <td [colSpan]="visitColumns.length">
+            <div class="empty-state">
+              <p class="empty-state-text">{{ 'patient.noVisits' | translate }}</p>
+            </div>
+          </td>
+        </tr>
+
+      </table>
     </div>
 
   </div>
