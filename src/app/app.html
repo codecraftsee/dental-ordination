@@ -1,32 +1,41 @@
 @if (authService.isAuthenticated()) {
-  <div class="app-layout" [class.sidebar-collapsed]="sidebarCollapsed()">
-    <app-sidebar (collapsedChange)="sidebarCollapsed.set($event)" />
+  <mat-sidenav-container
+    class="app-container"
+    [class.sidenav-collapsed]="!isMobile() && sidebarCollapsed()"
+  >
+    <mat-sidenav
+      [mode]="isMobile() ? 'over' : 'side'"
+      [opened]="isMobile() ? sidenavOpen() : true"
+      (openedChange)="sidenavOpen.set($event)"
+    >
+      <app-sidebar [collapsed]="!isMobile() && sidebarCollapsed()" />
+    </mat-sidenav>
 
-    @if (!sidebarCollapsed()) {
-      <div class="sidebar-overlay" (click)="sidebar().toggle()"></div>
-    }
-
-    <header class="top-header">
-      <button class="hamburger" (click)="sidebar().toggle()" title="Toggle sidebar">
-        <span>☰</span>
-      </button>
-      <div class="header-actions">
+    <mat-sidenav-content>
+      <mat-toolbar class="app-toolbar">
+        <button mat-icon-button (click)="toggleSidenav()" aria-label="Toggle navigation">
+          <mat-icon>menu</mat-icon>
+        </button>
+        <span class="toolbar-spacer"></span>
         <app-language-switcher />
         <button
-          class="btn-theme-toggle"
+          mat-icon-button
           (click)="themeService.toggleTheme()"
-          [title]="(themeService.isDark() ? 'nav.lightMode' : 'nav.darkMode') | translate"
+          [attr.aria-label]="(themeService.isDark() ? 'nav.lightMode' : 'nav.darkMode') | translate"
         >
-          {{ themeService.isDark() ? '☀️' : '🌙' }}
+          <mat-icon>{{ themeService.isDark() ? 'light_mode' : 'dark_mode' }}</mat-icon>
         </button>
-        <button class="btn-logout" (click)="logout()">{{ 'nav.logout' | translate }}</button>
-      </div>
-    </header>
+        <button matButton="outlined" class="logout-btn" (click)="logout()">
+          <mat-icon>logout</mat-icon>
+          {{ 'nav.logout' | translate }}
+        </button>
+      </mat-toolbar>
 
-    <main class="main-content">
-      <router-outlet />
-    </main>
-  </div>
+      <main class="main-content">
+        <router-outlet />
+      </main>
+    </mat-sidenav-content>
+  </mat-sidenav-container>
 } @else {
   <router-outlet />
 }

@@ -1,5 +1,16 @@
-import { ChangeDetectionStrategy, Component, inject, signal, computed, OnInit } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject, signal, computed, effect, viewChild, OnInit } from '@angular/core';
 import { RouterLink } from '@angular/router';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatInputModule } from '@angular/material/input';
+import { MatSelectModule } from '@angular/material/select';
+import { MatTableModule, MatTableDataSource } from '@angular/material/table';
+import { MatPaginator, MatPaginatorModule } from '@angular/material/paginator';
+import { MatCardModule } from '@angular/material/card';
+import { MatDatepickerModule, MatDatepickerInputEvent } from '@angular/material/datepicker';
+import { MatNativeDateModule } from '@angular/material/core';
+import { MatButtonModule } from '@angular/material/button';
+import { MatIconModule } from '@angular/material/icon';
+import { MatTooltipModule } from '@angular/material/tooltip';
 import { forkJoin } from 'rxjs';
 import { TranslatePipe } from '../../shared/translate.pipe';
 import { LocalizedDatePipe } from '../../shared/localized-date.pipe';
@@ -9,10 +20,11 @@ import { PatientService } from '../../services/patient.service';
 import { DoctorService } from '../../services/doctor.service';
 import { DiagnosisService } from '../../services/diagnosis.service';
 import { TreatmentService } from '../../services/treatment.service';
+import { Visit } from '../../models/visit.model';
 
 @Component({
   selector: 'app-visit-list',
-  imports: [RouterLink, TranslatePipe, LocalizedDatePipe, CurrencyFormatPipe],
+  imports: [RouterLink, TranslatePipe, LocalizedDatePipe, CurrencyFormatPipe, MatFormFieldModule, MatInputModule, MatSelectModule, MatTableModule, MatPaginatorModule, MatCardModule, MatDatepickerModule, MatNativeDateModule, MatButtonModule, MatIconModule, MatTooltipModule],
   templateUrl: './visit-list.html',
   styleUrl: './visit-list.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -23,7 +35,10 @@ export default class VisitList implements OnInit {
   private doctorService = inject(DoctorService);
   private diagnosisService = inject(DiagnosisService);
   private treatmentService = inject(TreatmentService);
+  private paginator = viewChild(MatPaginator);
 
+  displayedColumns = ['date', 'patient', 'doctor', 'tooth', 'diagnosis', 'treatment', 'price', 'actions'];
+  dataSource = new MatTableDataSource<Visit>();
   searchQuery = signal('');
   patientFilter = signal<string>('');
   doctorFilter = signal<string>('');
@@ -62,6 +77,19 @@ export default class VisitList implements OnInit {
       this.doctorNames(),
     );
   });
+
+  constructor() {
+    effect(() => {
+      const pag = this.paginator();
+      if (pag) {
+        this.dataSource.paginator = pag;
+      }
+    });
+
+    effect(() => {
+      this.dataSource.data = this.filteredVisits();
+    });
+  }
 
   ngOnInit(): void {
     forkJoin([
@@ -103,11 +131,18 @@ export default class VisitList implements OnInit {
     this.doctorFilter.set((event.target as HTMLSelectElement).value);
   }
 
-  onDateFromChange(event: Event): void {
-    this.dateFromFilter.set((event.target as HTMLInputElement).value);
+  onDateFromChange(event: MatDatepickerInputEvent<Date>): void {
+    this.dateFromFilter.set(event.value ? this.formatDate(event.value) : '');
   }
 
-  onDateToChange(event: Event): void {
-    this.dateToFilter.set((event.target as HTMLInputElement).value);
+  onDateToChange(event: MatDatepickerInputEvent<Date>): void {
+    this.dateToFilter.set(event.value ? this.formatDate(event.value) : '');
+  }
+
+  private formatDate(date: Date): string {
+    const y = date.getFullYear();
+    const m = String(date.getMonth() + 1).padStart(2, '0');
+    const d = String(date.getDate()).padStart(2, '0');
+    return `${y}-${m}-${d}`;
   }
 }

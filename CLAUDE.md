@@ -1,11 +1,10 @@
 # Dental Ordination — Project Guide
 
-## Angular Reference Docs (always use latest)
-- https://angular.dev/assets/context/best-practices.md
-- https://angular.dev/llms.txt
-- https://angular.dev/llms-full.txt
+## Angular Reference Docs
 
-> Always read the best-practices.md link above before writing any Angular code.
+- `.claude/angular-best-practices.md` — local copy of Angular best practices (fetch fresh with `curl -s "https://angular.dev/assets/context/best-practices.md" -o .claude/angular-best-practices.md`)
+
+> Always read `.claude/angular-best-practices.md` before writing any Angular code.
 
 ---
 

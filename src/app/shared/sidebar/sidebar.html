@@ -1,30 +1,47 @@
-<aside class="sidebar" [class.collapsed]="collapsed()">
+<div class="sidebar-inner">
   <div class="sidebar-logo">
     @if (!collapsed()) {
       <span class="logo-text">{{ 'nav.brand' | translate }}</span>
     } @else {
-      <span class="logo-icon">🦷</span>
+      <mat-icon>medical_services</mat-icon>
     }
   </div>
 
-  <nav class="sidebar-nav">
-    @for (link of navLinks; track link.route) {
-      <a
-        class="nav-item"
-        [routerLink]="link.route"
-        routerLinkActive="active"
-        [routerLinkActiveOptions]="{ exact: link.exact }"
-        [title]="collapsed() ? (link.label | translate) : ''"
-      >
-        <span class="nav-icon">{{ link.icon }}</span>
-        @if (!collapsed()) {
-          <span class="nav-label">{{ link.label | translate }}</span>
-        }
-      </a>
-    }
-  </nav>
-
-  <button class="collapse-btn" (click)="toggle()" [title]="collapsed() ? 'Expand' : 'Collapse'">
-    <span class="collapse-icon">{{ collapsed() ? '›' : '‹' }}</span>
-  </button>
-</aside>
+  @if (collapsed()) {
+    <nav class="icon-rail" aria-label="Navigation">
+      @for (link of navLinks; track link.route) {
+        <a
+          class="icon-rail-item"
+          matRipple
+          [matRippleCentered]="true"
+          [routerLink]="link.route"
+          routerLinkActive
+          #rla="routerLinkActive"
+          [routerLinkActiveOptions]="{ exact: link.exact }"
+          [class.active]="rla.isActive"
+          [title]="link.label | translate"
+          [attr.aria-label]="link.label | translate"
+          [attr.aria-current]="rla.isActive ? 'page' : null"
+        >
+          <mat-icon>{{ link.icon }}</mat-icon>
+        </a>
+      }
+    </nav>
+  } @else {
+    <mat-nav-list>
+      @for (link of navLinks; track link.route) {
+        <a
+          mat-list-item
+          [routerLink]="link.route"
+          routerLinkActive
+          #rla="routerLinkActive"
+          [routerLinkActiveOptions]="{ exact: link.exact }"
+          [activated]="rla.isActive"
+        >
+          <mat-icon matListItemIcon>{{ link.icon }}</mat-icon>
+          <span matListItemTitle>{{ link.label | translate }}</span>
+        </a>
+      }
+    </mat-nav-list>
+  }
+</div>

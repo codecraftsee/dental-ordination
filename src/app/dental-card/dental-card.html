@@ -3,9 +3,9 @@
     <div class="page-header no-print">
       <h1 class="section-title">{{ 'dentalCard.title' | translate }}</h1>
       <div class="header-actions">
-        <button class="btn btn-outline" (click)="printCard()">{{ 'dentalCard.print' | translate }}</button>
-        <button class="btn btn-primary" (click)="exportExcel()">{{ 'dentalCard.exportExcel' | translate }}</button>
-        <a [routerLink]="['/patients', p.id]" class="btn btn-outline">{{ 'common.back' | translate }}</a>
+        <button matButton="outlined" (click)="printCard()"><mat-icon>print</mat-icon>{{ 'dentalCard.print' | translate }}</button>
+        <button matButton="elevated" color="primary" (click)="exportExcel()"><mat-icon>download</mat-icon>{{ 'dentalCard.exportExcel' | translate }}</button>
+        <a [routerLink]="['/patients', p.id]" matButton="outlined"><mat-icon>arrow_back</mat-icon>{{ 'common.back' | translate }}</a>
       </div>
     </div>
 
