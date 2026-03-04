@@ -4,75 +4,112 @@
     <a routerLink="/visits/new" matButton="elevated" color="primary"><mat-icon>add</mat-icon>{{ 'visits.addNew' | translate }}</a>
   </div>
 
-  <div class="search-bar">
-    <mat-form-field appearance="outline" class="search-field">
-      <mat-label>{{ 'visits.search' | translate }}</mat-label>
-      <input matInput (input)="onSearch($event)" />
-    </mat-form-field>
-    <mat-form-field appearance="outline" class="filter-field">
-      <mat-label>{{ 'visits.filterPatient' | translate }}</mat-label>
-      <mat-select (selectionChange)="patientFilter.set($event.value)">
-        <mat-option value="">{{ 'visits.filterPatient' | translate }}</mat-option>
-        @for (p of patients(); track p.id) {
-          <mat-option [value]="p.id">{{ p.firstName }} {{ p.lastName }}</mat-option>
-        }
-      </mat-select>
-    </mat-form-field>
-    <mat-form-field appearance="outline" class="filter-field">
-      <mat-label>{{ 'visits.filterDoctor' | translate }}</mat-label>
-      <mat-select (selectionChange)="doctorFilter.set($event.value)">
-        <mat-option value="">{{ 'visits.filterDoctor' | translate }}</mat-option>
-        @for (d of doctors(); track d.id) {
-          <mat-option [value]="d.id">Dr. {{ d.firstName }} {{ d.lastName }}</mat-option>
-        }
-      </mat-select>
-    </mat-form-field>
-  </div>
-  <div class="search-bar">
-    <mat-form-field appearance="outline" class="filter-field">
-      <mat-label>{{ 'visits.filterDateFrom' | translate }}</mat-label>
-      <input matInput type="date" (change)="onDateFromChange($event)" />
-    </mat-form-field>
-    <mat-form-field appearance="outline" class="filter-field">
-      <mat-label>{{ 'visits.filterDateTo' | translate }}</mat-label>
-      <input matInput type="date" (change)="onDateToChange($event)" />
-    </mat-form-field>
-  </div>
+  <mat-card class="filters-card form-card">
+    <mat-card-content>
+      <div class="filters-row">
+        <mat-form-field appearance="fill" class="search-field">
+          <mat-label>{{ 'visits.search' | translate }}</mat-label>
+          <mat-icon matPrefix>search</mat-icon>
+          <input matInput (input)="onSearch($event)" />
+        </mat-form-field>
+        <mat-form-field appearance="fill" class="filter-field">
+          <mat-label>{{ 'visits.filterPatient' | translate }}</mat-label>
+          <mat-select (selectionChange)="patientFilter.set($event.value)">
+            <mat-option value="">{{ 'visits.filterPatient' | translate }}</mat-option>
+            @for (p of patients(); track p.id) {
+              <mat-option [value]="p.id">{{ p.firstName }} {{ p.lastName }}</mat-option>
+            }
+          </mat-select>
+        </mat-form-field>
+        <mat-form-field appearance="fill" class="filter-field">
+          <mat-label>{{ 'visits.filterDoctor' | translate }}</mat-label>
+          <mat-select (selectionChange)="doctorFilter.set($event.value)">
+            <mat-option value="">{{ 'visits.filterDoctor' | translate }}</mat-option>
+            @for (d of doctors(); track d.id) {
+              <mat-option [value]="d.id">Dr. {{ d.firstName }} {{ d.lastName }}</mat-option>
+            }
+          </mat-select>
+        </mat-form-field>
+        <mat-form-field appearance="fill" class="filter-field">
+          <mat-label>{{ 'visits.filterDateFrom' | translate }}</mat-label>
+          <input matInput [matDatepicker]="dateFromPicker" (dateChange)="onDateFromChange($event)" readonly />
+          <mat-datepicker-toggle matSuffix [for]="dateFromPicker"></mat-datepicker-toggle>
+          <mat-datepicker #dateFromPicker></mat-datepicker>
+        </mat-form-field>
+        <mat-form-field appearance="fill" class="filter-field">
+          <mat-label>{{ 'visits.filterDateTo' | translate }}</mat-label>
+          <input matInput [matDatepicker]="dateToPicker" (dateChange)="onDateToChange($event)" readonly />
+          <mat-datepicker-toggle matSuffix [for]="dateToPicker"></mat-datepicker-toggle>
+          <mat-datepicker #dateToPicker></mat-datepicker>
+        </mat-form-field>
+      </div>
+    </mat-card-content>
+  </mat-card>
 
-  @if (filteredVisits().length > 0) {
-    <table class="data-table data-table-card">
-      <thead>
-        <tr>
-          <th>{{ 'visits.date' | translate }}</th>
-          <th>{{ 'visits.patient' | translate }}</th>
-          <th>{{ 'visits.doctor' | translate }}</th>
-          <th>{{ 'visits.tooth' | translate }}</th>
-          <th>{{ 'visits.diagnosis' | translate }}</th>
-          <th>{{ 'visits.treatment' | translate }}</th>
-          <th>{{ 'visits.price' | translate }}</th>
-          <th>{{ 'visits.actions' | translate }}</th>
-        </tr>
-      </thead>
-      <tbody>
-        @for (visit of filteredVisits(); track visit.id) {
-          <tr>
-            <td [attr.data-label]="'visits.date' | translate">{{ visit.date | localizedDate:'mediumDate' }}</td>
-            <td [attr.data-label]="'visits.patient' | translate"><a [routerLink]="['/patients', visit.patientId]">{{ getPatientName(visit.patientId) }}</a></td>
-            <td [attr.data-label]="'visits.doctor' | translate"><a [routerLink]="['/doctors', visit.doctorId]">{{ getDoctorName(visit.doctorId) }}</a></td>
-            <td [attr.data-label]="'visits.tooth' | translate">{{ visit.toothNumber || '-' }}</td>
-            <td [attr.data-label]="'visits.diagnosis' | translate">{{ getDiagnosisName(visit.diagnosisId) }}</td>
-            <td [attr.data-label]="'visits.treatment' | translate">{{ getTreatmentName(visit.treatmentId) }}</td>
-            <td [attr.data-label]="'visits.price' | translate">{{ visit.price | currencyFormat }}</td>
-            <td class="td-actions">
-              <a [routerLink]="['/visits', visit.id]" matButton="outlined"><mat-icon>visibility</mat-icon>{{ 'common.view' | translate }}</a>
-            </td>
-          </tr>
-        }
-      </tbody>
-    </table>
-  } @else {
-    <div class="empty-state">
-      <p class="empty-state-text">{{ 'visits.noResults' | translate }}</p>
-    </div>
-  }
+  <table mat-table [dataSource]="filteredVisits()" class="visits-table">
+
+    <ng-container matColumnDef="date">
+      <th mat-header-cell *matHeaderCellDef>{{ 'visits.date' | translate }}</th>
+      <td mat-cell *matCellDef="let v">
+        <a [routerLink]="['/visits', v.id]">{{ v.date | localizedDate:'mediumDate' }}</a>
+      </td>
+    </ng-container>
+
+    <ng-container matColumnDef="patient">
+      <th mat-header-cell *matHeaderCellDef>{{ 'visits.patient' | translate }}</th>
+      <td mat-cell *matCellDef="let v">
+        <a [routerLink]="['/patients', v.patientId]">{{ getPatientName(v.patientId) }}</a>
+      </td>
+    </ng-container>
+
+    <ng-container matColumnDef="doctor">
+      <th mat-header-cell *matHeaderCellDef>{{ 'visits.doctor' | translate }}</th>
+      <td mat-cell *matCellDef="let v">
+        <a [routerLink]="['/doctors', v.doctorId]">{{ getDoctorName(v.doctorId) }}</a>
+      </td>
+    </ng-container>
+
+    <ng-container matColumnDef="tooth">
+      <th mat-header-cell *matHeaderCellDef>{{ 'visits.tooth' | translate }}</th>
+      <td mat-cell *matCellDef="let v">{{ v.toothNumber || '-' }}</td>
+    </ng-container>
+
+    <ng-container matColumnDef="diagnosis">
+      <th mat-header-cell *matHeaderCellDef>{{ 'visits.diagnosis' | translate }}</th>
+      <td mat-cell *matCellDef="let v">{{ getDiagnosisName(v.diagnosisId) }}</td>
+    </ng-container>
+
+    <ng-container matColumnDef="treatment">
+      <th mat-header-cell *matHeaderCellDef>{{ 'visits.treatment' | translate }}</th>
+      <td mat-cell *matCellDef="let v">{{ getTreatmentName(v.treatmentId) }}</td>
+    </ng-container>
+
+    <ng-container matColumnDef="price">
+      <th mat-header-cell *matHeaderCellDef>{{ 'visits.price' | translate }}</th>
+      <td mat-cell *matCellDef="let v">{{ v.price | currencyFormat }}</td>
+    </ng-container>
+
+    <ng-container matColumnDef="actions">
+      <th mat-header-cell *matHeaderCellDef>{{ 'visits.actions' | translate }}</th>
+      <td mat-cell *matCellDef="let v">
+        <div class="actions-cell">
+          <a mat-icon-button class="icon-btn--primary" [routerLink]="['/visits', v.id]" [matTooltip]="'common.view' | translate">
+            <mat-icon>visibility</mat-icon>
+          </a>
+        </div>
+      </td>
+    </ng-container>
+
+    <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+    <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
+
+    <tr class="mat-mdc-no-data-row" *matNoDataRow>
+      <td [colSpan]="displayedColumns.length">
+        <div class="empty-state">
+          <p class="empty-state-text">{{ 'visits.noResults' | translate }}</p>
+        </div>
+      </td>
+    </tr>
+
+  </table>
 </div>

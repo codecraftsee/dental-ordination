@@ -1,93 +1,78 @@
 <div class="container page">
   <div class="page-header">
     <h1 class="section-title">{{ 'diagnoses.title' | translate }}</h1>
-    <button matButton="elevated" color="primary" (click)="openAddForm()"><mat-icon>add</mat-icon>{{ 'diagnoses.addNew' | translate }}</button>
+    <a routerLink="/diagnoses/new" matButton="elevated" color="primary"><mat-icon>add</mat-icon>{{ 'diagnoses.addNew' | translate }}</a>
   </div>
 
-  <div class="search-bar">
-    <mat-form-field appearance="outline" class="search-field">
-      <mat-label>{{ 'diagnoses.search' | translate }}</mat-label>
-      <input matInput (input)="onSearch($event)" />
-    </mat-form-field>
-    <mat-form-field appearance="outline" class="filter-field">
-      <mat-label>{{ 'diagnoses.filterCategory' | translate }}</mat-label>
-      <mat-select (selectionChange)="categoryFilter.set($event.value)">
-        <mat-option value="">{{ 'diagnoses.filterCategory' | translate }}</mat-option>
-        @for (cat of categories; track cat) {
-          <mat-option [value]="cat">{{ 'diagnosisCategory.' + cat | translate }}</mat-option>
-        }
-      </mat-select>
-    </mat-form-field>
-  </div>
-
-  @if (showForm()) {
-    <mat-card class="mb-lg">
-      <mat-card-content>
-      <h3>{{ (editingId() ? 'diagnoses.editTitle' : 'diagnoses.addTitle') | translate }}</h3>
-      <form [formGroup]="form" (ngSubmit)="onSubmit()">
-        <div class="form-row">
-          <mat-form-field appearance="outline">
-            <mat-label>{{ 'diagnoses.code' | translate }}</mat-label>
-            <input matInput type="text" formControlName="code" />
-            <mat-error>{{ 'common.required' | translate }}</mat-error>
-          </mat-form-field>
-          <mat-form-field appearance="outline">
-            <mat-label>{{ 'diagnoses.name' | translate }}</mat-label>
-            <input matInput type="text" formControlName="name" />
-            <mat-error>{{ 'common.required' | translate }}</mat-error>
-          </mat-form-field>
-        </div>
-        <mat-form-field appearance="outline">
-          <mat-label>{{ 'diagnoses.category' | translate }}</mat-label>
-          <mat-select formControlName="category">
+  <mat-card class="filters-card form-card">
+    <mat-card-content>
+      <div class="filters-row">
+        <mat-form-field appearance="fill" class="search-field">
+          <mat-label>{{ 'diagnoses.search' | translate }}</mat-label>
+          <mat-icon matPrefix>search</mat-icon>
+          <input matInput (input)="onSearch($event)" />
+        </mat-form-field>
+        <mat-form-field appearance="fill" class="filter-field">
+          <mat-label>{{ 'diagnoses.filterCategory' | translate }}</mat-label>
+          <mat-select (selectionChange)="categoryFilter.set($event.value)">
+            <mat-option value="">{{ 'diagnoses.filterCategory' | translate }}</mat-option>
             @for (cat of categories; track cat) {
-              <mat-option [value]="cat">{{ 'diagnosisCategory.' + cat | translate }}</mat-option>
+            <mat-option [value]="cat">{{ 'diagnosisCategory.' + cat | translate }}</mat-option>
             }
           </mat-select>
-          <mat-error>{{ 'common.required' | translate }}</mat-error>
         </mat-form-field>
-        <mat-form-field appearance="outline">
-          <mat-label>{{ 'diagnoses.description' | translate }}</mat-label>
-          <textarea matInput formControlName="description" rows="2"></textarea>
-        </mat-form-field>
-        <div class="form-actions">
-          <button type="submit" matButton="elevated" color="primary"><mat-icon>save</mat-icon>{{ 'common.save' | translate }}</button>
-          <button type="button" matButton="outlined" (click)="cancelForm()"><mat-icon>close</mat-icon>{{ 'common.cancel' | translate }}</button>
-        </div>
-      </form>
-      </mat-card-content>
-    </mat-card>
-  }
+      </div>
+    </mat-card-content>
+  </mat-card>
 
-  @if (filteredDiagnoses().length > 0) {
-    <table class="data-table data-table-card">
-      <thead>
-        <tr>
-          <th>{{ 'diagnoses.code' | translate }}</th>
-          <th>{{ 'diagnoses.name' | translate }}</th>
-          <th>{{ 'diagnoses.category' | translate }}</th>
-          <th>{{ 'diagnoses.description' | translate }}</th>
-          <th>{{ 'diagnoses.actions' | translate }}</th>
-        </tr>
-      </thead>
-      <tbody>
-        @for (dg of filteredDiagnoses(); track dg.id) {
-          <tr>
-            <td [attr.data-label]="'diagnoses.code' | translate">{{ dg.code }}</td>
-            <td [attr.data-label]="'diagnoses.name' | translate">{{ dg.name }}</td>
-            <td [attr.data-label]="'diagnoses.category' | translate"><span class="badge badge-info">{{ 'diagnosisCategory.' + dg.category | translate }}</span></td>
-            <td [attr.data-label]="'diagnoses.description' | translate">{{ dg.description }}</td>
-            <td class="td-actions">
-              <button matButton="outlined" (click)="openEditForm(dg)"><mat-icon>edit</mat-icon>{{ 'common.edit' | translate }}</button>
-              <button matButton="outlined" class="btn-danger-outlined" (click)="deleteDiagnosis(dg.id)"><mat-icon>delete</mat-icon>{{ 'common.delete' | translate }}</button>
-            </td>
-          </tr>
-        }
-      </tbody>
-    </table>
-  } @else {
-    <div class="empty-state">
-      <p class="empty-state-text">{{ 'diagnoses.noResults' | translate }}</p>
-    </div>
-  }
+  <table mat-table [dataSource]="filteredDiagnoses()" class="diagnoses-table">
+
+    <ng-container matColumnDef="code">
+      <th mat-header-cell *matHeaderCellDef>{{ 'diagnoses.code' | translate }}</th>
+      <td mat-cell *matCellDef="let dg">{{ dg.code }}</td>
+    </ng-container>
+
+    <ng-container matColumnDef="name">
+      <th mat-header-cell *matHeaderCellDef>{{ 'diagnoses.name' | translate }}</th>
+      <td mat-cell *matCellDef="let dg">{{ dg.name }}</td>
+    </ng-container>
+
+    <ng-container matColumnDef="category">
+      <th mat-header-cell *matHeaderCellDef>{{ 'diagnoses.category' | translate }}</th>
+      <td mat-cell *matCellDef="let dg">
+        <span class="badge badge-info">{{ 'diagnosisCategory.' + dg.category | translate }}</span>
+      </td>
+    </ng-container>
+
+    <ng-container matColumnDef="description">
+      <th mat-header-cell *matHeaderCellDef>{{ 'diagnoses.description' | translate }}</th>
+      <td mat-cell *matCellDef="let dg">{{ dg.description }}</td>
+    </ng-container>
+
+    <ng-container matColumnDef="actions">
+      <th mat-header-cell *matHeaderCellDef>{{ 'diagnoses.actions' | translate }}</th>
+      <td mat-cell *matCellDef="let dg">
+        <div class="actions-cell">
+          <a mat-icon-button class="icon-btn--warning" [routerLink]="['/diagnoses', dg.id, 'edit']" [matTooltip]="'common.edit' | translate">
+            <mat-icon>edit</mat-icon>
+          </a>
+          <button mat-icon-button class="icon-btn--danger" (click)="deleteDiagnosis(dg.id)" [matTooltip]="'common.delete' | translate">
+            <mat-icon>delete</mat-icon>
+          </button>
+        </div>
+      </td>
+    </ng-container>
+
+    <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+    <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
+
+    <tr class="mat-mdc-no-data-row" *matNoDataRow>
+      <td [colSpan]="displayedColumns.length">
+        <div class="empty-state">
+          <p class="empty-state-text">{{ 'diagnoses.noResults' | translate }}</p>
+        </div>
+      </td>
+    </tr>
+
+  </table>
 </div>

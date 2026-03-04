@@ -3,8 +3,13 @@ import { RouterLink } from '@angular/router';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
+import { MatTableModule } from '@angular/material/table';
+import { MatCardModule } from '@angular/material/card';
+import { MatDatepickerModule, MatDatepickerInputEvent } from '@angular/material/datepicker';
+import { MatNativeDateModule } from '@angular/material/core';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
+import { MatTooltipModule } from '@angular/material/tooltip';
 import { forkJoin } from 'rxjs';
 import { TranslatePipe } from '../../shared/translate.pipe';
 import { LocalizedDatePipe } from '../../shared/localized-date.pipe';
@@ -17,7 +22,7 @@ import { TreatmentService } from '../../services/treatment.service';
 
 @Component({
   selector: 'app-visit-list',
-  imports: [RouterLink, TranslatePipe, LocalizedDatePipe, CurrencyFormatPipe, MatFormFieldModule, MatInputModule, MatSelectModule, MatButtonModule, MatIconModule],
+  imports: [RouterLink, TranslatePipe, LocalizedDatePipe, CurrencyFormatPipe, MatFormFieldModule, MatInputModule, MatSelectModule, MatTableModule, MatCardModule, MatDatepickerModule, MatNativeDateModule, MatButtonModule, MatIconModule, MatTooltipModule],
   templateUrl: './visit-list.html',
   styleUrl: './visit-list.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -29,6 +34,7 @@ export default class VisitList implements OnInit {
   private diagnosisService = inject(DiagnosisService);
   private treatmentService = inject(TreatmentService);
 
+  displayedColumns = ['date', 'patient', 'doctor', 'tooth', 'diagnosis', 'treatment', 'price', 'actions'];
   searchQuery = signal('');
   patientFilter = signal<string>('');
   doctorFilter = signal<string>('');
@@ -108,11 +114,18 @@ export default class VisitList implements OnInit {
     this.doctorFilter.set((event.target as HTMLSelectElement).value);
   }
 
-  onDateFromChange(event: Event): void {
-    this.dateFromFilter.set((event.target as HTMLInputElement).value);
+  onDateFromChange(event: MatDatepickerInputEvent<Date>): void {
+    this.dateFromFilter.set(event.value ? this.formatDate(event.value) : '');
   }
 
-  onDateToChange(event: Event): void {
-    this.dateToFilter.set((event.target as HTMLInputElement).value);
+  onDateToChange(event: MatDatepickerInputEvent<Date>): void {
+    this.dateToFilter.set(event.value ? this.formatDate(event.value) : '');
+  }
+
+  private formatDate(date: Date): string {
+    const y = date.getFullYear();
+    const m = String(date.getMonth() + 1).padStart(2, '0');
+    const d = String(date.getDate()).padStart(2, '0');
+    return `${y}-${m}-${d}`;
   }
 }

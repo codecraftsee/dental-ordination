@@ -4,22 +4,26 @@
     <a routerLink="/doctors/new" matButton="elevated" color="primary"><mat-icon>person_add</mat-icon>{{ 'doctors.addNew' | translate }}</a>
   </div>
 
-  <div class="search-bar">
-    <mat-form-field appearance="fill" class="search-field">
-      <mat-label>{{ 'doctors.search' | translate }}</mat-label>
-      <mat-icon matPrefix>search</mat-icon>
-      <input matInput (input)="onSearch($event)" />
-    </mat-form-field>
-    <mat-form-field appearance="fill" class="filter-field">
-      <mat-label>{{ 'doctors.filterSpecialization' | translate }}</mat-label>
-      <mat-select (selectionChange)="specializationFilter.set($event.value)">
-        <mat-option value="">{{ 'doctors.filterSpecialization' | translate }}</mat-option>
-        @for (spec of specializations; track spec) {
-          <mat-option [value]="spec">{{ 'specialization.' + spec | translate }}</mat-option>
-        }
-      </mat-select>
-    </mat-form-field>
-  </div>
+  <mat-card class="filters-card form-card">
+    <mat-card-content>
+      <div class="filters-row">
+        <mat-form-field appearance="fill" class="search-field">
+          <mat-label>{{ 'doctors.search' | translate }}</mat-label>
+          <mat-icon matPrefix>search</mat-icon>
+          <input matInput (input)="onSearch($event)" />
+        </mat-form-field>
+        <mat-form-field appearance="fill" class="filter-field">
+          <mat-label>{{ 'doctors.filterSpecialization' | translate }}</mat-label>
+          <mat-select (selectionChange)="specializationFilter.set($event.value)">
+            <mat-option value="">{{ 'doctors.filterSpecialization' | translate }}</mat-option>
+            @for (spec of specializations; track spec) {
+              <mat-option [value]="spec">{{ 'specialization.' + spec | translate }}</mat-option>
+            }
+          </mat-select>
+        </mat-form-field>
+      </div>
+    </mat-card-content>
+  </mat-card>
 
   <table mat-table [dataSource]="filteredDoctors()" class="doctors-table">
 

@@ -3,6 +3,26 @@
   padding-bottom: var(--spacing-2xl);
 }
 
+.filters-card {
+  margin-bottom: var(--spacing-lg);
+
+  .filters-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--spacing-sm);
+    align-items: flex-start;
+
+    .search-field {
+      flex: 1 1 200px;
+      min-width: 180px;
+    }
+
+    .filter-field {
+      flex: 0 0 200px;
+    }
+  }
+}
+
 .doctors-table {
   width: 100%;
   border: 1px solid var(--color-border);

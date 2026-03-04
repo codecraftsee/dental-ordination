@@ -10,10 +10,11 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 import { TranslatePipe } from '../../shared/translate.pipe';
 import { LocalizedDatePipe } from '../../shared/localized-date.pipe';
 import { PatientService } from '../../services/patient.service';
+import { MatCardModule } from '@angular/material/card';
 
 @Component({
   selector: 'app-patient-list',
-  imports: [RouterLink, MatTableModule, MatFormFieldModule, MatInputModule, MatSelectModule, MatButtonModule, MatIconModule, MatTooltipModule, TranslatePipe, LocalizedDatePipe],
+  imports: [RouterLink, MatTableModule, MatFormFieldModule, MatInputModule, MatCardModule, MatSelectModule, MatButtonModule, MatIconModule, MatTooltipModule, TranslatePipe, LocalizedDatePipe],
   templateUrl: './patient-list.html',
   styleUrl: './patient-list.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
