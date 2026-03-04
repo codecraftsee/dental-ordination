@@ -7,12 +7,44 @@
       </div>
     } @else {
       <div class="book-scene">
+        <!-- Spine decoration -->
+        <div class="book-spine"></div>
+
+        <!-- Base layer: the page that will be revealed after flip -->
+        @if (flipState() === 'flip-forward' && nextItem(); as next) {
+          <div class="page-layer page-under">
+            <div class="page-paper">
+              <div class="page-content">
+                @if (pageTemplate(); as tmpl) {
+                  <ng-container *ngTemplateOutlet="tmpl; context: { $implicit: next }" />
+                } @else {
+                  <pre class="page-fallback">{{ next | json }}</pre>
+                }
+              </div>
+            </div>
+          </div>
+        }
+        @if (flipState() === 'flip-backward' && prevItem(); as prev) {
+          <div class="page-layer page-under">
+            <div class="page-paper">
+              <div class="page-content">
+                @if (pageTemplate(); as tmpl) {
+                  <ng-container *ngTemplateOutlet="tmpl; context: { $implicit: prev }" />
+                } @else {
+                  <pre class="page-fallback">{{ prev | json }}</pre>
+                }
+              </div>
+            </div>
+          </div>
+        }
+
+        <!-- Top layer: the page that flips -->
         <div
-          class="book-page"
-          [class.flip-forward]="animationDirection() === 'forward'"
-          [class.flip-backward]="animationDirection() === 'backward'"
+          class="page-layer page-top"
+          [class.turning-forward]="flipState() === 'flip-forward'"
+          [class.turning-backward]="flipState() === 'flip-backward'"
         >
-          <div class="page-front">
+          <div class="page-paper">
             <div class="page-content">
               @if (pageTemplate(); as tmpl) {
                 <ng-container *ngTemplateOutlet="tmpl; context: { $implicit: currentItem() }" />
@@ -20,9 +52,17 @@
                 <pre class="page-fallback">{{ currentItem() | json }}</pre>
               }
             </div>
-            <div class="page-edge"></div>
+            <!-- Stacked pages illusion on the right -->
+            <div class="page-edges"></div>
           </div>
+          <!-- Shadow that appears during page turn -->
+          <div class="page-shadow"></div>
         </div>
+
+        <!-- Page curl shadow on the base page during animation -->
+        @if (flipState() !== 'idle') {
+          <div class="curl-shadow"></div>
+        }
       </div>
 
       <div class="book-nav">
