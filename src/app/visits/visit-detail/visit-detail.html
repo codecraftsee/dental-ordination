@@ -1,65 +1,138 @@
 @if (visit(); as v) {
   <div class="container page">
-    <div class="page-header">
-      <h1 class="section-title">{{ 'visit.title.detail' | translate }}</h1>
-      <div>
-        <button matButton="outlined" class="btn-danger-outlined" (click)="deleteVisit()"><mat-icon>delete</mat-icon>{{ 'common.delete' | translate }}</button>
-        <a routerLink="/visits" matButton="outlined"><mat-icon>arrow_back</mat-icon>{{ 'common.back' | translate }}</a>
-      </div>
-    </div>
 
-    <mat-card class="mb-lg">
+    <!-- HEADER CARD -->
+    <mat-card class="profile-card">
       <mat-card-content>
-        <div class="detail-grid">
-          <div class="detail-item">
-            <div class="detail-label">{{ 'visit.date' | translate }}</div>
-            <div class="detail-value">{{ v.date | localizedDate:'longDate' }}</div>
+        <div class="profile-top">
+          <div class="profile-main">
+            <div class="avatar">
+              <mat-icon class="avatar-icon">event_note</mat-icon>
+            </div>
+            <div class="profile-info">
+              <h2 class="profile-name">{{ getPatientName(v.patientId) }}</h2>
+              <div class="profile-meta">
+                <span class="badge badge-primary">{{ v.date | localizedDate:'longDate' }}</span>
+                <span class="profile-registered">
+                  {{ 'visit.doctor' | translate }}: {{ getDoctorName(v.doctorId) }}
+                </span>
+              </div>
+            </div>
           </div>
-          <div class="detail-item">
-            <div class="detail-label">{{ 'visit.patient' | translate }}</div>
-            <div class="detail-value">
+          <div class="profile-actions">
+            <button matButton="outlined" class="btn-danger-outlined" (click)="deleteVisit()"><mat-icon>delete</mat-icon>{{ 'common.delete' | translate }}</button>
+            <a routerLink="/visits" matButton="outlined"><mat-icon>arrow_back</mat-icon>{{ 'common.back' | translate }}</a>
+          </div>
+        </div>
+      </mat-card-content>
+    </mat-card>
+
+    <!-- STATS BAR -->
+    <div class="stats-bar">
+      <mat-card class="stat-card stat-card--primary">
+        <mat-card-content>
+          <div class="stat-icon-wrap">
+            <mat-icon>person</mat-icon>
+          </div>
+          <div class="stat-body">
+            <div class="stat-value stat-value--text">
               <a [routerLink]="['/patients', v.patientId]">{{ getPatientName(v.patientId) }}</a>
             </div>
+            <div class="stat-label">{{ 'visit.patient' | translate }}</div>
           </div>
-          <div class="detail-item">
-            <div class="detail-label">{{ 'visit.doctor' | translate }}</div>
-            <div class="detail-value">
+        </mat-card-content>
+      </mat-card>
+      <mat-card class="stat-card stat-card--info">
+        <mat-card-content>
+          <div class="stat-icon-wrap">
+            <mat-icon>medical_services</mat-icon>
+          </div>
+          <div class="stat-body">
+            <div class="stat-value stat-value--text">
               <a [routerLink]="['/doctors', v.doctorId]">{{ getDoctorName(v.doctorId) }}</a>
             </div>
+            <div class="stat-label">{{ 'visit.doctor' | translate }}</div>
           </div>
-          <div class="detail-item">
-            <div class="detail-label">{{ 'visit.toothNumber' | translate }}</div>
-            <div class="detail-value">{{ v.toothNumber || '-' }}</div>
+        </mat-card-content>
+      </mat-card>
+      <mat-card class="stat-card stat-card--highlight">
+        <mat-card-content>
+          <div class="stat-icon-wrap">
+            <mat-icon>dentistry</mat-icon>
           </div>
-        </div>
-      </mat-card-content>
-    </mat-card>
+          <div class="stat-body">
+            <div class="stat-value">{{ v.toothNumber || '—' }}</div>
+            <div class="stat-label">{{ 'visit.toothNumber' | translate }}</div>
+          </div>
+        </mat-card-content>
+      </mat-card>
+      <mat-card class="stat-card stat-card--danger">
+        <mat-card-content>
+          <div class="stat-icon-wrap">
+            <mat-icon>payments</mat-icon>
+          </div>
+          <div class="stat-body">
+            <div class="stat-value">{{ v.price | currencyFormat }}</div>
+            <div class="stat-label">{{ 'visit.price' | translate }}</div>
+          </div>
+        </mat-card-content>
+      </mat-card>
+    </div>
 
-    <mat-card>
-      <mat-card-content>
-        <div class="detail-grid">
-          <div class="detail-item">
-            <div class="detail-label">{{ 'visit.diagnosis' | translate }}</div>
-            <div class="detail-value">{{ getDiagnosisCode(v.diagnosisId) }} - {{ getDiagnosisName(v.diagnosisId) }}</div>
-          </div>
-          <div class="detail-item">
-            <div class="detail-label">{{ 'visit.diagnosisNotes' | translate }}</div>
-            <div class="detail-value">{{ v.diagnosisNotes || '-' }}</div>
-          </div>
-          <div class="detail-item">
-            <div class="detail-label">{{ 'visit.treatment' | translate }}</div>
-            <div class="detail-value">{{ getTreatmentCode(v.treatmentId) }} - {{ getTreatmentName(v.treatmentId) }}</div>
-          </div>
-          <div class="detail-item">
-            <div class="detail-label">{{ 'visit.treatmentNotes' | translate }}</div>
-            <div class="detail-value">{{ v.treatmentNotes || '-' }}</div>
-          </div>
-          <div class="detail-item">
-            <div class="detail-label">{{ 'visit.price' | translate }}</div>
-            <div class="detail-value">{{ v.price | currencyFormat }}</div>
-          </div>
-        </div>
-      </mat-card-content>
-    </mat-card>
+    <!-- INFO SECTION -->
+    <div class="info-section">
+
+      <!-- DIAGNOSIS CARD -->
+      <mat-card class="info-card info-card--info">
+        <mat-card-content>
+          <h3 class="card-section-title">
+            <mat-icon class="card-section-icon">biotech</mat-icon>
+            {{ 'visit.diagnosis' | translate }}
+          </h3>
+          @if (v.diagnosisId) {
+            <div class="contact-row">
+              <mat-icon class="contact-icon">tag</mat-icon>
+              <span class="contact-value">{{ getDiagnosisCode(v.diagnosisId) }} — {{ getDiagnosisName(v.diagnosisId) }}</span>
+            </div>
+          }
+          @if (v.diagnosisNotes) {
+            <div class="contact-row">
+              <mat-icon class="contact-icon">notes</mat-icon>
+              <span class="contact-value">{{ v.diagnosisNotes }}</span>
+            </div>
+          }
+          @if (!v.diagnosisId && !v.diagnosisNotes) {
+            <p class="text-muted">—</p>
+          }
+        </mat-card-content>
+      </mat-card>
+
+      <!-- TREATMENT CARD -->
+      <mat-card class="info-card info-card--primary">
+        <mat-card-content>
+          <h3 class="card-section-title">
+            <mat-icon class="card-section-icon">healing</mat-icon>
+            {{ 'visit.treatment' | translate }}
+          </h3>
+          @if (v.treatmentId) {
+            <div class="contact-row">
+              <mat-icon class="contact-icon">tag</mat-icon>
+              <span class="contact-value">{{ getTreatmentCode(v.treatmentId) }} — {{ getTreatmentName(v.treatmentId) }}</span>
+            </div>
+          }
+          @if (v.treatmentNotes) {
+            <div class="contact-row">
+              <mat-icon class="contact-icon">notes</mat-icon>
+              <span class="contact-value">{{ v.treatmentNotes }}</span>
+            </div>
+          }
+          @if (!v.treatmentId && !v.treatmentNotes) {
+            <p class="text-muted">—</p>
+          }
+        </mat-card-content>
+      </mat-card>
+
+    </div>
+
   </div>
 }
