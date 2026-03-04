@@ -35,7 +35,67 @@
       </div>
     </mat-card-content>
   </mat-card>
-  <table mat-table [dataSource]="dataSource" class="patients-table" [class.no-paginator]="filteredPatients().length <= 5">
+
+  <div class="mobile-book-view">
+  <app-book-table [data]="filteredPatients()">
+    <ng-template #bookPage let-patient>
+      <div class="book-page-header">
+        <mat-icon class="book-page-avatar">person</mat-icon>
+        <div class="book-page-name">
+          <a [routerLink]="['/patients', patient.id]">{{ patient.firstName }} {{ patient.lastName }}</a>
+        </div>
+      </div>
+      <div class="book-page-fields">
+        @if (patient.parentName) {
+          <div class="book-field">
+            <span class="book-field-label">{{ 'patients.parentName' | translate }}</span>
+            <span class="book-field-value">{{ patient.parentName }}</span>
+          </div>
+        }
+        @if (patient.city) {
+          <div class="book-field">
+            <span class="book-field-label">{{ 'patients.city' | translate }}</span>
+            <span class="book-field-value">{{ patient.city }}</span>
+          </div>
+        }
+        @if (patient.phone) {
+          <div class="book-field">
+            <span class="book-field-label">{{ 'patients.phone' | translate }}</span>
+            <span class="book-field-value">{{ patient.phone }}</span>
+          </div>
+        }
+        @if (patient.email) {
+          <div class="book-field">
+            <span class="book-field-label">{{ 'patient.email' | translate }}</span>
+            <span class="book-field-value">{{ patient.email }}</span>
+          </div>
+        }
+        @if (patient.dateOfBirth) {
+          <div class="book-field">
+            <span class="book-field-label">{{ 'patients.dateOfBirth' | translate }}</span>
+            <span class="book-field-value">{{ patient.dateOfBirth | localizedDate:'mediumDate' }}</span>
+          </div>
+        }
+      </div>
+      <div class="book-page-actions">
+        <a mat-button color="primary" [routerLink]="['/patients', patient.id]">
+          <mat-icon>visibility</mat-icon>
+          {{ 'common.view' | translate }}
+        </a>
+        <a mat-button [routerLink]="['/patients', patient.id, 'edit']">
+          <mat-icon>edit</mat-icon>
+          {{ 'common.edit' | translate }}
+        </a>
+        <a mat-button [routerLink]="['/patients', patient.id, 'dental-card']">
+          <mat-icon>assignment</mat-icon>
+          {{ 'patients.viewDentalCard' | translate }}
+        </a>
+      </div>
+    </ng-template>
+  </app-book-table>
+  </div>
+
+  <table mat-table [dataSource]="dataSource" class="patients-table desktop-table" [class.no-paginator]="filteredPatients().length <= 5">
 
     <ng-container matColumnDef="name">
       <th mat-header-cell *matHeaderCellDef>{{ 'patients.name' | translate }}</th>

@@ -186,6 +186,11 @@
   "dentalCard.print": "Print",
   "dentalCard.exportExcel": "Export Excel",
 
+  "bookTable.noData": "No records to display",
+  "bookTable.prevPage": "Previous page",
+  "bookTable.nextPage": "Next page",
+  "bookTable.ariaLabel": "Data book view",
+
   "common.save": "Save",
   "common.cancel": "Cancel",
   "common.delete": "Delete",

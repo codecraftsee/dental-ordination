@@ -1,0 +1,53 @@
+@if (isMobile()) {
+  <div class="book-container">
+    @if (isEmpty()) {
+      <div class="book-empty">
+        <mat-icon>menu_book</mat-icon>
+        <p>{{ 'bookTable.noData' | translate }}</p>
+      </div>
+    } @else {
+      <div class="book-scene">
+        <div
+          class="book-page"
+          [class.flip-forward]="animationDirection() === 'forward'"
+          [class.flip-backward]="animationDirection() === 'backward'"
+        >
+          <div class="page-front">
+            <div class="page-content">
+              @if (pageTemplate(); as tmpl) {
+                <ng-container *ngTemplateOutlet="tmpl; context: { $implicit: currentItem() }" />
+              } @else {
+                <pre class="page-fallback">{{ currentItem() | json }}</pre>
+              }
+            </div>
+            <div class="page-edge"></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="book-nav">
+        <button
+          mat-icon-button
+          [disabled]="!hasPrev() || animating()"
+          (click)="goPrev()"
+          [attr.aria-label]="'bookTable.prevPage' | translate"
+        >
+          <mat-icon>chevron_left</mat-icon>
+        </button>
+
+        <span class="page-indicator" aria-live="polite">
+          {{ pageLabel() }}
+        </span>
+
+        <button
+          mat-icon-button
+          [disabled]="!hasNext() || animating()"
+          (click)="goNext()"
+          [attr.aria-label]="'bookTable.nextPage' | translate"
+        >
+          <mat-icon>chevron_right</mat-icon>
+        </button>
+      </div>
+    }
+  </div>
+}
