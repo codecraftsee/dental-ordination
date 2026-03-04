@@ -32,6 +32,8 @@ jobs:
 
       - run: npx ng build --configuration production --base-href /dental-ordination/
 
+      - run: cp dist/dental-ordination/browser/index.html dist/dental-ordination/browser/404.html
+
       - uses: actions/configure-pages@v5
 
       - uses: actions/upload-pages-artifact@v3
