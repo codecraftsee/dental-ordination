@@ -186,6 +186,11 @@
   "dentalCard.print": "Štampaj",
   "dentalCard.exportExcel": "Izvezi Excel",
 
+  "bookTable.noData": "Nema podataka za prikaz",
+  "bookTable.prevPage": "Prethodna stranica",
+  "bookTable.nextPage": "Sledeća stranica",
+  "bookTable.ariaLabel": "Prikaz podataka u formi knjige",
+
   "common.save": "Sačuvaj",
   "common.cancel": "Otkaži",
   "common.delete": "Obriši",

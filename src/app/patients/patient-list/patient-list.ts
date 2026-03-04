@@ -13,10 +13,11 @@ import { LocalizedDatePipe } from '../../shared/localized-date.pipe';
 import { PatientService } from '../../services/patient.service';
 import { Patient } from '../../models/patient.model';
 import { MatCardModule } from '@angular/material/card';
+import { BookTableComponent } from '../../shared/book-table/book-table';
 
 @Component({
   selector: 'app-patient-list',
-  imports: [RouterLink, MatTableModule, MatPaginatorModule, MatFormFieldModule, MatInputModule, MatCardModule, MatSelectModule, MatButtonModule, MatIconModule, MatTooltipModule, TranslatePipe, LocalizedDatePipe],
+  imports: [RouterLink, MatTableModule, MatPaginatorModule, MatFormFieldModule, MatInputModule, MatCardModule, MatSelectModule, MatButtonModule, MatIconModule, MatTooltipModule, TranslatePipe, LocalizedDatePipe, BookTableComponent],
   templateUrl: './patient-list.html',
   styleUrl: './patient-list.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
