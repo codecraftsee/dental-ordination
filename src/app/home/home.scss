@@ -46,6 +46,61 @@
   }
 }
 
+// Book page content styles
+.book-page-fields {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xs);
+}
+
+.book-field {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  padding: var(--spacing-xs) 0;
+
+  &:not(:last-child) {
+    border-bottom: 1px dashed rgba(0, 0, 0, 0.04);
+
+    [data-theme='dark'] & {
+      border-bottom-color: rgba(255, 255, 255, 0.04);
+    }
+  }
+}
+
+.book-field-label {
+  font-size: 0.8rem;
+  color: var(--color-text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+.book-field-value {
+  font-size: 0.95rem;
+  font-weight: 500;
+  color: var(--color-text);
+
+  a {
+    color: var(--color-text);
+    text-decoration: none;
+
+    &:hover {
+      color: var(--color-primary);
+    }
+  }
+}
+
+.book-field-price {
+  color: var(--color-primary);
+  font-weight: 600;
+}
+
+@media (min-width: 768px) {
+  .mobile-book-view {
+    display: none;
+  }
+}
+
 @media (max-width: 767px) {
   .dashboard {
     padding-top: var(--spacing-md);
@@ -70,5 +125,9 @@
       width: 100%;
       justify-content: center;
     }
+  }
+
+  .desktop-table {
+    display: none;
   }
 }

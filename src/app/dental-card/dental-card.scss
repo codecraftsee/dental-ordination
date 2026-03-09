@@ -8,12 +8,92 @@
   gap: var(--spacing-sm);
 }
 
-.karton {
-  background: white;
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-lg);
-  padding: var(--spacing-xl) var(--spacing-2xl);
+// ── Patient Info Card ──
+.patient-card {
   margin-top: var(--spacing-lg);
+  margin-bottom: var(--spacing-lg);
+  position: relative;
+  overflow: hidden;
+  background: linear-gradient(
+    170deg,
+    #fffdf8 0%,
+    #faf7f0 30%,
+    #f5f1e8 70%,
+    #f0ecdf 100%
+  ) !important;
+  border: 1px solid rgba(81, 86, 190, 0.1);
+  border-top: none;
+  box-shadow:
+    0 4px 20px rgba(81, 86, 190, 0.08),
+    0 8px 40px rgba(0, 0, 0, 0.06),
+    0 1px 3px rgba(0, 0, 0, 0.04) !important;
+
+  // Gradient top accent line — light mode
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: linear-gradient(
+      90deg,
+      transparent 5%,
+      rgba(81, 86, 190, 0.3) 20%,
+      rgba(81, 86, 190, 0.6) 50%,
+      rgba(81, 86, 190, 0.3) 80%,
+      transparent 95%
+    );
+  }
+
+  :host-context([data-theme='dark']) & {
+    background: linear-gradient(
+      145deg,
+      #0f1923 0%,
+      #141e2e 25%,
+      #18233a 50%,
+      #1a2040 75%,
+      #12182a 100%
+    ) !important;
+    backdrop-filter: blur(16px);
+    border: 1px solid rgba(81, 86, 190, 0.2);
+    border-top: none;
+    box-shadow:
+      0 8px 32px rgba(0, 0, 0, 0.5),
+      0 0 60px rgba(81, 86, 190, 0.06),
+      inset 0 1px 0 rgba(255, 255, 255, 0.05),
+      inset 0 -1px 0 rgba(81, 86, 190, 0.04) !important;
+
+    &::before {
+      height: 2px;
+      background: linear-gradient(
+        90deg,
+        transparent 5%,
+        #4a4fad 20%,
+        #7b7fd4 35%,
+        #a5a8e6 50%,
+        #7b7fd4 65%,
+        #4a4fad 80%,
+        transparent 95%
+      );
+      box-shadow: 0 0 15px rgba(108, 112, 200, 0.4), 0 0 30px rgba(108, 112, 200, 0.15);
+    }
+
+    &::after {
+      content: '';
+      position: absolute;
+      top: -50%;
+      left: -50%;
+      width: 200%;
+      height: 200%;
+      background: radial-gradient(
+        ellipse at 50% 0%,
+        rgba(81, 86, 190, 0.08) 0%,
+        transparent 50%
+      );
+      pointer-events: none;
+    }
+  }
 }
 
 .karton-title {
@@ -23,19 +103,30 @@
   text-transform: uppercase;
   letter-spacing: 0.05em;
   margin-bottom: var(--spacing-lg);
-  color: var(--color-text);
+  color: var(--color-primary);
+
+  :host-context([data-theme='dark']) & {
+    color: #a5a8e6;
+    text-shadow: 0 0 20px rgba(108, 112, 200, 0.3);
+  }
 }
 
 .patient-info {
-  margin-bottom: var(--spacing-xl);
-  border-bottom: 2px solid var(--color-border);
-  padding-bottom: var(--spacing-lg);
+  margin-bottom: 0;
 }
 
 .info-row {
   display: flex;
   padding: var(--spacing-xs) 0;
   line-height: 1.6;
+
+  &:not(:last-child) {
+    border-bottom: 1px solid var(--color-border);
+
+    :host-context([data-theme='dark']) & {
+      border-bottom-color: rgba(81, 86, 190, 0.2);
+    }
+  }
 }
 
 .info-label {
@@ -49,61 +140,150 @@
   color: var(--color-text);
 }
 
-.karton-table {
+// ── Visits Table ──
+.visits-table {
   width: 100%;
-  border-collapse: collapse;
-  font-size: 0.9rem;
+  table-layout: fixed;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  box-shadow: var(--shadow-1);
+}
 
-  th,
-  td {
-    border: 1px solid var(--color-border);
-    padding: var(--spacing-sm) var(--spacing-md);
-    text-align: left;
-    vertical-align: top;
-  }
+// ── Book page content styles (mobile) ──
+.book-page-fields {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xs);
+}
 
-  thead th {
-    background: var(--color-surface-variant);
-    font-weight: 700;
-    white-space: nowrap;
-  }
+.book-field {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  padding: var(--spacing-xs) 0;
 
-  tbody tr:hover {
-    background: var(--color-surface-variant);
-  }
+  &:not(:last-child) {
+    border-bottom: 1px dashed rgba(0, 0, 0, 0.04);
 
-  .col-date {
-    width: 110px;
-    white-space: nowrap;
-  }
-
-  .col-diagnosis {
-    width: 25%;
-  }
-
-  .col-treatment {
-    width: 30%;
-  }
-
-  .col-price {
-    width: 100px;
-    text-align: right;
-    white-space: nowrap;
-  }
-
-  .col-doctor {
-    width: 150px;
-    white-space: nowrap;
-  }
-
-  tfoot td {
-    border-top: 2px solid var(--color-primary);
-    padding: var(--spacing-sm) var(--spacing-md);
-    background: var(--color-surface-variant);
-    font-weight: 600;
+    :host-context([data-theme='dark']) & {
+      border-bottom-color: rgba(255, 255, 255, 0.04);
+    }
   }
 }
 
+.book-field-label {
+  font-size: 0.8rem;
+  color: var(--color-text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+.book-field-value {
+  font-size: 0.95rem;
+  font-weight: 500;
+  color: var(--color-text);
+}
+
+.book-field-price {
+  color: var(--color-primary);
+  font-weight: 600;
+}
+
+.book-total {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: var(--spacing-sm) var(--spacing-md);
+  background: var(--color-surface-variant);
+  border-radius: var(--radius-md);
+  border-left: 3px solid var(--color-primary);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  max-width: 400px;
+  margin: 0 auto;
+}
+
+.book-total-label {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--color-text);
+}
+
+.book-total-value {
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--color-primary);
+}
+
+// ── Total Card ──
+.total-card {
+  margin-top: var(--spacing-md);
+  border-radius: var(--radius-md) !important;
+  border: none !important;
+  border-left: 4px solid var(--color-primary) !important;
+  background: linear-gradient(
+    135deg,
+    rgba(81, 86, 190, 0.06) 0%,
+    rgba(81, 86, 190, 0.02) 100%
+  ) !important;
+  box-shadow:
+    0 2px 12px rgba(81, 86, 190, 0.1),
+    0 1px 3px rgba(0, 0, 0, 0.04) !important;
+
+  .mat-mdc-card-content {
+    padding: var(--spacing-md) var(--spacing-lg) !important;
+  }
+
+  :host-context([data-theme='dark']) & {
+    background: linear-gradient(
+      135deg,
+      rgba(81, 86, 190, 0.12) 0%,
+      rgba(81, 86, 190, 0.04) 100%
+    ) !important;
+    border-left: 4px solid #7b7fd4 !important;
+    box-shadow:
+      0 4px 16px rgba(0, 0, 0, 0.3),
+      0 0 20px rgba(81, 86, 190, 0.08) !important;
+  }
+}
+
+.total-row {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+
+  mat-icon {
+    color: var(--color-primary);
+    font-size: 24px;
+    width: 24px;
+    height: 24px;
+
+    :host-context([data-theme='dark']) & {
+      color: #a5a8e6;
+    }
+  }
+}
+
+.total-label {
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--color-text);
+  flex: 1;
+}
+
+.total-value {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: var(--color-primary);
+  letter-spacing: 0.02em;
+
+  :host-context([data-theme='dark']) & {
+    color: #a5a8e6;
+    text-shadow: 0 0 12px rgba(108, 112, 200, 0.3);
+  }
+}
+
+// ── Responsive ──
 @media (max-width: 767px) {
   .page {
     padding-top: var(--spacing-md);
@@ -120,11 +300,6 @@
     }
   }
 
-  .karton {
-    padding: var(--spacing-md);
-    border-radius: var(--radius-md);
-  }
-
   .karton-title {
     font-size: 1.2rem;
   }
@@ -133,94 +308,18 @@
     width: 130px;
   }
 
-  // Card layout for karton-table on mobile
-  .karton-table {
-    thead {
-      display: none;
-    }
-
-    tbody tr {
-      display: block;
-      background: var(--color-surface);
-      border-radius: var(--radius-md);
-      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1), 0 1px 3px rgba(0, 0, 0, 0.06);
-      margin-bottom: 12px;
-      padding: var(--spacing-md);
-      border-left: 3px solid var(--color-primary);
-      transition: box-shadow 0.2s, transform 0.15s;
-
-      &:hover {
-        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.14), 0 2px 6px rgba(0, 0, 0, 0.08);
-        transform: translateY(-1px);
-      }
-    }
-
-    td {
-      display: flex;
-      justify-content: space-between;
-      align-items: flex-start;
-      gap: var(--spacing-sm);
-      padding: 7px 0;
-      border: none;
-      border-bottom: 1px solid var(--color-border);
-      white-space: normal;
-      width: auto;
-      font-size: 0.9rem;
-
-      &:last-child {
-        border-bottom: none;
-      }
-
-      &::before {
-        content: attr(data-label);
-        font-size: 0.7rem;
-        font-weight: 700;
-        color: var(--color-text-secondary);
-        text-transform: uppercase;
-        letter-spacing: 0.6px;
-        flex-shrink: 0;
-        min-width: 70px;
-        padding-top: 2px;
-      }
-
-      &.col-price {
-        text-align: left;
-        font-weight: 600;
-        color: var(--color-primary);
-      }
-    }
-
-    tfoot tr {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      border-radius: var(--radius-md);
-      border-left: 3px solid var(--color-primary);
-      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-      padding: var(--spacing-sm) var(--spacing-md);
-      background: var(--color-surface-variant);
-      margin-bottom: 0;
-
-      .tfoot-label {
-        border: none;
-        padding: 0;
-        font-size: 0.9rem;
-      }
-
-      .tfoot-total {
-        border: none;
-        padding: 0;
-        font-size: 1rem;
-        color: var(--color-primary);
-      }
-
-      .tfoot-empty {
-        display: none;
-      }
-    }
+  .desktop-table {
+    display: none;
   }
 }
 
+@media (min-width: 768px) {
+  .mobile-book-view {
+    display: none;
+  }
+}
+
+// ── Print ──
 @media print {
   :host {
     display: block;
@@ -230,7 +329,7 @@
     display: none !important;
   }
 
-  .karton {
+  .patient-card {
     border: none;
     border-radius: 0;
     padding: 0;
@@ -252,12 +351,8 @@
     width: 160px;
   }
 
-  .karton-table {
+  .visits-table {
     font-size: 0.8rem;
-
-    th,
-    td {
-      padding: 4px 6px;
-    }
+    box-shadow: none;
   }
 }

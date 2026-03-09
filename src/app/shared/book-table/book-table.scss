@@ -63,13 +63,15 @@
   border-radius: 2px 0 0 2px;
   z-index: 5;
 
-  [data-theme='dark'] & {
+  :host-context([data-theme='dark']) & {
+    width: 8px;
     background: linear-gradient(
       to right,
-      rgba(0, 0, 0, 0.4),
-      rgba(0, 0, 0, 0.2) 40%,
+      rgba(0, 0, 0, 0.6),
+      rgba(81, 86, 190, 0.15) 40%,
       rgba(0, 0, 0, 0.05)
     );
+    box-shadow: -1px 0 6px rgba(81, 86, 190, 0.1);
   }
 }
 
@@ -157,26 +159,36 @@
     pointer-events: none;
   }
 
-  [data-theme='dark'] & {
+  :host-context([data-theme='dark']) & {
     background: linear-gradient(
       170deg,
-      #2c2f38 0%,
-      #282b33 30%,
-      #24272f 70%,
-      #20232a 100%
+      #353a4a 0%,
+      #2f3444 30%,
+      #2a2f3e 70%,
+      #262b38 100%
     );
-    border-color: rgba(255, 255, 255, 0.06);
-    border-left-color: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(81, 86, 190, 0.18);
+    border-left: 2px solid rgba(81, 86, 190, 0.12);
+    border-radius: 2px var(--radius-md) var(--radius-md) 2px;
     box-shadow:
-      0 1px 4px rgba(0, 0, 0, 0.2),
-      0 4px 12px rgba(0, 0, 0, 0.15),
-      inset 2px 0 8px rgba(0, 0, 0, 0.1);
+      0 4px 12px rgba(0, 0, 0, 0.4),
+      0 12px 32px rgba(0, 0, 0, 0.25),
+      0 0 0 1px rgba(81, 86, 190, 0.08),
+      0 0 20px rgba(81, 86, 190, 0.06),
+      inset 2px 0 12px rgba(0, 0, 0, 0.15),
+      inset 0 1px 0 rgba(255, 255, 255, 0.06);
+
+    // Noise texture more visible in dark
+    &::before {
+      opacity: 0.05;
+    }
 
     &::after {
+      width: 35px;
       background: linear-gradient(
         to right,
-        rgba(0, 0, 0, 0.15),
-        rgba(0, 0, 0, 0.05) 50%,
+        rgba(0, 0, 0, 0.2),
+        rgba(81, 86, 190, 0.03) 50%,
         transparent
       );
     }
@@ -187,6 +199,7 @@
   position: relative;
   padding: var(--spacing-lg) var(--spacing-lg) var(--spacing-lg) calc(var(--spacing-lg) + 8px);
   z-index: 1;
+  color: var(--color-text);
 }
 
 .page-fallback {
@@ -219,8 +232,9 @@
     background: linear-gradient(to right, #ede9df, #e8e4d8);
     box-shadow: 1px 0 1px rgba(0, 0, 0, 0.04);
 
-    [data-theme='dark'] & {
-      background: linear-gradient(to right, #1e2028, #1a1c24);
+    :host-context([data-theme='dark']) & {
+      background: linear-gradient(to right, #2c3040, #272b38);
+      box-shadow: 1px 0 3px rgba(0, 0, 0, 0.3), 1px 0 1px rgba(81, 86, 190, 0.08);
     }
   }
 
@@ -230,8 +244,9 @@
     background: linear-gradient(to right, #e4e0d5, #dedad0);
     opacity: 0.7;
 
-    [data-theme='dark'] & {
-      background: linear-gradient(to right, #18191f, #15161c);
+    :host-context([data-theme='dark']) & {
+      background: linear-gradient(to right, #252938, #212530);
+      opacity: 0.9;
     }
   }
 }
@@ -250,6 +265,15 @@
   pointer-events: none;
   border-radius: 2px var(--radius-md) var(--radius-md) 2px;
   backface-visibility: hidden;
+
+  :host-context([data-theme='dark']) & {
+    background: linear-gradient(
+      to left,
+      rgba(0, 0, 0, 0.4) 0%,
+      rgba(0, 0, 0, 0.15) 30%,
+      transparent 60%
+    );
+  }
 }
 
 // ── Curl shadow on the base page ──
@@ -269,6 +293,15 @@
   z-index: 0;
   animation: curlShadowPulse 0.6s ease forwards;
   pointer-events: none;
+
+  :host-context([data-theme='dark']) & {
+    background: linear-gradient(
+      to right,
+      transparent 0%,
+      rgba(0, 0, 0, 0.1) 40%,
+      rgba(0, 0, 0, 0.2) 100%
+    );
+  }
 }
 
 // ── Navigation ──
@@ -280,7 +313,7 @@
   button {
     color: var(--color-primary);
     border-radius: var(--radius-md);
-    transition: background 0.2s, transform 0.15s;
+    transition: background 0.2s, transform 0.15s, box-shadow 0.2s;
 
     &:hover:not([disabled]) {
       background: rgba(81, 86, 190, 0.1);
@@ -289,6 +322,24 @@
 
     &[disabled] {
       opacity: 0.3;
+    }
+
+    :host-context([data-theme='dark']) & {
+      color: var(--color-primary-light, #8b8fd6);
+      background: rgba(81, 86, 190, 0.1);
+      border: 1px solid rgba(81, 86, 190, 0.2);
+
+      &:hover:not([disabled]) {
+        background: rgba(81, 86, 190, 0.2);
+        box-shadow: 0 0 12px rgba(81, 86, 190, 0.25);
+        transform: scale(1.1);
+      }
+
+      &[disabled] {
+        background: rgba(255, 255, 255, 0.04);
+        border-color: rgba(255, 255, 255, 0.06);
+        opacity: 0.35;
+      }
     }
   }
 }
@@ -300,6 +351,10 @@
   min-width: 60px;
   text-align: center;
   user-select: none;
+
+  :host-context([data-theme='dark']) & {
+    color: var(--color-text);
+  }
 }
 
 // ── Keyframe Animations ──

@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, ElementRef, inject, OnInit, signal, ViewChild } from '@angular/core';
+import { ChangeDetectionStrategy, Component, ElementRef, inject, OnInit, signal, ViewChild, WritableSignal } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { MatCardModule } from '@angular/material/card';
 import { MatButtonModule } from '@angular/material/button';
@@ -12,10 +12,12 @@ import { DoctorService } from '../services/doctor.service';
 import { VisitService } from '../services/visit.service';
 import { DiagnosisService } from '../services/diagnosis.service';
 import { TreatmentService } from '../services/treatment.service';
+import { BookTableComponent } from '../shared/book-table/book-table';
+import { Visit } from '../models/visit.model';
 
 @Component({
   selector: 'app-home',
-  imports: [RouterLink, MatCardModule, MatButtonModule, MatIconModule, TranslatePipe, LocalizedDatePipe, CurrencyFormatPipe],
+  imports: [RouterLink, MatCardModule, MatButtonModule, MatIconModule, TranslatePipe, LocalizedDatePipe, CurrencyFormatPipe, BookTableComponent],
   templateUrl: './home.html',
   styleUrl: './home.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -37,10 +39,7 @@ export default class Home implements OnInit {
   totalDoctors = 0;
   visitsThisMonth = 0;
   totalVisits = 0;
-
-  get recentVisits() {
-    return this.visitService.getRecent(5);
-  }
+  recentVisits: WritableSignal<Visit[]> = signal<Visit[]>([]);
 
   ngOnInit(): void {
     forkJoin([
@@ -54,6 +53,7 @@ export default class Home implements OnInit {
       this.totalDoctors = this.doctorService.getAll().length;
       this.totalVisits = this.visitService.getAll().length;
       this.visitsThisMonth = this.visitService.getThisMonthCount();
+      this.recentVisits.set(this.visitService.getRecent(5));
       this.loaded.set(true);
     });
   }

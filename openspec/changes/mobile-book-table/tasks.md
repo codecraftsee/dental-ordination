@@ -41,9 +41,28 @@
 - [ ] 6.3 Conditionally hide mat-table on mobile when book-table is active
 - [ ] 6.4 Add i18n keys for book-table labels (page indicator, nav buttons) to both `en.json` and `sr.json`
 
-## 7. Testing
+## 7. Dental Card Integration
 
-- [ ] 7.1 Create `book-table.spec.ts` with tests for: page rendering, navigation, boundary conditions, data change reset, empty data display
-- [ ] 7.2 Add swipe gesture simulation tests
-- [ ] 7.3 Add keyboard navigation tests
-- [ ] 7.4 Update patient-list tests to cover book-table integration on mobile
+- [ ] 7.1 Import `BookTableComponent` in dental-card component
+- [ ] 7.2 Add `<app-book-table [data]="visits()">` with `#bookPage` template showing date, diagnosis (formatted), treatment (formatted), price, doctor name
+- [ ] 7.3 Wrap book-table in `.mobile-book-view` div (shown only on mobile via CSS)
+- [ ] 7.4 Hide `.karton-table` on mobile when book-table is active (add `.desktop-table` class or media query)
+- [ ] 7.5 Keep total cost summary visible below the book-table as a standalone footer on mobile
+- [ ] 7.6 Ensure desktop and print views remain unchanged
+
+## 8. Home Page Integration
+
+- [ ] 8.1 Import `BookTableComponent` in home component
+- [ ] 8.2 Add `<app-book-table [data]="recentVisits">` with `#bookPage` template showing date, patient (linked), doctor, diagnosis, treatment, price
+- [ ] 8.3 Wrap book-table in `.mobile-book-view` div (shown only on mobile via CSS)
+- [ ] 8.4 Hide `.data-table` on mobile when book-table is active (add `.desktop-table` class)
+- [ ] 8.5 Add mobile/desktop visibility media queries to home SCSS
+
+## 9. Testing
+
+- [ ] 9.1 Create `book-table.spec.ts` with tests for: page rendering, navigation, boundary conditions, data change reset, empty data display
+- [ ] 9.2 Add swipe gesture simulation tests
+- [ ] 9.3 Add keyboard navigation tests
+- [ ] 9.4 Update patient-list tests to cover book-table integration on mobile
+- [ ] 9.5 Add dental-card tests to verify book-table renders visit data on mobile and desktop table remains untouched
+- [ ] 9.6 Add home page tests to verify book-table renders recent visits on mobile and desktop table remains untouched

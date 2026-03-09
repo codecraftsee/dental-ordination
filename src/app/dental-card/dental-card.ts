@@ -14,11 +14,14 @@ import { Patient } from '../models/patient.model';
 import { Visit } from '../models/visit.model';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
+import { MatTableModule, MatTableDataSource } from '@angular/material/table';
+import { MatCardModule } from '@angular/material/card';
+import { BookTableComponent } from '../shared/book-table/book-table';
 import * as XLSX from 'xlsx';
 
 @Component({
   selector: 'app-dental-card',
-  imports: [RouterLink, TranslatePipe, LocalizedDatePipe, CurrencyFormatPipe, MatButtonModule, MatIconModule],
+  imports: [RouterLink, TranslatePipe, LocalizedDatePipe, CurrencyFormatPipe, MatButtonModule, MatIconModule, MatTableModule, MatCardModule, BookTableComponent],
   templateUrl: './dental-card.html',
   styleUrl: './dental-card.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -36,6 +39,8 @@ export default class DentalCard implements OnInit {
   patient = signal<Patient | undefined>(undefined);
   visits = signal<Visit[]>([]);
   today = new Date().toISOString().split('T')[0];
+  dataSource = new MatTableDataSource<Visit>();
+  displayedColumns = ['date', 'diagnosis', 'treatment', 'price', 'doctor'];
 
   totalCost = computed(() => {
     return this.visits().reduce((sum, v) => sum + (Number(v.price) || 0), 0);
@@ -57,9 +62,9 @@ export default class DentalCard implements OnInit {
     ]).subscribe({
       next: ([patient]) => {
         this.patient.set(patient);
-        this.visits.set(
-          this.visitService.getByPatientId(id).sort((a, b) => a.date.localeCompare(b.date)),
-        );
+        const sorted = this.visitService.getByPatientId(id).sort((a, b) => a.date.localeCompare(b.date));
+        this.visits.set(sorted);
+        this.dataSource.data = sorted;
       },
       error: () => this.router.navigate(['/patients']),
     });
