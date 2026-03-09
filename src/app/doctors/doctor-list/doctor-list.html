@@ -1,53 +1,80 @@
 <div class="container page">
   <div class="page-header">
     <h1 class="section-title">{{ 'doctors.title' | translate }}</h1>
-    <a routerLink="/doctors/new" class="btn btn-primary">{{ 'doctors.addNew' | translate }}</a>
+    <a routerLink="/doctors/new" matButton="elevated" color="primary"><mat-icon>person_add</mat-icon>{{ 'doctors.addNew' | translate }}</a>
   </div>
 
-  <div class="search-bar">
-    <input
-      type="text"
-      class="form-control"
-      [placeholder]="'doctors.search' | translate"
-      (input)="onSearch($event)"
-    />
-    <select class="form-control" (change)="onSpecializationChange($event)">
-      <option value="">{{ 'doctors.filterSpecialization' | translate }}</option>
-      @for (spec of specializations; track spec) {
-        <option [value]="spec">{{ 'specialization.' + spec | translate }}</option>
-      }
-    </select>
-  </div>
+  <mat-card class="filters-card form-card">
+    <mat-card-content>
+      <div class="filters-row">
+        <mat-form-field appearance="fill" class="search-field">
+          <mat-label>{{ 'doctors.search' | translate }}</mat-label>
+          <mat-icon matPrefix>search</mat-icon>
+          <input matInput (input)="onSearch($event)" />
+        </mat-form-field>
+        <mat-form-field appearance="fill" class="filter-field">
+          <mat-label>{{ 'doctors.filterSpecialization' | translate }}</mat-label>
+          <mat-select (selectionChange)="specializationFilter.set($event.value)">
+            <mat-option value="">{{ 'doctors.filterSpecialization' | translate }}</mat-option>
+            @for (spec of specializations; track spec) {
+              <mat-option [value]="spec">{{ 'specialization.' + spec | translate }}</mat-option>
+            }
+          </mat-select>
+        </mat-form-field>
+      </div>
+    </mat-card-content>
+  </mat-card>
 
-  @if (filteredDoctors().length > 0) {
-    <table class="data-table data-table-card">
-      <thead>
-        <tr>
-          <th>{{ 'doctors.name' | translate }}</th>
-          <th>{{ 'doctors.specialization' | translate }}</th>
-          <th>{{ 'doctors.phone' | translate }}</th>
-          <th>{{ 'doctors.email' | translate }}</th>
-          <th>{{ 'doctors.actions' | translate }}</th>
-        </tr>
-      </thead>
-      <tbody>
-        @for (doctor of filteredDoctors(); track doctor.id) {
-          <tr>
-            <td [attr.data-label]="'doctors.name' | translate"><a [routerLink]="['/doctors', doctor.id]">Dr. {{ doctor.firstName }} {{ doctor.lastName }}</a></td>
-            <td [attr.data-label]="'doctors.specialization' | translate"><span class="badge badge-primary">{{ 'specialization.' + doctor.specialization | translate }}</span></td>
-            <td [attr.data-label]="'doctors.phone' | translate">{{ doctor.phone }}</td>
-            <td [attr.data-label]="'doctors.email' | translate">{{ doctor.email }}</td>
-            <td class="td-actions">
-              <a [routerLink]="['/doctors', doctor.id]" class="btn btn-sm btn-outline">{{ 'common.view' | translate }}</a>
-              <a [routerLink]="['/doctors', doctor.id, 'edit']" class="btn btn-sm btn-outline">{{ 'common.edit' | translate }}</a>
-            </td>
-          </tr>
-        }
-      </tbody>
-    </table>
-  } @else {
-    <div class="empty-state">
-      <p class="empty-state-text">{{ 'doctors.noResults' | translate }}</p>
-    </div>
+  <table mat-table [dataSource]="dataSource" class="doctors-table" [class.no-paginator]="filteredDoctors().length <= 5">
+
+    <ng-container matColumnDef="name">
+      <th mat-header-cell *matHeaderCellDef>{{ 'doctors.name' | translate }}</th>
+      <td mat-cell *matCellDef="let d">
+        <a [routerLink]="['/doctors', d.id]">Dr. {{ d.firstName }} {{ d.lastName }}</a>
+      </td>
+    </ng-container>
+
+    <ng-container matColumnDef="specialization">
+      <th mat-header-cell *matHeaderCellDef>{{ 'doctors.specialization' | translate }}</th>
+      <td mat-cell *matCellDef="let d">
+        <span class="badge badge-primary">{{ 'specialization.' + d.specialization | translate }}</span>
+      </td>
+    </ng-container>
+
+    <ng-container matColumnDef="phone">
+      <th mat-header-cell *matHeaderCellDef>{{ 'doctors.phone' | translate }}</th>
+      <td mat-cell *matCellDef="let d">{{ d.phone }}</td>
+    </ng-container>
+
+    <ng-container matColumnDef="email">
+      <th mat-header-cell *matHeaderCellDef>{{ 'doctors.email' | translate }}</th>
+      <td mat-cell *matCellDef="let d">{{ d.email }}</td>
+    </ng-container>
+
+    <ng-container matColumnDef="actions">
+      <th mat-header-cell *matHeaderCellDef>{{ 'doctors.actions' | translate }}</th>
+      <td mat-cell *matCellDef="let d">
+        <div class="actions-cell">
+          <a mat-icon-button class="icon-btn--warning" [routerLink]="['/doctors', d.id, 'edit']" [matTooltip]="'common.edit' | translate">
+            <mat-icon>edit</mat-icon>
+          </a>
+        </div>
+      </td>
+    </ng-container>
+
+    <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+    <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
+
+    <tr class="mat-mdc-no-data-row" *matNoDataRow>
+      <td [colSpan]="displayedColumns.length">
+        <div class="empty-state">
+          <p class="empty-state-text">{{ 'doctors.noResults' | translate }}</p>
+        </div>
+      </td>
+    </tr>
+
+  </table>
+  @if (filteredDoctors().length > 5) {
+    <mat-paginator [pageSizeOptions]="[5, 10, 25]" [pageSize]="10" showFirstLastButtons></mat-paginator>
   }
 </div>

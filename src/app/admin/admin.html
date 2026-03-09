@@ -14,7 +14,7 @@
 
     <div class="action-cards">
       @for (action of actions; track action.key) {
-        <div class="action-card" [class.action-card--all]="action.danger">
+        <mat-card [class.action-card--all]="action.danger">
           <div class="action-card-header">
             <h3 class="action-title">{{ action.titleKey | translate }}</h3>
           </div>
@@ -33,10 +33,11 @@
               spellcheck="false"
             />
             <button
-              class="btn btn-danger"
+              matButton="elevated" color="warn"
               [disabled]="action.confirmInput() !== 'DELETE' || action.loading()"
               (click)="execute(action)"
             >
+              <mat-icon>delete_forever</mat-icon>
               @if (action.loading()) {
                 {{ 'admin.deleting' | translate }}
               } @else {
@@ -54,7 +55,7 @@
               }
             </div>
           }
-        </div>
+        </mat-card>
       }
     </div>
   </div>

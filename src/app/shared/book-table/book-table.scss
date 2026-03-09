@@ -1,0 +1,415 @@
+:host {
+  display: block;
+  outline: none;
+
+  &:focus-visible .book-container {
+    outline: 2px solid var(--color-primary);
+    outline-offset: 2px;
+    border-radius: var(--radius-md);
+  }
+}
+
+.book-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--spacing-md);
+  padding: var(--spacing-md) 0;
+}
+
+.book-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--spacing-sm);
+  padding: var(--spacing-2xl) var(--spacing-md);
+  color: var(--color-text-secondary);
+
+  mat-icon {
+    font-size: 48px;
+    width: 48px;
+    height: 48px;
+    opacity: 0.4;
+  }
+
+  p {
+    margin: 0;
+    font-size: 0.95rem;
+  }
+}
+
+// ── Book scene (3D stage) ──
+.book-scene {
+  position: relative;
+  width: 100%;
+  max-width: 400px;
+  perspective: 1500px;
+  perspective-origin: 50% 50%;
+}
+
+// ── Spine ──
+.book-spine {
+  position: absolute;
+  left: -4px;
+  top: 8px;
+  bottom: 8px;
+  width: 6px;
+  background: linear-gradient(
+    to right,
+    rgba(0, 0, 0, 0.15),
+    rgba(0, 0, 0, 0.08) 40%,
+    rgba(0, 0, 0, 0.03)
+  );
+  border-radius: 2px 0 0 2px;
+  z-index: 5;
+
+  :host-context([data-theme='dark']) & {
+    width: 8px;
+    background: linear-gradient(
+      to right,
+      rgba(0, 0, 0, 0.6),
+      rgba(81, 86, 190, 0.15) 40%,
+      rgba(0, 0, 0, 0.05)
+    );
+    box-shadow: -1px 0 6px rgba(81, 86, 190, 0.1);
+  }
+}
+
+// ── Page layers ──
+.page-layer {
+  transform-style: preserve-3d;
+}
+
+.page-under {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+}
+
+.page-top {
+  position: relative;
+  z-index: 2;
+  transform-origin: left center;
+  transform-style: preserve-3d;
+
+  &.turning-forward {
+    animation: turnPageForward 0.6s cubic-bezier(0.4, 0.0, 0.2, 1) forwards;
+    will-change: transform;
+
+    .page-shadow {
+      animation: shadowForward 0.6s ease forwards;
+    }
+  }
+
+  &.turning-backward {
+    animation: turnPageBackwardIn 0.6s cubic-bezier(0.4, 0.0, 0.2, 1) forwards;
+    will-change: transform;
+
+    .page-shadow {
+      animation: shadowBackward 0.6s ease forwards;
+    }
+  }
+}
+
+// ── Paper styling ──
+.page-paper {
+  position: relative;
+  height: 100%;
+  background: linear-gradient(
+    170deg,
+    #fffdf8 0%,
+    #faf7f0 30%,
+    #f5f1e8 70%,
+    #f0ecdf 100%
+  );
+  border: 1px solid rgba(0, 0, 0, 0.07);
+  border-left: 2px solid rgba(0, 0, 0, 0.04);
+  border-radius: 2px var(--radius-md) var(--radius-md) 2px;
+  box-shadow:
+    0 1px 4px rgba(0, 0, 0, 0.06),
+    0 4px 12px rgba(0, 0, 0, 0.04),
+    inset 2px 0 8px rgba(0, 0, 0, 0.02);
+  overflow: hidden;
+  backface-visibility: hidden;
+
+  // Subtle paper texture via noise
+  &::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.03'/%3E%3C/svg%3E");
+    pointer-events: none;
+    border-radius: inherit;
+  }
+
+  // Inner fold shadow near spine
+  &::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 30px;
+    background: linear-gradient(
+      to right,
+      rgba(0, 0, 0, 0.06),
+      rgba(0, 0, 0, 0.02) 50%,
+      transparent
+    );
+    pointer-events: none;
+  }
+
+  :host-context([data-theme='dark']) & {
+    background: linear-gradient(
+      170deg,
+      #353a4a 0%,
+      #2f3444 30%,
+      #2a2f3e 70%,
+      #262b38 100%
+    );
+    border: 1px solid rgba(81, 86, 190, 0.18);
+    border-left: 2px solid rgba(81, 86, 190, 0.12);
+    border-radius: 2px var(--radius-md) var(--radius-md) 2px;
+    box-shadow:
+      0 4px 12px rgba(0, 0, 0, 0.4),
+      0 12px 32px rgba(0, 0, 0, 0.25),
+      0 0 0 1px rgba(81, 86, 190, 0.08),
+      0 0 20px rgba(81, 86, 190, 0.06),
+      inset 2px 0 12px rgba(0, 0, 0, 0.15),
+      inset 0 1px 0 rgba(255, 255, 255, 0.06);
+
+    // Noise texture more visible in dark
+    &::before {
+      opacity: 0.05;
+    }
+
+    &::after {
+      width: 35px;
+      background: linear-gradient(
+        to right,
+        rgba(0, 0, 0, 0.2),
+        rgba(81, 86, 190, 0.03) 50%,
+        transparent
+      );
+    }
+  }
+}
+
+.page-content {
+  position: relative;
+  padding: var(--spacing-lg) var(--spacing-lg) var(--spacing-lg) calc(var(--spacing-lg) + 8px);
+  z-index: 1;
+  color: var(--color-text);
+}
+
+.page-fallback {
+  font-size: 0.8rem;
+  white-space: pre-wrap;
+  word-break: break-all;
+  color: var(--color-text-secondary);
+}
+
+// ── Stacked page edges (right side) ──
+.page-edges {
+  position: absolute;
+  top: 6px;
+  right: -4px;
+  bottom: 6px;
+  width: 4px;
+
+  &::before,
+  &::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    right: 0;
+    border-radius: 0 1px 1px 0;
+  }
+
+  &::before {
+    width: 4px;
+    background: linear-gradient(to right, #ede9df, #e8e4d8);
+    box-shadow: 1px 0 1px rgba(0, 0, 0, 0.04);
+
+    :host-context([data-theme='dark']) & {
+      background: linear-gradient(to right, #2c3040, #272b38);
+      box-shadow: 1px 0 3px rgba(0, 0, 0, 0.3), 1px 0 1px rgba(81, 86, 190, 0.08);
+    }
+  }
+
+  &::after {
+    right: -2px;
+    width: 3px;
+    background: linear-gradient(to right, #e4e0d5, #dedad0);
+    opacity: 0.7;
+
+    :host-context([data-theme='dark']) & {
+      background: linear-gradient(to right, #252938, #212530);
+      opacity: 0.9;
+    }
+  }
+}
+
+// ── Page turn shadow ──
+.page-shadow {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    to left,
+    rgba(0, 0, 0, 0.15) 0%,
+    rgba(0, 0, 0, 0.05) 30%,
+    transparent 60%
+  );
+  opacity: 0;
+  pointer-events: none;
+  border-radius: 2px var(--radius-md) var(--radius-md) 2px;
+  backface-visibility: hidden;
+
+  :host-context([data-theme='dark']) & {
+    background: linear-gradient(
+      to left,
+      rgba(0, 0, 0, 0.4) 0%,
+      rgba(0, 0, 0, 0.15) 30%,
+      transparent 60%
+    );
+  }
+}
+
+// ── Curl shadow on the base page ──
+.curl-shadow {
+  position: absolute;
+  top: 4px;
+  bottom: 4px;
+  left: 30%;
+  right: 0;
+  background: linear-gradient(
+    to right,
+    transparent 0%,
+    rgba(0, 0, 0, 0.03) 40%,
+    rgba(0, 0, 0, 0.08) 100%
+  );
+  border-radius: 0 var(--radius-md) var(--radius-md) 0;
+  z-index: 0;
+  animation: curlShadowPulse 0.6s ease forwards;
+  pointer-events: none;
+
+  :host-context([data-theme='dark']) & {
+    background: linear-gradient(
+      to right,
+      transparent 0%,
+      rgba(0, 0, 0, 0.1) 40%,
+      rgba(0, 0, 0, 0.2) 100%
+    );
+  }
+}
+
+// ── Navigation ──
+.book-nav {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-md);
+
+  button {
+    color: var(--color-primary);
+    border-radius: var(--radius-md);
+    transition: background 0.2s, transform 0.15s, box-shadow 0.2s;
+
+    &:hover:not([disabled]) {
+      background: rgba(81, 86, 190, 0.1);
+      transform: scale(1.1);
+    }
+
+    &[disabled] {
+      opacity: 0.3;
+    }
+
+    :host-context([data-theme='dark']) & {
+      color: var(--color-primary-light, #8b8fd6);
+      background: rgba(81, 86, 190, 0.1);
+      border: 1px solid rgba(81, 86, 190, 0.2);
+
+      &:hover:not([disabled]) {
+        background: rgba(81, 86, 190, 0.2);
+        box-shadow: 0 0 12px rgba(81, 86, 190, 0.25);
+        transform: scale(1.1);
+      }
+
+      &[disabled] {
+        background: rgba(255, 255, 255, 0.04);
+        border-color: rgba(255, 255, 255, 0.06);
+        opacity: 0.35;
+      }
+    }
+  }
+}
+
+.page-indicator {
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: var(--color-text-secondary);
+  min-width: 60px;
+  text-align: center;
+  user-select: none;
+
+  :host-context([data-theme='dark']) & {
+    color: var(--color-text);
+  }
+}
+
+// ── Keyframe Animations ──
+
+// Forward: page lifts from right, rotates around left spine, folds over
+@keyframes turnPageForward {
+  0% {
+    transform: rotateY(0deg);
+  }
+  30% {
+    transform: rotateY(-45deg) scale(1.02);
+  }
+  60% {
+    transform: rotateY(-120deg) scale(1.01);
+  }
+  100% {
+    transform: rotateY(-180deg) scale(1);
+  }
+}
+
+// Backward: page unfolds from left back to flat
+@keyframes turnPageBackwardIn {
+  0% {
+    transform: rotateY(-180deg);
+  }
+  40% {
+    transform: rotateY(-120deg) scale(1.01);
+  }
+  70% {
+    transform: rotateY(-45deg) scale(1.02);
+  }
+  100% {
+    transform: rotateY(0deg) scale(1);
+  }
+}
+
+// Shadow appears as page lifts, fades as it settles
+@keyframes shadowForward {
+  0% { opacity: 0; }
+  30% { opacity: 0.6; }
+  70% { opacity: 0.8; }
+  100% { opacity: 0; }
+}
+
+@keyframes shadowBackward {
+  0% { opacity: 0; }
+  30% { opacity: 0.8; }
+  70% { opacity: 0.6; }
+  100% { opacity: 0; }
+}
+
+// Curl shadow on base page pulses during turn
+@keyframes curlShadowPulse {
+  0% { opacity: 0; transform: scaleX(0.3); }
+  40% { opacity: 1; transform: scaleX(1); }
+  70% { opacity: 0.8; transform: scaleX(0.8); }
+  100% { opacity: 0; transform: scaleX(0); }
+}

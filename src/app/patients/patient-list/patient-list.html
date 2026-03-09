@@ -1,61 +1,162 @@
 <div class="container page">
   <div class="page-header">
     <h1 class="section-title">{{ 'patients.title' | translate }}</h1>
-    <a routerLink="/patients/new" class="btn btn-primary">{{ 'patients.addNew' | translate }}</a>
+    <a routerLink="/patients/new" matButton="elevated" color="primary">
+      <mat-icon>person_add</mat-icon>
+      {{ 'patients.addNew' | translate }}
+    </a>
   </div>
 
-  <div class="search-bar">
-    <input
-      type="text"
-      class="form-control"
-      [placeholder]="'patients.search' | translate"
-      (input)="onSearch($event)"
-    />
-    <select class="form-control" (change)="onCityChange($event)">
-      <option value="">{{ 'patients.filterCity' | translate }}</option>
-      @for (city of cities(); track city) {
-        <option [value]="city">{{ city }}</option>
-      }
-    </select>
-    <select class="form-control" (change)="onGenderChange($event)">
-      <option value="">{{ 'patients.filterGender' | translate }}</option>
-      <option value="male">{{ 'patient.gender.male' | translate }}</option>
-      <option value="female">{{ 'patient.gender.female' | translate }}</option>
-    </select>
-  </div>
+  <mat-card class="filters-card form-card">
+    <mat-card-content>
+      <div class="filters-row">
+        <mat-form-field appearance="fill" class="search-field">
+          <mat-label>{{ 'patients.search' | translate }}</mat-label>
+          <mat-icon matPrefix>search</mat-icon>
+          <input matInput (input)="onSearch($event)" />
+        </mat-form-field>
+        <mat-form-field appearance="fill" class="filter-field">
+          <mat-label>{{ 'patients.filterCity' | translate }}</mat-label>
+          <mat-select (selectionChange)="cityFilter.set($event.value)">
+            <mat-option value="">{{ 'patients.filterCity' | translate }}</mat-option>
+            @for (city of cities(); track city) {
+              <mat-option [value]="city">{{ city }}</mat-option>
+            }
+          </mat-select>
+        </mat-form-field>
+        <mat-form-field appearance="fill" class="filter-field">
+          <mat-label>{{ 'patients.filterGender' | translate }}</mat-label>
+          <mat-select (selectionChange)="genderFilter.set($event.value)">
+            <mat-option value="">{{ 'patients.filterGender' | translate }}</mat-option>
+            <mat-option value="male">{{ 'patient.gender.male' | translate }}</mat-option>
+            <mat-option value="female">{{ 'patient.gender.female' | translate }}</mat-option>
+          </mat-select>
+        </mat-form-field>
+      </div>
+    </mat-card-content>
+  </mat-card>
 
-  @if (filteredPatients().length > 0) {
-    <table class="data-table data-table-card">
-      <thead>
-        <tr>
-          <th>{{ 'patients.name' | translate }}</th>
-          <th>{{ 'patients.parentName' | translate }}</th>
-          <th>{{ 'patients.dateOfBirth' | translate }}</th>
-          <th>{{ 'patients.city' | translate }}</th>
-          <th>{{ 'patients.phone' | translate }}</th>
-          <th>{{ 'patients.actions' | translate }}</th>
-        </tr>
-      </thead>
-      <tbody>
-        @for (patient of filteredPatients(); track patient.id) {
-          <tr>
-            <td [attr.data-label]="'patients.name' | translate"><a [routerLink]="['/patients', patient.id]">{{ patient.firstName }} {{ patient.lastName }}</a></td>
-            <td [attr.data-label]="'patients.parentName' | translate">{{ patient.parentName }}</td>
-            <td [attr.data-label]="'patients.dateOfBirth' | translate">{{ patient.dateOfBirth | localizedDate:'mediumDate' }}</td>
-            <td [attr.data-label]="'patients.city' | translate">{{ patient.city }}</td>
-            <td [attr.data-label]="'patients.phone' | translate">{{ patient.phone }}</td>
-            <td class="td-actions">
-              <a [routerLink]="['/patients', patient.id]" class="btn btn-sm btn-outline">{{ 'common.view' | translate }}</a>
-              <a [routerLink]="['/patients', patient.id, 'edit']" class="btn btn-sm btn-outline">{{ 'common.edit' | translate }}</a>
-              <a [routerLink]="['/patients', patient.id, 'dental-card']" class="btn btn-sm btn-primary">{{ 'patients.viewDentalCard' | translate }}</a>
-            </td>
-          </tr>
+  <div class="mobile-book-view">
+  <app-book-table [data]="filteredPatients()">
+    <ng-template #bookPage let-patient>
+      <div class="book-page-header">
+        <mat-icon class="book-page-avatar">person</mat-icon>
+        <div class="book-page-name">
+          <a [routerLink]="['/patients', patient.id]">{{ patient.firstName }} {{ patient.lastName }}</a>
+          @if (hasDebt(patient.id)) {
+            <span class="badge badge-danger badge-sm">{{ 'patients.hasDebt' | translate }}</span>
+          }
+        </div>
+      </div>
+      <div class="book-page-fields">
+        @if (patient.parentName) {
+          <div class="book-field">
+            <span class="book-field-label">{{ 'patients.parentName' | translate }}</span>
+            <span class="book-field-value">{{ patient.parentName }}</span>
+          </div>
         }
-      </tbody>
-    </table>
-  } @else {
-    <div class="empty-state">
-      <p class="empty-state-text">{{ 'patients.noResults' | translate }}</p>
-    </div>
+        @if (patient.city) {
+          <div class="book-field">
+            <span class="book-field-label">{{ 'patients.city' | translate }}</span>
+            <span class="book-field-value">{{ patient.city }}</span>
+          </div>
+        }
+        @if (patient.phone) {
+          <div class="book-field">
+            <span class="book-field-label">{{ 'patients.phone' | translate }}</span>
+            <span class="book-field-value">{{ patient.phone }}</span>
+          </div>
+        }
+        @if (patient.email) {
+          <div class="book-field">
+            <span class="book-field-label">{{ 'patient.email' | translate }}</span>
+            <span class="book-field-value">{{ patient.email }}</span>
+          </div>
+        }
+        @if (patient.dateOfBirth) {
+          <div class="book-field">
+            <span class="book-field-label">{{ 'patients.dateOfBirth' | translate }}</span>
+            <span class="book-field-value">{{ patient.dateOfBirth | localizedDate:'mediumDate' }}</span>
+          </div>
+        }
+      </div>
+      <div class="book-page-actions">
+        <a mat-button color="primary" [routerLink]="['/patients', patient.id]">
+          <mat-icon>visibility</mat-icon>
+          {{ 'common.view' | translate }}
+        </a>
+        <a mat-button [routerLink]="['/patients', patient.id, 'edit']">
+          <mat-icon>edit</mat-icon>
+          {{ 'common.edit' | translate }}
+        </a>
+        <a mat-button [routerLink]="['/patients', patient.id, 'dental-card']">
+          <mat-icon>assignment</mat-icon>
+          {{ 'patients.viewDentalCard' | translate }}
+        </a>
+      </div>
+    </ng-template>
+  </app-book-table>
+  </div>
+
+  <table mat-table [dataSource]="dataSource" class="patients-table desktop-table" [class.no-paginator]="filteredPatients().length <= 5">
+
+    <ng-container matColumnDef="name">
+      <th mat-header-cell *matHeaderCellDef>{{ 'patients.name' | translate }}</th>
+      <td mat-cell *matCellDef="let p">
+        <a [routerLink]="['/patients', p.id]">{{ p.firstName }} {{ p.lastName }}</a>
+        @if (hasDebt(p.id)) {
+          <span class="badge badge-danger badge-sm">{{ 'patients.hasDebt' | translate }}</span>
+        }
+      </td>
+    </ng-container>
+
+    <ng-container matColumnDef="parentName">
+      <th mat-header-cell *matHeaderCellDef>{{ 'patients.parentName' | translate }}</th>
+      <td mat-cell *matCellDef="let p">{{ p.parentName }}</td>
+    </ng-container>
+
+    <ng-container matColumnDef="dateOfBirth">
+      <th mat-header-cell *matHeaderCellDef>{{ 'patients.dateOfBirth' | translate }}</th>
+      <td mat-cell *matCellDef="let p">{{ p.dateOfBirth | localizedDate:'mediumDate' }}</td>
+    </ng-container>
+
+    <ng-container matColumnDef="city">
+      <th mat-header-cell *matHeaderCellDef>{{ 'patients.city' | translate }}</th>
+      <td mat-cell *matCellDef="let p">{{ p.city }}</td>
+    </ng-container>
+
+    <ng-container matColumnDef="phone">
+      <th mat-header-cell *matHeaderCellDef>{{ 'patients.phone' | translate }}</th>
+      <td mat-cell *matCellDef="let p">{{ p.phone }}</td>
+    </ng-container>
+
+    <ng-container matColumnDef="actions">
+      <th mat-header-cell *matHeaderCellDef>{{ 'patients.actions' | translate }}</th>
+      <td mat-cell *matCellDef="let p">
+        <div class="actions-cell">
+          <a mat-icon-button class="icon-btn--warning" [routerLink]="['/patients', p.id, 'edit']" [matTooltip]="'common.edit' | translate">
+            <mat-icon>edit</mat-icon>
+          </a>
+          <a mat-icon-button class="icon-btn--success" [routerLink]="['/patients', p.id, 'dental-card']" [matTooltip]="'patients.viewDentalCard' | translate">
+            <mat-icon>assignment</mat-icon>
+          </a>
+        </div>
+      </td>
+    </ng-container>
+
+    <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+    <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
+
+    <tr class="mat-mdc-no-data-row" *matNoDataRow>
+      <td [colSpan]="displayedColumns.length">
+        <div class="empty-state">
+          <p class="empty-state-text">{{ 'patients.noResults' | translate }}</p>
+        </div>
+      </td>
+    </tr>
+
+  </table>
+  @if (filteredPatients().length > 5) {
+    <mat-paginator [pageSizeOptions]="[5, 10, 25]" [pageSize]="10" showFirstLastButtons></mat-paginator>
   }
 </div>

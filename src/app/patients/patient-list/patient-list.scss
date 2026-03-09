@@ -2,3 +2,147 @@
   padding-top: var(--spacing-xl);
   padding-bottom: var(--spacing-2xl);
 }
+
+.filters-card {
+  margin-bottom: var(--spacing-lg);
+
+  .filters-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--spacing-sm);
+    align-items: flex-start;
+
+    .search-field {
+      flex: 1 1 200px;
+      min-width: 180px;
+    }
+
+    .filter-field {
+      flex: 0 0 200px;
+    }
+  }
+}
+
+.patients-table {
+  width: 100%;
+  table-layout: fixed;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md) var(--radius-md) 0 0;
+  overflow: hidden;
+  box-shadow: var(--shadow-1);
+
+  .mat-column-actions {
+    width: 90px;
+  }
+
+  .actions-cell {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    gap: 2px;
+  }
+}
+// Book page content styles
+.book-page-header {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  margin-bottom: var(--spacing-md);
+  padding-bottom: var(--spacing-sm);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+
+  [data-theme='dark'] & {
+    border-bottom-color: rgba(255, 255, 255, 0.08);
+  }
+}
+
+.book-page-avatar {
+  font-size: 36px;
+  width: 36px;
+  height: 36px;
+  color: var(--color-primary);
+  opacity: 0.7;
+}
+
+.book-page-name {
+  font-size: 1.15rem;
+  font-weight: 600;
+
+  a {
+    color: var(--color-text);
+    text-decoration: none;
+
+    &:hover {
+      color: var(--color-primary);
+    }
+  }
+}
+
+.book-page-fields {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xs);
+  margin-bottom: var(--spacing-md);
+}
+
+.book-field {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  padding: var(--spacing-xs) 0;
+
+  &:not(:last-child) {
+    border-bottom: 1px dashed rgba(0, 0, 0, 0.04);
+
+    [data-theme='dark'] & {
+      border-bottom-color: rgba(255, 255, 255, 0.04);
+    }
+  }
+}
+
+.book-field-label {
+  font-size: 0.8rem;
+  color: var(--color-text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+.book-field-value {
+  font-size: 0.95rem;
+  font-weight: 500;
+  color: var(--color-text);
+}
+
+.book-page-actions {
+  display: flex;
+  justify-content: center;
+  gap: var(--spacing-xs);
+  padding-top: var(--spacing-sm);
+  border-top: 1px solid rgba(0, 0, 0, 0.06);
+
+  [data-theme='dark'] & {
+    border-top-color: rgba(255, 255, 255, 0.08);
+  }
+
+  a {
+    font-size: 0.8rem;
+  }
+}
+
+@media (max-width: 767px) {
+  .page {
+    padding-top: var(--spacing-md);
+    padding-bottom: var(--spacing-lg);
+  }
+
+  .desktop-table,
+  .desktop-table + mat-paginator {
+    display: none;
+  }
+}
+
+@media (min-width: 768px) {
+  .mobile-book-view {
+    display: none;
+  }
+}

@@ -2,30 +2,65 @@
   <h1 class="section-title">{{ 'home.title' | translate }}</h1>
 
   <div class="stats-grid">
-    <div class="stat-card">
-      <div class="stat-value">{{ totalPatients }}</div>
-      <div class="stat-label">{{ 'home.totalPatients' | translate }}</div>
-    </div>
-    <div class="stat-card">
-      <div class="stat-value">{{ totalDoctors }}</div>
-      <div class="stat-label">{{ 'home.totalDoctors' | translate }}</div>
-    </div>
-    <div class="stat-card">
-      <div class="stat-value">{{ visitsThisMonth }}</div>
-      <div class="stat-label">{{ 'home.visitsThisMonth' | translate }}</div>
-    </div>
-    <div class="stat-card">
-      <div class="stat-value">{{ totalVisits }}</div>
-      <div class="stat-label">{{ 'home.totalVisits' | translate }}</div>
-    </div>
+    <mat-card class="stat-card stat-card--primary">
+      <mat-card-content>
+        <div class="stat-icon-wrap">
+          <mat-icon>people</mat-icon>
+        </div>
+        <div class="stat-body">
+          <div class="stat-value">{{ totalPatients }}</div>
+          <div class="stat-label">{{ 'home.totalPatients' | translate }}</div>
+        </div>
+      </mat-card-content>
+    </mat-card>
+    <mat-card class="stat-card stat-card--info">
+      <mat-card-content>
+        <div class="stat-icon-wrap">
+          <mat-icon>stethoscope</mat-icon>
+        </div>
+        <div class="stat-body">
+          <div class="stat-value">{{ totalDoctors }}</div>
+          <div class="stat-label">{{ 'home.totalDoctors' | translate }}</div>
+        </div>
+      </mat-card-content>
+    </mat-card>
+    <mat-card class="stat-card stat-card--highlight">
+      <mat-card-content>
+        <div class="stat-icon-wrap">
+          <mat-icon>today</mat-icon>
+        </div>
+        <div class="stat-body">
+          <div class="stat-value">{{ visitsThisMonth }}</div>
+          <div class="stat-label">{{ 'home.visitsThisMonth' | translate }}</div>
+        </div>
+      </mat-card-content>
+    </mat-card>
+    <mat-card class="stat-card stat-card--danger">
+      <mat-card-content>
+        <div class="stat-icon-wrap">
+          <mat-icon>bar_chart</mat-icon>
+        </div>
+        <div class="stat-body">
+          <div class="stat-value">{{ totalVisits }}</div>
+          <div class="stat-label">{{ 'home.totalVisits' | translate }}</div>
+        </div>
+      </mat-card-content>
+    </mat-card>
   </div>
 
   <div class="quick-actions">
     <h2>{{ 'home.quickActions' | translate }}</h2>
     <div class="actions-row">
-      <a routerLink="/patients/new" class="btn btn-primary btn-lg">{{ 'home.newPatient' | translate }}</a>
-      <a routerLink="/visits/new" class="btn btn-success btn-lg">{{ 'home.newVisit' | translate }}</a>
-      <button class="btn btn-secondary btn-lg" (click)="triggerXlsxInput()" [disabled]="importing()">
+      <a routerLink="/patients/new" matButton="elevated" color="primary">
+        <mat-icon>person_add</mat-icon>
+        {{ 'home.newPatient' | translate }}
+      </a>
+      <a routerLink="/visits/new" matButton="elevated" color="accent">
+        <mat-icon>calendar_today</mat-icon>
+        {{ 'home.newVisit' | translate }}
+      </a>
+      <button matButton="elevated" class="btn-amber" (click)="triggerXlsxInput()" [disabled]="importing()">
+        <mat-icon>upload_file</mat-icon>
         @if (importing()) {
           {{ 'home.importing' | translate }}
         } @else {
@@ -51,8 +86,55 @@
 
   <div class="recent-visits-section">
     <h2>{{ 'home.recentVisits' | translate }}</h2>
-    @if (recentVisits.length > 0) {
-      <table class="data-table data-table-card">
+    @if (recentVisits().length > 0) {
+      <div class="mobile-book-view">
+        <app-book-table [data]="recentVisits()">
+          <ng-template #bookPage let-visit>
+            <div class="book-page-fields">
+              <div class="book-field">
+                <span class="book-field-label">{{ 'visits.date' | translate }}</span>
+                <span class="book-field-value">{{ visit.date | localizedDate:'mediumDate' }}</span>
+              </div>
+              <div class="book-field">
+                <span class="book-field-label">{{ 'visits.patient' | translate }}</span>
+                <span class="book-field-value">
+                  <a [routerLink]="['/patients', visit.patientId]">{{ getPatientName(visit.patientId) }}</a>
+                </span>
+              </div>
+              <div class="book-field">
+                <span class="book-field-label">{{ 'visits.doctor' | translate }}</span>
+                <span class="book-field-value">{{ getDoctorName(visit.doctorId) }}</span>
+              </div>
+              @if (getDiagnosisName(visit.diagnosisId)) {
+                <div class="book-field">
+                  <span class="book-field-label">{{ 'visits.diagnosis' | translate }}</span>
+                  <span class="book-field-value">{{ getDiagnosisName(visit.diagnosisId) }}</span>
+                </div>
+              }
+              @if (getTreatmentName(visit.treatmentId)) {
+                <div class="book-field">
+                  <span class="book-field-label">{{ 'visits.treatment' | translate }}</span>
+                  <span class="book-field-value">{{ getTreatmentName(visit.treatmentId) }}</span>
+                </div>
+              }
+              @if (visit.price) {
+                <div class="book-field">
+                  <span class="book-field-label">{{ 'visits.price' | translate }}</span>
+                  <span class="book-field-value book-field-price">{{ visit.price | currencyFormat }}</span>
+                </div>
+              }
+              <div class="book-field">
+                <span class="book-field-label">{{ 'visit.paid' | translate }}</span>
+                <span class="book-field-value">
+                  <mat-icon [class]="visit.paid ? 'paid-icon' : 'unpaid-icon'">{{ visit.paid ? 'check_circle' : 'cancel' }}</mat-icon>
+                </span>
+              </div>
+            </div>
+          </ng-template>
+        </app-book-table>
+      </div>
+
+      <table class="data-table data-table-card desktop-table">
         <thead>
           <tr>
             <th>{{ 'visits.date' | translate }}</th>
@@ -61,10 +143,11 @@
             <th>{{ 'visits.diagnosis' | translate }}</th>
             <th>{{ 'visits.treatment' | translate }}</th>
             <th>{{ 'visits.price' | translate }}</th>
+            <th>{{ 'visit.paid' | translate }}</th>
           </tr>
         </thead>
         <tbody>
-          @for (visit of recentVisits; track visit.id) {
+          @for (visit of recentVisits(); track visit.id) {
             <tr>
               <td [attr.data-label]="'visits.date' | translate">{{ visit.date | localizedDate:'mediumDate' }}</td>
               <td [attr.data-label]="'visits.patient' | translate"><a [routerLink]="['/patients', visit.patientId]">{{ getPatientName(visit.patientId) }}</a></td>
@@ -72,6 +155,7 @@
               <td [attr.data-label]="'visits.diagnosis' | translate">{{ getDiagnosisName(visit.diagnosisId) }}</td>
               <td [attr.data-label]="'visits.treatment' | translate">{{ getTreatmentName(visit.treatmentId) }}</td>
               <td [attr.data-label]="'visits.price' | translate">{{ visit.price | currencyFormat }}</td>
+              <td [attr.data-label]="'visit.paid' | translate"><mat-icon [class]="visit.paid ? 'paid-icon' : 'unpaid-icon'">{{ visit.paid ? 'check_circle' : 'cancel' }}</mat-icon></td>
             </tr>
           }
         </tbody>

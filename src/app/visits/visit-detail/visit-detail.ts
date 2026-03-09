@@ -1,5 +1,8 @@
 import { ChangeDetectionStrategy, Component, inject, signal, OnInit } from '@angular/core';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
+import { MatCardModule } from '@angular/material/card';
+import { MatButtonModule } from '@angular/material/button';
+import { MatIconModule } from '@angular/material/icon';
 import { forkJoin } from 'rxjs';
 import { TranslatePipe } from '../../shared/translate.pipe';
 import { LocalizedDatePipe } from '../../shared/localized-date.pipe';
@@ -14,7 +17,7 @@ import { Visit } from '../../models/visit.model';
 
 @Component({
   selector: 'app-visit-detail',
-  imports: [RouterLink, TranslatePipe, LocalizedDatePipe, CurrencyFormatPipe],
+  imports: [RouterLink, TranslatePipe, LocalizedDatePipe, CurrencyFormatPipe, MatCardModule, MatButtonModule, MatIconModule],
   templateUrl: './visit-detail.html',
   styleUrl: './visit-detail.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -78,6 +81,14 @@ export default class VisitDetail implements OnInit {
   getTreatmentCode(id: string | undefined): string {
     if (!id) return '';
     return this.treatmentService.getById(id)?.code || '';
+  }
+
+  togglePaid(): void {
+    const v = this.visit();
+    if (!v) return;
+    this.visitService.update(v.id, { paid: !v.paid }).subscribe(updated => {
+      this.visit.set(updated);
+    });
   }
 
   deleteVisit(): void {

@@ -1,5 +1,10 @@
-import { ChangeDetectionStrategy, Component, inject, signal, OnInit } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject, signal, viewChild, effect, OnInit } from '@angular/core';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
+import { MatCardModule } from '@angular/material/card';
+import { MatTableModule, MatTableDataSource } from '@angular/material/table';
+import { MatPaginator, MatPaginatorModule } from '@angular/material/paginator';
+import { MatButtonModule } from '@angular/material/button';
+import { MatIconModule } from '@angular/material/icon';
 import { forkJoin } from 'rxjs';
 import { TranslatePipe } from '../../shared/translate.pipe';
 import { LocalizedDatePipe } from '../../shared/localized-date.pipe';
@@ -15,7 +20,7 @@ import { Visit } from '../../models/visit.model';
 
 @Component({
   selector: 'app-doctor-detail',
-  imports: [RouterLink, TranslatePipe, LocalizedDatePipe, CurrencyFormatPipe],
+  imports: [RouterLink, TranslatePipe, LocalizedDatePipe, CurrencyFormatPipe, MatCardModule, MatTableModule, MatPaginatorModule, MatButtonModule, MatIconModule],
   templateUrl: './doctor-detail.html',
   styleUrl: './doctor-detail.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -30,8 +35,21 @@ export default class DoctorDetail implements OnInit {
   private diagnosisService = inject(DiagnosisService);
   private treatmentService = inject(TreatmentService);
 
+  private paginator = viewChild(MatPaginator);
+
+  visitColumns = ['date', 'patient', 'tooth', 'diagnosis', 'treatment', 'price'];
   doctor = signal<Doctor | undefined>(undefined);
   visits = signal<Visit[]>([]);
+  visitsDataSource = new MatTableDataSource<Visit>();
+
+  constructor() {
+    effect(() => {
+      const pag = this.paginator();
+      if (pag) {
+        this.visitsDataSource.paginator = pag;
+      }
+    });
+  }
 
   ngOnInit(): void {
     const id = this.route.snapshot.paramMap.get('id');
@@ -49,10 +67,26 @@ export default class DoctorDetail implements OnInit {
     ]).subscribe({
       next: ([doctor]) => {
         this.doctor.set(doctor);
-        this.visits.set(this.visitService.getByDoctorId(id));
+        const doctorVisits = this.visitService.getByDoctorId(id);
+        this.visits.set(doctorVisits);
+        this.visitsDataSource.data = doctorVisits;
       },
       error: () => this.router.navigate(['/doctors']),
     });
+  }
+
+  getInitials(doc: Doctor): string {
+    return `${doc.firstName[0]}${doc.lastName[0]}`.toUpperCase();
+  }
+
+  getVisitsThisYear(): number {
+    const year = new Date().getFullYear().toString();
+    return this.visits().filter(v => v.date.startsWith(year)).length;
+  }
+
+  getUniquePatients(): number {
+    const ids = new Set(this.visits().map(v => v.patientId));
+    return ids.size;
   }
 
   getPatientName(id: string): string {
