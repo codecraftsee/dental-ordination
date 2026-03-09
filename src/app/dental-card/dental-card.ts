@@ -40,7 +40,7 @@ export default class DentalCard implements OnInit {
   visits = signal<Visit[]>([]);
   today = new Date().toISOString().split('T')[0];
   dataSource = new MatTableDataSource<Visit>();
-  displayedColumns = ['date', 'diagnosis', 'treatment', 'price', 'doctor'];
+  displayedColumns = ['date', 'diagnosis', 'treatment', 'price', 'paid', 'doctor'];
 
   totalCost = computed(() => {
     return this.visits().reduce((sum, v) => sum + (Number(v.price) || 0), 0);

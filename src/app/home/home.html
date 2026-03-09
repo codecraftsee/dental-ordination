@@ -123,6 +123,12 @@
                   <span class="book-field-value book-field-price">{{ visit.price | currencyFormat }}</span>
                 </div>
               }
+              <div class="book-field">
+                <span class="book-field-label">{{ 'visit.paid' | translate }}</span>
+                <span class="book-field-value">
+                  <mat-icon [class]="visit.paid ? 'paid-icon' : 'unpaid-icon'">{{ visit.paid ? 'check_circle' : 'cancel' }}</mat-icon>
+                </span>
+              </div>
             </div>
           </ng-template>
         </app-book-table>
@@ -137,6 +143,7 @@
             <th>{{ 'visits.diagnosis' | translate }}</th>
             <th>{{ 'visits.treatment' | translate }}</th>
             <th>{{ 'visits.price' | translate }}</th>
+            <th>{{ 'visit.paid' | translate }}</th>
           </tr>
         </thead>
         <tbody>
@@ -148,6 +155,7 @@
               <td [attr.data-label]="'visits.diagnosis' | translate">{{ getDiagnosisName(visit.diagnosisId) }}</td>
               <td [attr.data-label]="'visits.treatment' | translate">{{ getTreatmentName(visit.treatmentId) }}</td>
               <td [attr.data-label]="'visits.price' | translate">{{ visit.price | currencyFormat }}</td>
+              <td [attr.data-label]="'visit.paid' | translate"><mat-icon [class]="visit.paid ? 'paid-icon' : 'unpaid-icon'">{{ visit.paid ? 'check_circle' : 'cancel' }}</mat-icon></td>
             </tr>
           }
         </tbody>

@@ -59,6 +59,9 @@
   "patient.visitsThisYear": "Ove Godine",
   "patient.contactInfo": "Kontakt",
   "patient.personalInfo": "Lični Podaci",
+  "patient.debt": "Dug",
+  "patient.allPaid": "Sve Plaćeno",
+  "patients.hasDebt": "Dug",
 
   "doctors.title": "Lekari",
   "doctors.search": "Pretraži lekare...",
@@ -128,6 +131,10 @@
   "visit.selectDoctor": "Izaberite lekara...",
   "visit.selectDiagnosis": "Izaberite dijagnozu...",
   "visit.selectTreatment": "Izaberite terapiju...",
+  "visit.paid": "Plaćeno",
+  "visit.unpaid": "Neplaćeno",
+  "visit.markPaid": "Označi kao plaćeno",
+  "visit.markUnpaid": "Označi kao neplaćeno",
 
   "diagnoses.title": "Katalog Dijagnoza",
   "diagnoses.search": "Pretraži dijagnoze...",
@@ -185,6 +192,7 @@
   "dentalCard.recordDate": "Datum",
   "dentalCard.print": "Štampaj",
   "dentalCard.exportExcel": "Izvezi Excel",
+  "dentalCard.paid": "Plaćeno",
 
   "bookTable.noData": "Nema podataka za prikaz",
   "bookTable.prevPage": "Prethodna stranica",

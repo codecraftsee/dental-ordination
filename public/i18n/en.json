@@ -59,6 +59,9 @@
   "patient.visitsThisYear": "This Year",
   "patient.contactInfo": "Contact",
   "patient.personalInfo": "Personal Info",
+  "patient.debt": "Debt",
+  "patient.allPaid": "All Paid",
+  "patients.hasDebt": "Debt",
 
   "doctors.title": "Doctors",
   "doctors.search": "Search doctors...",
@@ -128,6 +131,10 @@
   "visit.selectDoctor": "Select doctor...",
   "visit.selectDiagnosis": "Select diagnosis...",
   "visit.selectTreatment": "Select treatment...",
+  "visit.paid": "Paid",
+  "visit.unpaid": "Unpaid",
+  "visit.markPaid": "Mark as paid",
+  "visit.markUnpaid": "Mark as unpaid",
 
   "diagnoses.title": "Diagnoses Catalog",
   "diagnoses.search": "Search diagnoses...",
@@ -185,6 +192,7 @@
   "dentalCard.recordDate": "Date",
   "dentalCard.print": "Print",
   "dentalCard.exportExcel": "Export Excel",
+  "dentalCard.paid": "Paid",
 
   "bookTable.noData": "No records to display",
   "bookTable.prevPage": "Previous page",

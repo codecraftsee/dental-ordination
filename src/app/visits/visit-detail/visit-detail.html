@@ -13,6 +13,9 @@
               <h2 class="profile-name">{{ getPatientName(v.patientId) }}</h2>
               <div class="profile-meta">
                 <span class="badge badge-primary">{{ v.date | localizedDate:'longDate' }}</span>
+                <span class="badge" [class]="v.paid ? 'badge-success' : 'badge-danger'">
+                  {{ (v.paid ? 'visit.paid' : 'visit.unpaid') | translate }}
+                </span>
                 <span class="profile-registered">
                   {{ 'visit.doctor' | translate }}: {{ getDoctorName(v.doctorId) }}
                 </span>
@@ -20,6 +23,10 @@
             </div>
           </div>
           <div class="profile-actions">
+            <button matButton="elevated" [color]="v.paid ? 'accent' : 'primary'" (click)="togglePaid()">
+              <mat-icon>{{ v.paid ? 'money_off' : 'paid' }}</mat-icon>
+              {{ (v.paid ? 'visit.markUnpaid' : 'visit.markPaid') | translate }}
+            </button>
             <button matButton="outlined" class="btn-danger-outlined" (click)="deleteVisit()"><mat-icon>delete</mat-icon>{{ 'common.delete' | translate }}</button>
             <a routerLink="/visits" matButton="outlined"><mat-icon>arrow_back</mat-icon>{{ 'common.back' | translate }}</a>
           </div>

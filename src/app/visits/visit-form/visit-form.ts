@@ -10,6 +10,7 @@ import { MatNativeDateModule } from '@angular/material/core';
 import { MatCardModule } from '@angular/material/card';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
+import { MatSlideToggleModule } from '@angular/material/slide-toggle';
 import { TranslatePipe } from '../../shared/translate.pipe';
 import { VisitService } from '../../services/visit.service';
 import { PatientService } from '../../services/patient.service';
@@ -31,6 +32,7 @@ import { TreatmentService } from '../../services/treatment.service';
     MatCardModule,
     MatButtonModule,
     MatIconModule,
+    MatSlideToggleModule,
   ],
   templateUrl: './visit-form.html',
   styleUrl: './visit-form.scss',
@@ -64,6 +66,7 @@ export default class VisitForm implements OnInit, OnDestroy {
       treatmentId: ['', Validators.required],
       treatmentNotes: [''],
       price: [0, [Validators.required, Validators.min(0)]],
+      paid: [false],
     });
 
     forkJoin([
@@ -103,6 +106,7 @@ export default class VisitForm implements OnInit, OnDestroy {
       date: this.formatDate(formValue.date),
       toothNumber: formValue.toothNumber ? Number(formValue.toothNumber) : null,
       price: Number(formValue.price),
+      paid: formValue.paid ?? false,
     }).subscribe(visit => {
       this.router.navigate(['/visits', visit.id]);
     });
