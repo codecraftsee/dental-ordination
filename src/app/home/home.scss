@@ -95,6 +95,20 @@
   font-weight: 600;
 }
 
+.paid-icon {
+  color: var(--color-success);
+  font-size: 20px;
+  width: 20px;
+  height: 20px;
+}
+
+.unpaid-icon {
+  color: var(--color-danger);
+  font-size: 20px;
+  width: 20px;
+  height: 20px;
+}
+
 @media (min-width: 768px) {
   .mobile-book-view {
     display: none;

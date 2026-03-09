@@ -299,6 +299,13 @@ a {
   color: var(--color-primary);
 }
 
+.badge-sm {
+  font-size: 0.65rem;
+  padding: 1px 5px;
+  margin-left: 4px;
+  vertical-align: middle;
+}
+
 // Cards
 .card {
   background: var(--color-surface);
@@ -637,6 +644,15 @@ mat-card.stat-card {
       mat-icon { color: var(--color-danger); }
     }
     .stat-value { color: var(--color-danger); }
+  }
+
+  &.stat-card--success {
+    border-top: 4px solid var(--color-success) !important;
+    .stat-icon-wrap {
+      background: rgba(40, 167, 69, 0.1);
+      mat-icon { color: var(--color-success); }
+    }
+    .stat-value { color: var(--color-success); }
   }
 }
 

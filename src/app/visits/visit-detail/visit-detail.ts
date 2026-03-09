@@ -83,6 +83,14 @@ export default class VisitDetail implements OnInit {
     return this.treatmentService.getById(id)?.code || '';
   }
 
+  togglePaid(): void {
+    const v = this.visit();
+    if (!v) return;
+    this.visitService.update(v.id, { paid: !v.paid }).subscribe(updated => {
+      this.visit.set(updated);
+    });
+  }
+
   deleteVisit(): void {
     const v = this.visit();
     if (v && confirm(this.translateService.translate('common.confirmDelete'))) {

@@ -43,6 +43,9 @@
         <mat-icon class="book-page-avatar">person</mat-icon>
         <div class="book-page-name">
           <a [routerLink]="['/patients', patient.id]">{{ patient.firstName }} {{ patient.lastName }}</a>
+          @if (hasDebt(patient.id)) {
+            <span class="badge badge-danger badge-sm">{{ 'patients.hasDebt' | translate }}</span>
+          }
         </div>
       </div>
       <div class="book-page-fields">
@@ -101,6 +104,9 @@
       <th mat-header-cell *matHeaderCellDef>{{ 'patients.name' | translate }}</th>
       <td mat-cell *matCellDef="let p">
         <a [routerLink]="['/patients', p.id]">{{ p.firstName }} {{ p.lastName }}</a>
+        @if (hasDebt(p.id)) {
+          <span class="badge badge-danger badge-sm">{{ 'patients.hasDebt' | translate }}</span>
+        }
       </td>
     </ng-container>
 

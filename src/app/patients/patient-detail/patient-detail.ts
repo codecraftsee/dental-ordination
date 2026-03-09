@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, inject, signal, viewChild, effect, OnInit } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject, signal, computed, viewChild, effect, OnInit } from '@angular/core';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { MatCardModule } from '@angular/material/card';
 import { MatTableModule, MatTableDataSource } from '@angular/material/table';
@@ -41,6 +41,16 @@ export default class PatientDetail implements OnInit {
   patient = signal<Patient | undefined>(undefined);
   allVisits = signal<Visit[]>([]);
   visitsDataSource = new MatTableDataSource<Visit>();
+
+  patientDebt = computed(() =>
+    this.allVisits()
+      .filter(v => !v.paid && v.price)
+      .reduce((sum, v) => sum + (Number(v.price) || 0), 0)
+  );
+
+  hasUnpaidVisits = computed(() =>
+    this.allVisits().some(v => !v.paid)
+  );
 
   constructor() {
     effect(() => {

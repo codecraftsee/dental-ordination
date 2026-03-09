@@ -11,6 +11,7 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 import { TranslatePipe } from '../../shared/translate.pipe';
 import { LocalizedDatePipe } from '../../shared/localized-date.pipe';
 import { PatientService } from '../../services/patient.service';
+import { VisitService } from '../../services/visit.service';
 import { Patient } from '../../models/patient.model';
 import { MatCardModule } from '@angular/material/card';
 import { BookTableComponent } from '../../shared/book-table/book-table';
@@ -24,6 +25,7 @@ import { BookTableComponent } from '../../shared/book-table/book-table';
 })
 export default class PatientList implements OnInit {
   private patientService = inject(PatientService);
+  private visitService = inject(VisitService);
   private paginator = viewChild(MatPaginator);
 
   readonly displayedColumns = ['name', 'parentName', 'dateOfBirth', 'city', 'phone', 'actions'];
@@ -57,6 +59,13 @@ export default class PatientList implements OnInit {
 
   ngOnInit(): void {
     this.patientService.loadAll().subscribe();
+    if (!this.visitService.isLoaded()) {
+      this.visitService.loadAll().subscribe();
+    }
+  }
+
+  hasDebt(patientId: string): boolean {
+    return this.visitService.getByPatientId(patientId).some(v => !v.paid && v.price);
   }
 
   onSearch(event: Event): void {

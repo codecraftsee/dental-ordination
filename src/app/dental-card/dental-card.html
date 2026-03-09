@@ -81,6 +81,12 @@
                 </div>
               }
               <div class="book-field">
+                <span class="book-field-label">{{ 'dentalCard.paid' | translate }}</span>
+                <span class="book-field-value">
+                  <mat-icon [class]="visit.paid ? 'paid-icon' : 'unpaid-icon'">{{ visit.paid ? 'check_circle' : 'cancel' }}</mat-icon>
+                </span>
+              </div>
+              <div class="book-field">
                 <span class="book-field-label">{{ 'dentalCard.doctor' | translate }}</span>
                 <span class="book-field-value">{{ getDoctorName(visit.doctorId) }}</span>
               </div>
@@ -112,6 +118,13 @@
         <ng-container matColumnDef="price">
           <th mat-header-cell *matHeaderCellDef>{{ 'dentalCard.price' | translate }}</th>
           <td mat-cell *matCellDef="let v">{{ v.price ? (v.price | currencyFormat) : '' }}</td>
+        </ng-container>
+
+        <ng-container matColumnDef="paid">
+          <th mat-header-cell *matHeaderCellDef>{{ 'dentalCard.paid' | translate }}</th>
+          <td mat-cell *matCellDef="let v">
+            <mat-icon [class]="v.paid ? 'paid-icon' : 'unpaid-icon'">{{ v.paid ? 'check_circle' : 'cancel' }}</mat-icon>
+          </td>
         </ng-container>
 
         <ng-container matColumnDef="doctor">

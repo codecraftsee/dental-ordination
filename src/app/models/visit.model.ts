@@ -9,6 +9,7 @@ export interface Visit {
   treatmentId?: string;
   treatmentNotes?: string;
   price?: number;
+  paid: boolean;
   createdAt: string;
   updatedAt: string;
 }
@@ -23,6 +24,7 @@ export interface VisitCreate {
   treatmentId?: string;
   treatmentNotes?: string;
   price?: number;
+  paid?: boolean;
 }
 
 export interface VisitUpdate {
@@ -35,4 +37,5 @@ export interface VisitUpdate {
   treatmentId?: string;
   treatmentNotes?: string;
   price?: number;
+  paid?: boolean;
 }

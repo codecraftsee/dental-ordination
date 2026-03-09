@@ -15,6 +15,11 @@
                 <span class="badge" [class]="p.gender === 'male' ? 'badge-info' : 'badge-success'">
                   {{ 'patient.gender.' + p.gender | translate }}
                 </span>
+                @if (hasUnpaidVisits()) {
+                  <span class="badge badge-danger">{{ 'patient.debt' | translate }}: {{ patientDebt() | currencyFormat }}</span>
+                } @else if (allVisits().length > 0) {
+                  <span class="badge badge-success">{{ 'patient.allPaid' | translate }}</span>
+                }
                 <span class="profile-registered">
                   {{ 'patient.registeredOn' | translate }}: {{ p.createdAt | localizedDate:'mediumDate' }}
                 </span>
@@ -74,6 +79,17 @@
           <div class="stat-body">
             <div class="stat-value stat-value--date">{{ p.dateOfBirth | localizedDate:'mediumDate' }}</div>
             <div class="stat-label">{{ 'patient.dateOfBirth' | translate }}</div>
+          </div>
+        </mat-card-content>
+      </mat-card>
+      <mat-card class="stat-card" [class]="hasUnpaidVisits() ? 'stat-card--danger' : 'stat-card--success'">
+        <mat-card-content>
+          <div class="stat-icon-wrap">
+            <mat-icon>{{ hasUnpaidVisits() ? 'money_off' : 'paid' }}</mat-icon>
+          </div>
+          <div class="stat-body">
+            <div class="stat-value">{{ patientDebt() | currencyFormat }}</div>
+            <div class="stat-label">{{ 'patient.debt' | translate }}</div>
           </div>
         </mat-card-content>
       </mat-card>
