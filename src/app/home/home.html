@@ -86,8 +86,49 @@
 
   <div class="recent-visits-section">
     <h2>{{ 'home.recentVisits' | translate }}</h2>
-    @if (recentVisits.length > 0) {
-      <table class="data-table data-table-card">
+    @if (recentVisits().length > 0) {
+      <div class="mobile-book-view">
+        <app-book-table [data]="recentVisits()">
+          <ng-template #bookPage let-visit>
+            <div class="book-page-fields">
+              <div class="book-field">
+                <span class="book-field-label">{{ 'visits.date' | translate }}</span>
+                <span class="book-field-value">{{ visit.date | localizedDate:'mediumDate' }}</span>
+              </div>
+              <div class="book-field">
+                <span class="book-field-label">{{ 'visits.patient' | translate }}</span>
+                <span class="book-field-value">
+                  <a [routerLink]="['/patients', visit.patientId]">{{ getPatientName(visit.patientId) }}</a>
+                </span>
+              </div>
+              <div class="book-field">
+                <span class="book-field-label">{{ 'visits.doctor' | translate }}</span>
+                <span class="book-field-value">{{ getDoctorName(visit.doctorId) }}</span>
+              </div>
+              @if (getDiagnosisName(visit.diagnosisId)) {
+                <div class="book-field">
+                  <span class="book-field-label">{{ 'visits.diagnosis' | translate }}</span>
+                  <span class="book-field-value">{{ getDiagnosisName(visit.diagnosisId) }}</span>
+                </div>
+              }
+              @if (getTreatmentName(visit.treatmentId)) {
+                <div class="book-field">
+                  <span class="book-field-label">{{ 'visits.treatment' | translate }}</span>
+                  <span class="book-field-value">{{ getTreatmentName(visit.treatmentId) }}</span>
+                </div>
+              }
+              @if (visit.price) {
+                <div class="book-field">
+                  <span class="book-field-label">{{ 'visits.price' | translate }}</span>
+                  <span class="book-field-value book-field-price">{{ visit.price | currencyFormat }}</span>
+                </div>
+              }
+            </div>
+          </ng-template>
+        </app-book-table>
+      </div>
+
+      <table class="data-table data-table-card desktop-table">
         <thead>
           <tr>
             <th>{{ 'visits.date' | translate }}</th>
@@ -99,7 +140,7 @@
           </tr>
         </thead>
         <tbody>
-          @for (visit of recentVisits; track visit.id) {
+          @for (visit of recentVisits(); track visit.id) {
             <tr>
               <td [attr.data-label]="'visits.date' | translate">{{ visit.date | localizedDate:'mediumDate' }}</td>
               <td [attr.data-label]="'visits.patient' | translate"><a [routerLink]="['/patients', visit.patientId]">{{ getPatientName(visit.patientId) }}</a></td>

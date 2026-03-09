@@ -14,7 +14,8 @@ The project uses Angular 21 with signals, standalone components, SCSS with CSS c
 - Support touch swipe gestures and button navigation
 - Show page indicator with current/total count
 - Integrate into patient list as proof of concept
-- Maintain existing desktop mat-table experience untouched
+- Integrate into dental card page — visit history renders as book pages on mobile (one visit per page with date, diagnosis, treatment, price, doctor)
+- Maintain existing desktop mat-table / karton-table experience untouched
 
 **Non-Goals:**
 - Multi-record pages (each page = one record for now)
@@ -75,6 +76,59 @@ The project uses Angular 21 with signals, standalone components, SCSS with CSS c
 - **[Swipe conflicts with browser back gesture]** → Mitigation: Only trigger page flip when horizontal swipe is dominant (deltaX > deltaY), add a small dead zone
 - **[Accessibility]** → Mitigation: Add `aria-live="polite"` region for page changes, keyboard arrow key support, visible focus indicators on nav buttons
 - **[Data updates while browsing]** → Mitigation: Reset to page 0 when data array reference changes (via `effect()`)
+
+### 7. Dental card integration: Book-table for visit history on mobile
+
+**Rationale**: The dental card currently renders visit rows as stacked cards on mobile (CSS card layout in `.karton-table` media query). This is functional but inconsistent with the new book-table pattern used on patient list. Replacing the stacked cards with book-table gives a unified mobile experience.
+
+**Approach**:
+- On mobile, hide the `karton-table` and show `<app-book-table [data]="visits()">` instead
+- Each book page shows one visit: date, diagnosis (code + tooth + notes), treatment (name + notes), price, and doctor name
+- The total cost row stays visible below the book as a summary footer (not inside the book pages)
+- Desktop and print views remain completely unchanged
+- The `dental-card` component imports `BookTableComponent` and uses the same `#bookPage` template pattern
+
+```html
+<div class="mobile-book-view">
+  <app-book-table [data]="visits()">
+    <ng-template #bookPage let-visit>
+      <div class="book-field">
+        <span class="book-field-label">{{ 'dentalCard.date' | translate }}</span>
+        <span class="book-field-value">{{ visit.date | localizedDate:'mediumDate' }}</span>
+      </div>
+      <div class="book-field">
+        <span class="book-field-label">{{ 'dentalCard.diagnosis' | translate }}</span>
+        <span class="book-field-value">{{ formatDiagnosis(visit) }}</span>
+      </div>
+      <!-- ... treatment, price, doctor fields -->
+    </ng-template>
+  </app-book-table>
+</div>
+```
+
+### 8. Home page integration: Book-table for recent visits on mobile
+
+**Rationale**: The home page recent visits table uses the global `.data-table-card` stacked card layout on mobile. Replacing it with book-table makes the mobile experience consistent across all visit displays (home, dental card, patient list).
+
+**Approach**:
+- On mobile, hide the `.data-table` and show `<app-book-table [data]="recentVisits">` instead
+- Each book page shows one visit: date, patient name (linked), doctor, diagnosis, treatment, price
+- Desktop view remains completely unchanged
+- The `home` component imports `BookTableComponent` and uses the `#bookPage` template pattern
+
+```html
+<div class="mobile-book-view">
+  <app-book-table [data]="recentVisits">
+    <ng-template #bookPage let-visit>
+      <div class="book-field">
+        <span class="book-field-label">{{ 'visits.date' | translate }}</span>
+        <span class="book-field-value">{{ visit.date | localizedDate:'mediumDate' }}</span>
+      </div>
+      <!-- ... patient, doctor, diagnosis, treatment, price fields -->
+    </ng-template>
+  </app-book-table>
+</div>
+```
 
 ## Open Questions
 
