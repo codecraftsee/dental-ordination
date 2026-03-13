@@ -1,4 +1,5 @@
-import { ChangeDetectionStrategy, Component, inject, signal, OnInit } from '@angular/core';
+import { ChangeDetectionStrategy, Component, DestroyRef, inject, signal, OnInit } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { MatCardModule } from '@angular/material/card';
 import { MatButtonModule } from '@angular/material/button';
@@ -25,6 +26,7 @@ import { Visit } from '../../models/visit.model';
 export default class VisitDetail implements OnInit {
   private route = inject(ActivatedRoute);
   private router = inject(Router);
+  private destroyRef = inject(DestroyRef);
   private translateService = inject(TranslateService);
   private visitService = inject(VisitService);
   private patientService = inject(PatientService);
@@ -47,7 +49,7 @@ export default class VisitDetail implements OnInit {
       this.doctorService.loadAll(),
       this.diagnosisService.loadAll(),
       this.treatmentService.loadAll(),
-    ]).subscribe({
+    ]).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: ([visit]) => this.visit.set(visit),
       error: () => this.router.navigate(['/visits']),
     });
@@ -86,7 +88,7 @@ export default class VisitDetail implements OnInit {
   togglePaid(): void {
     const v = this.visit();
     if (!v) return;
-    this.visitService.update(v.id, { paid: !v.paid }).subscribe(updated => {
+    this.visitService.update(v.id, { paid: !v.paid }).pipe(takeUntilDestroyed(this.destroyRef)).subscribe(updated => {
       this.visit.set(updated);
     });
   }
@@ -94,7 +96,7 @@ export default class VisitDetail implements OnInit {
   deleteVisit(): void {
     const v = this.visit();
     if (v && confirm(this.translateService.translate('common.confirmDelete'))) {
-      this.visitService.delete(v.id).subscribe(() => {
+      this.visitService.delete(v.id).pipe(takeUntilDestroyed(this.destroyRef)).subscribe(() => {
         this.router.navigate(['/visits']);
       });
     }

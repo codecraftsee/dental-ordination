@@ -1,4 +1,5 @@
-import { ChangeDetectionStrategy, Component, inject, signal, WritableSignal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, DestroyRef, inject, signal, WritableSignal } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { MatCardModule } from '@angular/material/card';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
@@ -33,6 +34,7 @@ interface ActionState {
 })
 export default class Admin {
   private adminService = inject(AdminService);
+  private destroyRef = inject(DestroyRef);
   private patientService = inject(PatientService);
   private doctorService = inject(DoctorService);
   private visitService = inject(VisitService);
@@ -57,7 +59,7 @@ export default class Admin {
     action.message.set('');
     action.isError.set(false);
 
-    this.getRequest(action.key).subscribe({
+    this.getRequest(action.key).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: () => {
         action.loading.set(false);
         action.confirmInput.set('');
@@ -88,27 +90,27 @@ export default class Admin {
   private refreshCaches(key: ActionKey): void {
     switch (key) {
       case 'visits':
-        this.visitService.loadAll().subscribe();
+        this.visitService.loadAll().pipe(takeUntilDestroyed(this.destroyRef)).subscribe();
         break;
       case 'patients':
-        this.patientService.loadAll().subscribe();
-        this.visitService.loadAll().subscribe();
+        this.patientService.loadAll().pipe(takeUntilDestroyed(this.destroyRef)).subscribe();
+        this.visitService.loadAll().pipe(takeUntilDestroyed(this.destroyRef)).subscribe();
         break;
       case 'doctors':
-        this.doctorService.loadAll().subscribe();
+        this.doctorService.loadAll().pipe(takeUntilDestroyed(this.destroyRef)).subscribe();
         break;
       case 'diagnoses':
-        this.diagnosisService.loadAll().subscribe();
+        this.diagnosisService.loadAll().pipe(takeUntilDestroyed(this.destroyRef)).subscribe();
         break;
       case 'treatments':
-        this.treatmentService.loadAll().subscribe();
+        this.treatmentService.loadAll().pipe(takeUntilDestroyed(this.destroyRef)).subscribe();
         break;
       case 'all':
-        this.patientService.loadAll().subscribe();
-        this.visitService.loadAll().subscribe();
-        this.doctorService.loadAll().subscribe();
-        this.diagnosisService.loadAll().subscribe();
-        this.treatmentService.loadAll().subscribe();
+        this.patientService.loadAll().pipe(takeUntilDestroyed(this.destroyRef)).subscribe();
+        this.visitService.loadAll().pipe(takeUntilDestroyed(this.destroyRef)).subscribe();
+        this.doctorService.loadAll().pipe(takeUntilDestroyed(this.destroyRef)).subscribe();
+        this.diagnosisService.loadAll().pipe(takeUntilDestroyed(this.destroyRef)).subscribe();
+        this.treatmentService.loadAll().pipe(takeUntilDestroyed(this.destroyRef)).subscribe();
         break;
     }
   }

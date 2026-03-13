@@ -1,4 +1,5 @@
-import { ChangeDetectionStrategy, Component, inject, OnInit } from '@angular/core';
+import { ChangeDetectionStrategy, Component, DestroyRef, inject, OnInit } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { MatFormFieldModule } from '@angular/material/form-field';
@@ -23,6 +24,7 @@ export default class TreatmentForm implements OnInit {
   private route = inject(ActivatedRoute);
   private router = inject(Router);
   private treatmentService = inject(TreatmentService);
+  private destroyRef = inject(DestroyRef);
 
   categories = Object.values(TreatmentCategory);
   isEditMode = false;
@@ -43,7 +45,7 @@ export default class TreatmentForm implements OnInit {
     });
 
     if (this.isEditMode && this.treatmentId) {
-      this.treatmentService.loadById(this.treatmentId).subscribe({
+      this.treatmentService.loadById(this.treatmentId).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
         next: treatment => {
           this.form.patchValue({
             code: treatment.code,
@@ -69,11 +71,11 @@ export default class TreatmentForm implements OnInit {
     }
 
     if (this.isEditMode && this.treatmentId) {
-      this.treatmentService.update(this.treatmentId, this.form.value).subscribe(() => {
+      this.treatmentService.update(this.treatmentId, this.form.value).pipe(takeUntilDestroyed(this.destroyRef)).subscribe(() => {
         this.router.navigate(['/treatments']);
       });
     } else {
-      this.treatmentService.create(this.form.value).subscribe(() => {
+      this.treatmentService.create(this.form.value).pipe(takeUntilDestroyed(this.destroyRef)).subscribe(() => {
         this.router.navigate(['/treatments']);
       });
     }

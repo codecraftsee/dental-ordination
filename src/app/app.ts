@@ -1,4 +1,5 @@
 import { Component, inject, signal, ChangeDetectionStrategy } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { Router, RouterOutlet, NavigationEnd } from '@angular/router';
 import { filter } from 'rxjs';
 import { MatSidenavModule } from '@angular/material/sidenav';
@@ -48,6 +49,7 @@ export class App {
 
     inject(Router).events.pipe(
       filter(e => e instanceof NavigationEnd),
+      takeUntilDestroyed(),
     ).subscribe(() => {
       if (this.isMobile()) {
         this.sidenavOpen.set(false);

@@ -1,4 +1,5 @@
-import { ChangeDetectionStrategy, Component, inject, signal, computed, effect, viewChild, OnInit } from '@angular/core';
+import { ChangeDetectionStrategy, Component, DestroyRef, inject, signal, computed, effect, viewChild, OnInit } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { RouterLink } from '@angular/router';
 import { MatTableModule, MatTableDataSource } from '@angular/material/table';
 import { MatPaginator, MatPaginatorModule } from '@angular/material/paginator';
@@ -26,6 +27,7 @@ import { BookTableComponent } from '../../shared/book-table/book-table';
 export default class PatientList implements OnInit {
   private patientService = inject(PatientService);
   private visitService = inject(VisitService);
+  private destroyRef = inject(DestroyRef);
   private paginator = viewChild(MatPaginator);
 
   readonly displayedColumns = ['name', 'parentName', 'dateOfBirth', 'city', 'phone', 'actions'];
@@ -58,9 +60,9 @@ export default class PatientList implements OnInit {
   }
 
   ngOnInit(): void {
-    this.patientService.loadAll().subscribe();
+    this.patientService.loadAll().pipe(takeUntilDestroyed(this.destroyRef)).subscribe();
     if (!this.visitService.isLoaded()) {
-      this.visitService.loadAll().subscribe();
+      this.visitService.loadAll().pipe(takeUntilDestroyed(this.destroyRef)).subscribe();
     }
   }
 

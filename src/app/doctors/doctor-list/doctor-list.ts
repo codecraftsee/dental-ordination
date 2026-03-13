@@ -1,4 +1,5 @@
-import { ChangeDetectionStrategy, Component, inject, signal, computed, effect, viewChild, OnInit } from '@angular/core';
+import { ChangeDetectionStrategy, Component, DestroyRef, inject, signal, computed, effect, viewChild, OnInit } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { RouterLink } from '@angular/router';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
@@ -22,6 +23,7 @@ import { Doctor, Specialization } from '../../models/doctor.model';
 })
 export default class DoctorList implements OnInit {
   private doctorService = inject(DoctorService);
+  private destroyRef = inject(DestroyRef);
   private paginator = viewChild(MatPaginator);
 
   specializations = Object.values(Specialization);
@@ -50,7 +52,7 @@ export default class DoctorList implements OnInit {
   }
 
   ngOnInit(): void {
-    this.doctorService.loadAll().subscribe();
+    this.doctorService.loadAll().pipe(takeUntilDestroyed(this.destroyRef)).subscribe();
   }
 
   onSearch(event: Event): void {

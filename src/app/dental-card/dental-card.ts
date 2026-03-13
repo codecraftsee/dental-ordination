@@ -1,4 +1,5 @@
-import { ChangeDetectionStrategy, Component, inject, signal, computed, OnInit } from '@angular/core';
+import { ChangeDetectionStrategy, Component, DestroyRef, inject, signal, computed, OnInit } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { forkJoin } from 'rxjs';
 import { TranslatePipe } from '../shared/translate.pipe';
@@ -29,6 +30,7 @@ import * as XLSX from 'xlsx';
 export default class DentalCard implements OnInit {
   private route = inject(ActivatedRoute);
   private router = inject(Router);
+  private destroyRef = inject(DestroyRef);
   private translateService = inject(TranslateService);
   private patientService = inject(PatientService);
   private visitService = inject(VisitService);
@@ -59,7 +61,7 @@ export default class DentalCard implements OnInit {
       this.doctorService.loadAll(),
       this.diagnosisService.loadAll(),
       this.treatmentService.loadAll(),
-    ]).subscribe({
+    ]).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: ([patient]) => {
         this.patient.set(patient);
         const sorted = this.visitService.getByPatientId(id).sort((a, b) => a.date.localeCompare(b.date));

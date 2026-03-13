@@ -1,4 +1,5 @@
-import { ChangeDetectionStrategy, Component, inject, OnInit } from '@angular/core';
+import { ChangeDetectionStrategy, Component, DestroyRef, inject, OnInit } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { MatFormFieldModule } from '@angular/material/form-field';
@@ -23,6 +24,7 @@ export default class DoctorForm implements OnInit {
   private route = inject(ActivatedRoute);
   private router = inject(Router);
   private doctorService = inject(DoctorService);
+  private destroyRef = inject(DestroyRef);
 
   specializations = Object.values(Specialization);
   isEditMode = false;
@@ -44,7 +46,7 @@ export default class DoctorForm implements OnInit {
     });
 
     if (this.isEditMode && this.doctorId) {
-      this.doctorService.loadById(this.doctorId).subscribe({
+      this.doctorService.loadById(this.doctorId).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
         next: doctor => {
           this.form.patchValue({
             firstName: doctor.firstName,
@@ -71,11 +73,11 @@ export default class DoctorForm implements OnInit {
     }
 
     if (this.isEditMode && this.doctorId) {
-      this.doctorService.update(this.doctorId, this.form.value).subscribe(doctor => {
+      this.doctorService.update(this.doctorId, this.form.value).pipe(takeUntilDestroyed(this.destroyRef)).subscribe(doctor => {
         this.router.navigate(['/doctors', doctor.id]);
       });
     } else {
-      this.doctorService.create(this.form.value).subscribe(doctor => {
+      this.doctorService.create(this.form.value).pipe(takeUntilDestroyed(this.destroyRef)).subscribe(doctor => {
         this.router.navigate(['/doctors', doctor.id]);
       });
     }

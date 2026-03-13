@@ -1,4 +1,5 @@
-import { ChangeDetectionStrategy, Component, ElementRef, inject, OnInit, signal, ViewChild, WritableSignal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, DestroyRef, ElementRef, inject, OnInit, signal, ViewChild, WritableSignal } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { RouterLink } from '@angular/router';
 import { MatCardModule } from '@angular/material/card';
 import { MatButtonModule } from '@angular/material/button';
@@ -28,6 +29,7 @@ export default class Home implements OnInit {
   private visitService = inject(VisitService);
   private diagnosisService = inject(DiagnosisService);
   private treatmentService = inject(TreatmentService);
+  private destroyRef = inject(DestroyRef);
 
   @ViewChild('xlsxInput') xlsxInput!: ElementRef<HTMLInputElement>;
 
@@ -48,7 +50,7 @@ export default class Home implements OnInit {
       this.visitService.loadAll(),
       this.diagnosisService.loadAll(),
       this.treatmentService.loadAll(),
-    ]).subscribe(() => {
+    ]).pipe(takeUntilDestroyed(this.destroyRef)).subscribe(() => {
       this.totalPatients = this.patientService.getAll().length;
       this.totalDoctors = this.doctorService.getAll().length;
       this.totalVisits = this.visitService.getAll().length;
@@ -91,7 +93,7 @@ export default class Home implements OnInit {
     this.importMessage.set('');
     this.importError.set(false);
 
-    this.patientService.importXlsx(Array.from(files)).subscribe({
+    this.patientService.importXlsx(Array.from(files)).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: (result) => {
         this.importing.set(false);
         this.importError.set(result.errors.length > 0);

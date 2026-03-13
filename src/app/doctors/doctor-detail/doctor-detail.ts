@@ -1,4 +1,5 @@
-import { ChangeDetectionStrategy, Component, inject, signal, viewChild, effect, OnInit } from '@angular/core';
+import { ChangeDetectionStrategy, Component, DestroyRef, inject, signal, viewChild, effect, OnInit } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { MatCardModule } from '@angular/material/card';
 import { MatTableModule, MatTableDataSource } from '@angular/material/table';
@@ -28,6 +29,7 @@ import { Visit } from '../../models/visit.model';
 export default class DoctorDetail implements OnInit {
   private route = inject(ActivatedRoute);
   private router = inject(Router);
+  private destroyRef = inject(DestroyRef);
   private translateService = inject(TranslateService);
   private doctorService = inject(DoctorService);
   private visitService = inject(VisitService);
@@ -64,7 +66,7 @@ export default class DoctorDetail implements OnInit {
       this.patientService.loadAll(),
       this.diagnosisService.loadAll(),
       this.treatmentService.loadAll(),
-    ]).subscribe({
+    ]).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: ([doctor]) => {
         this.doctor.set(doctor);
         const doctorVisits = this.visitService.getByDoctorId(id);
@@ -107,7 +109,7 @@ export default class DoctorDetail implements OnInit {
   deleteDoctor(): void {
     const d = this.doctor();
     if (d && confirm(this.translateService.translate('common.confirmDelete'))) {
-      this.doctorService.delete(d.id).subscribe(() => {
+      this.doctorService.delete(d.id).pipe(takeUntilDestroyed(this.destroyRef)).subscribe(() => {
         this.router.navigate(['/doctors']);
       });
     }

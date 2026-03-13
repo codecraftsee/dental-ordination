@@ -1,7 +1,8 @@
-import { ChangeDetectionStrategy, Component, inject, OnInit, OnDestroy } from '@angular/core';
+import { ChangeDetectionStrategy, Component, DestroyRef, inject, OnInit } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
-import { Subscription, forkJoin } from 'rxjs';
+import { forkJoin } from 'rxjs';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
@@ -38,9 +39,10 @@ import { TreatmentService } from '../../services/treatment.service';
   styleUrl: './visit-form.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export default class VisitForm implements OnInit, OnDestroy {
+export default class VisitForm implements OnInit {
   private fb = inject(FormBuilder);
   private router = inject(Router);
+  private destroyRef = inject(DestroyRef);
   private visitService = inject(VisitService);
   private patientService = inject(PatientService);
   private doctorService = inject(DoctorService);
@@ -53,7 +55,6 @@ export default class VisitForm implements OnInit, OnDestroy {
   get treatments() { return this.treatmentService.getAll(); }
 
   form!: FormGroup;
-  private treatmentSub?: Subscription;
 
   ngOnInit(): void {
     this.form = this.fb.group({
@@ -74,9 +75,11 @@ export default class VisitForm implements OnInit, OnDestroy {
       this.doctorService.loadAll(),
       this.diagnosisService.loadAll(),
       this.treatmentService.loadAll(),
-    ]).subscribe();
+    ]).pipe(takeUntilDestroyed(this.destroyRef)).subscribe();
 
-    this.treatmentSub = this.form.get('treatmentId')!.valueChanges.subscribe(treatmentId => {
+    this.form.get('treatmentId')!.valueChanges.pipe(
+      takeUntilDestroyed(this.destroyRef),
+    ).subscribe(treatmentId => {
       if (treatmentId) {
         const treatment = this.treatmentService.getById(treatmentId);
         if (treatment) {
@@ -84,10 +87,6 @@ export default class VisitForm implements OnInit, OnDestroy {
         }
       }
     });
-  }
-
-  ngOnDestroy(): void {
-    this.treatmentSub?.unsubscribe();
   }
 
   get f() {
@@ -107,7 +106,7 @@ export default class VisitForm implements OnInit, OnDestroy {
       toothNumber: formValue.toothNumber ? Number(formValue.toothNumber) : null,
       price: Number(formValue.price),
       paid: formValue.paid ?? false,
-    }).subscribe(visit => {
+    }).pipe(takeUntilDestroyed(this.destroyRef)).subscribe(visit => {
       this.router.navigate(['/visits', visit.id]);
     });
   }

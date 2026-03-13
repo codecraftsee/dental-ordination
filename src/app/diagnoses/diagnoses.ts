@@ -1,4 +1,5 @@
-import { ChangeDetectionStrategy, Component, inject, signal, computed, effect, viewChild, OnInit } from '@angular/core';
+import { ChangeDetectionStrategy, Component, DestroyRef, inject, signal, computed, effect, viewChild, OnInit } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { RouterLink } from '@angular/router';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
@@ -22,6 +23,7 @@ import { Diagnosis, DiagnosisCategory } from '../models/diagnosis.model';
 })
 export default class Diagnoses implements OnInit {
   private diagnosisService = inject(DiagnosisService);
+  private destroyRef = inject(DestroyRef);
   private paginator = viewChild(MatPaginator);
 
   categories = Object.values(DiagnosisCategory);
@@ -50,7 +52,7 @@ export default class Diagnoses implements OnInit {
   }
 
   ngOnInit(): void {
-    this.diagnosisService.loadAll().subscribe();
+    this.diagnosisService.loadAll().pipe(takeUntilDestroyed(this.destroyRef)).subscribe();
   }
 
   onSearch(event: Event): void {
@@ -58,6 +60,6 @@ export default class Diagnoses implements OnInit {
   }
 
   deleteDiagnosis(id: string): void {
-    this.diagnosisService.delete(id).subscribe();
+    this.diagnosisService.delete(id).pipe(takeUntilDestroyed(this.destroyRef)).subscribe();
   }
 }

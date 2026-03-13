@@ -1,4 +1,5 @@
-import { ChangeDetectionStrategy, Component, inject, signal, computed, effect, viewChild, OnInit } from '@angular/core';
+import { ChangeDetectionStrategy, Component, DestroyRef, inject, signal, computed, effect, viewChild, OnInit } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { RouterLink } from '@angular/router';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
@@ -35,6 +36,7 @@ export default class VisitList implements OnInit {
   private doctorService = inject(DoctorService);
   private diagnosisService = inject(DiagnosisService);
   private treatmentService = inject(TreatmentService);
+  private destroyRef = inject(DestroyRef);
   private paginator = viewChild(MatPaginator);
 
   displayedColumns = ['date', 'patient', 'doctor', 'tooth', 'diagnosis', 'treatment', 'price', 'actions'];
@@ -98,7 +100,7 @@ export default class VisitList implements OnInit {
       this.doctorService.loadAll(),
       this.diagnosisService.loadAll(),
       this.treatmentService.loadAll(),
-    ]).subscribe();
+    ]).pipe(takeUntilDestroyed(this.destroyRef)).subscribe();
   }
 
   getPatientName(id: string): string {
