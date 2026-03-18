@@ -9,6 +9,7 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { TranslatePipe } from '../../shared/translate.pipe';
+import { SearchableSelect } from '../../shared/searchable-select/searchable-select';
 import { LocalizedDatePipe } from '../../shared/localized-date.pipe';
 import { PatientService } from '../../services/patient.service';
 import { VisitService } from '../../services/visit.service';
@@ -18,7 +19,7 @@ import { BookTableComponent } from '../../shared/book-table/book-table';
 
 @Component({
   selector: 'app-patient-list',
-  imports: [RouterLink, MatTableModule, MatPaginatorModule, MatFormFieldModule, MatInputModule, MatCardModule, MatSelectModule, MatButtonModule, MatIconModule, MatTooltipModule, TranslatePipe, LocalizedDatePipe, BookTableComponent],
+  imports: [RouterLink, MatTableModule, MatPaginatorModule, MatFormFieldModule, MatInputModule, MatCardModule, MatSelectModule, MatButtonModule, MatIconModule, MatTooltipModule, TranslatePipe, SearchableSelect, LocalizedDatePipe, BookTableComponent],
   templateUrl: './patient-list.html',
   styleUrl: './patient-list.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -36,6 +37,9 @@ export default class PatientList implements OnInit {
   genderFilter = signal<string>('');
 
   cities = computed(() => this.patientService.getCities());
+
+  displayCity = (city: string): string => city;
+  valueCity = (city: string): string => city;
 
   filteredPatients = computed(() => {
     return this.patientService.search(this.searchQuery(), {

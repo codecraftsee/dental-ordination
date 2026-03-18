@@ -1066,6 +1066,17 @@ mat-card.stat-card {
   background: var(--color-surface) !important;
 }
 
+.searchable-select-panel {
+  max-height: 300px !important;
+
+  .search-option {
+    position: sticky;
+    top: 0;
+    z-index: 1;
+    background: var(--color-surface, #fff);
+  }
+}
+
 .mat-mdc-option {
   color: var(--color-text);
 

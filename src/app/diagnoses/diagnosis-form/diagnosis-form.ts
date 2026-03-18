@@ -8,12 +8,14 @@ import { MatCardModule } from '@angular/material/card';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { TranslatePipe } from '../../shared/translate.pipe';
+import { SearchableSelect } from '../../shared/searchable-select/searchable-select';
 import { DiagnosisService } from '../../services/diagnosis.service';
+import { TranslateService } from '../../services/translate.service';
 import { DiagnosisCategory } from '../../models/diagnosis.model';
 
 @Component({
   selector: 'app-diagnosis-form',
-  imports: [ReactiveFormsModule, RouterLink, TranslatePipe, MatFormFieldModule, MatInputModule, MatSelectModule, MatCardModule, MatButtonModule, MatIconModule],
+  imports: [ReactiveFormsModule, RouterLink, TranslatePipe, SearchableSelect, MatFormFieldModule, MatInputModule, MatSelectModule, MatCardModule, MatButtonModule, MatIconModule],
   templateUrl: './diagnosis-form.html',
   styleUrl: './diagnosis-form.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -23,8 +25,11 @@ export default class DiagnosisForm implements OnInit {
   private route = inject(ActivatedRoute);
   private router = inject(Router);
   private diagnosisService = inject(DiagnosisService);
+  private translate = inject(TranslateService);
 
   categories = Object.values(DiagnosisCategory);
+  displayCategory = (c: string): string => this.translate.translate('diagnosisCategory.' + c);
+  valueCategory = (c: string): string => c;
   isEditMode = false;
   diagnosisId: string | null = null;
 

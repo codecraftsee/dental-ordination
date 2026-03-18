@@ -8,12 +8,14 @@ import { MatCardModule } from '@angular/material/card';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { TranslatePipe } from '../../shared/translate.pipe';
+import { SearchableSelect } from '../../shared/searchable-select/searchable-select';
 import { DoctorService } from '../../services/doctor.service';
+import { TranslateService } from '../../services/translate.service';
 import { Specialization } from '../../models/doctor.model';
 
 @Component({
   selector: 'app-doctor-form',
-  imports: [ReactiveFormsModule, RouterLink, TranslatePipe, MatFormFieldModule, MatInputModule, MatSelectModule, MatCardModule, MatButtonModule, MatIconModule],
+  imports: [ReactiveFormsModule, RouterLink, TranslatePipe, SearchableSelect, MatFormFieldModule, MatInputModule, MatSelectModule, MatCardModule, MatButtonModule, MatIconModule],
   templateUrl: './doctor-form.html',
   styleUrl: './doctor-form.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -23,8 +25,11 @@ export default class DoctorForm implements OnInit {
   private route = inject(ActivatedRoute);
   private router = inject(Router);
   private doctorService = inject(DoctorService);
+  private translate = inject(TranslateService);
 
   specializations = Object.values(Specialization);
+  displaySpec = (s: string): string => this.translate.translate('specialization.' + s);
+  valueSpec = (s: string): string => s;
   isEditMode = false;
   doctorId: string | null = null;
 

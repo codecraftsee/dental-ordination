@@ -12,24 +12,22 @@
           <mat-icon matPrefix>search</mat-icon>
           <input matInput (input)="onSearch($event)" />
         </mat-form-field>
-        <mat-form-field appearance="fill" class="filter-field">
-          <mat-label>{{ 'visits.filterPatient' | translate }}</mat-label>
-          <mat-select (selectionChange)="patientFilter.set($event.value)">
-            <mat-option value="">{{ 'visits.filterPatient' | translate }}</mat-option>
-            @for (p of patients(); track p.id) {
-              <mat-option [value]="p.id">{{ p.firstName }} {{ p.lastName }}</mat-option>
-            }
-          </mat-select>
-        </mat-form-field>
-        <mat-form-field appearance="fill" class="filter-field">
-          <mat-label>{{ 'visits.filterDoctor' | translate }}</mat-label>
-          <mat-select (selectionChange)="doctorFilter.set($event.value)">
-            <mat-option value="">{{ 'visits.filterDoctor' | translate }}</mat-option>
-            @for (d of doctors(); track d.id) {
-              <mat-option [value]="d.id">Dr. {{ d.firstName }} {{ d.lastName }}</mat-option>
-            }
-          </mat-select>
-        </mat-form-field>
+        <app-searchable-select class="filter-field"
+          [options]="patients()"
+          [displayWith]="displayPatient"
+          [valueWith]="valuePatient"
+          [showAllOption]="true"
+          [allOptionLabel]="'visits.filterPatient' | translate"
+          [label]="'visits.filterPatient' | translate"
+          (selectionChange)="patientFilter.set($event)" />
+        <app-searchable-select class="filter-field"
+          [options]="doctors()"
+          [displayWith]="displayDoctor"
+          [valueWith]="valueDoctor"
+          [showAllOption]="true"
+          [allOptionLabel]="'visits.filterDoctor' | translate"
+          [label]="'visits.filterDoctor' | translate"
+          (selectionChange)="doctorFilter.set($event)" />
         <mat-form-field appearance="fill" class="filter-field">
           <mat-label>{{ 'visits.filterDateFrom' | translate }}</mat-label>
           <input matInput [matDatepicker]="dateFromPicker" (dateChange)="onDateFromChange($event)" readonly />

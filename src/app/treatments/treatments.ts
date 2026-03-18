@@ -10,22 +10,27 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { TranslatePipe } from '../shared/translate.pipe';
+import { SearchableSelect } from '../shared/searchable-select/searchable-select';
 import { CurrencyFormatPipe } from '../shared/currency-format.pipe';
 import { TreatmentService } from '../services/treatment.service';
+import { TranslateService } from '../services/translate.service';
 import { Treatment, TreatmentCategory } from '../models/treatment.model';
 
 @Component({
   selector: 'app-treatments',
-  imports: [RouterLink, TranslatePipe, CurrencyFormatPipe, MatFormFieldModule, MatInputModule, MatSelectModule, MatTableModule, MatPaginatorModule, MatCardModule, MatButtonModule, MatIconModule, MatTooltipModule],
+  imports: [RouterLink, TranslatePipe, SearchableSelect, CurrencyFormatPipe, MatFormFieldModule, MatInputModule, MatSelectModule, MatTableModule, MatPaginatorModule, MatCardModule, MatButtonModule, MatIconModule, MatTooltipModule],
   templateUrl: './treatments.html',
   styleUrl: './treatments.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export default class Treatments implements OnInit {
   private treatmentService = inject(TreatmentService);
+  private translate = inject(TranslateService);
   private paginator = viewChild(MatPaginator);
 
   categories = Object.values(TreatmentCategory);
+  displayCategory = (c: string): string => this.translate.translate('treatmentCategory.' + c);
+  valueCategory = (c: string): string => c;
   displayedColumns = ['code', 'name', 'category', 'defaultPrice', 'description', 'actions'];
   dataSource = new MatTableDataSource<Treatment>();
   searchQuery = signal('');

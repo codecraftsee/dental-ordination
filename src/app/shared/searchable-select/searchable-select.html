@@ -1,0 +1,38 @@
+<mat-form-field appearance="fill">
+  @if (label()) {
+    <mat-label>{{ label() }}</mat-label>
+  }
+  <mat-select
+    [value]="value()"
+    [disabled]="disabled()"
+    (openedChange)="onOpenedChange($event)"
+    (selectionChange)="onSelectionChange($event.value)"
+    panelClass="searchable-select-panel">
+    <mat-option disabled class="search-option" (click)="$event.stopPropagation()">
+      <div class="search-container" (click)="$event.stopPropagation()">
+        <mat-icon>search</mat-icon>
+        <input
+          #searchInput
+          type="text"
+          class="search-input"
+          [placeholder]="'common.search' | translate"
+          [value]="searchTerm()"
+          (input)="searchTerm.set($any($event.target).value)"
+          (keydown)="onSearchKeydown($event)"
+          (click)="$event.stopPropagation()" />
+      </div>
+    </mat-option>
+    @if (showAllOption()) {
+      <mat-option value="">{{ allOptionLabel() }}</mat-option>
+    }
+    @for (opt of filteredOptions(); track opt) {
+      <mat-option [value]="valueWith()(opt)">{{ displayWith()(opt) }}</mat-option>
+    }
+    @if (filteredOptions().length === 0 && searchTerm()) {
+      <mat-option disabled>{{ 'common.noResults' | translate }}</mat-option>
+    }
+  </mat-select>
+  @if (errorMessage()) {
+    <mat-error>{{ errorMessage() }}</mat-error>
+  }
+</mat-form-field>

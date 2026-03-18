@@ -12,11 +12,16 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatSlideToggleModule } from '@angular/material/slide-toggle';
 import { TranslatePipe } from '../../shared/translate.pipe';
+import { SearchableSelect } from '../../shared/searchable-select/searchable-select';
 import { VisitService } from '../../services/visit.service';
 import { PatientService } from '../../services/patient.service';
 import { DoctorService } from '../../services/doctor.service';
 import { DiagnosisService } from '../../services/diagnosis.service';
 import { TreatmentService } from '../../services/treatment.service';
+import { Patient } from '../../models/patient.model';
+import { Doctor } from '../../models/doctor.model';
+import { Diagnosis } from '../../models/diagnosis.model';
+import { Treatment } from '../../models/treatment.model';
 
 @Component({
   selector: 'app-visit-form',
@@ -27,6 +32,7 @@ import { TreatmentService } from '../../services/treatment.service';
     MatFormFieldModule,
     MatInputModule,
     MatSelectModule,
+    SearchableSelect,
     MatDatepickerModule,
     MatNativeDateModule,
     MatCardModule,
@@ -51,6 +57,15 @@ export default class VisitForm implements OnInit, OnDestroy {
   get doctors() { return this.doctorService.getAll(); }
   get diagnoses() { return this.diagnosisService.getAll(); }
   get treatments() { return this.treatmentService.getAll(); }
+
+  displayPatient = (p: Patient): string => `${p.firstName} ${p.lastName}`;
+  valuePatient = (p: Patient): string => p.id;
+  displayDoctor = (d: Doctor): string => `Dr. ${d.firstName} ${d.lastName}`;
+  valueDoctor = (d: Doctor): string => d.id;
+  displayDiagnosis = (dg: Diagnosis): string => `${dg.code} - ${dg.name}`;
+  valueDiagnosis = (dg: Diagnosis): string => dg.id;
+  displayTreatment = (tx: Treatment): string => `${tx.code} - ${tx.name}`;
+  valueTreatment = (tx: Treatment): string => tx.id;
 
   form!: FormGroup;
   private treatmentSub?: Subscription;

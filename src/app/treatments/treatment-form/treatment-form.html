@@ -20,15 +20,13 @@
       </div>
 
       <div class="form-row">
-        <mat-form-field appearance="fill">
-          <mat-label>{{ 'treatments.category' | translate }}</mat-label>
-          <mat-select formControlName="category">
-            @for (cat of categories; track cat) {
-              <mat-option [value]="cat">{{ 'treatmentCategory.' + cat | translate }}</mat-option>
-            }
-          </mat-select>
-          <mat-error>{{ 'common.required' | translate }}</mat-error>
-        </mat-form-field>
+        <app-searchable-select
+          formControlName="category"
+          [options]="categories"
+          [displayWith]="displayCategory"
+          [valueWith]="valueCategory"
+          [label]="'treatments.category' | translate"
+          [errorMessage]="'common.required' | translate" />
         <mat-form-field appearance="fill">
           <mat-label>{{ 'treatments.defaultPrice' | translate }}</mat-label>
           <input matInput type="number" formControlName="defaultPrice" />

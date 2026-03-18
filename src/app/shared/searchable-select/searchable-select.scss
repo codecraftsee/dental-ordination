@@ -1,0 +1,36 @@
+.search-option {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  background: var(--color-surface, #fff);
+}
+
+.search-container {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+}
+
+.search-input {
+  border: none;
+  outline: none;
+  background: transparent;
+  font: inherit;
+  color: var(--color-text, #333);
+  width: 100%;
+  padding: 4px 0;
+
+  &::placeholder {
+    color: var(--color-text-secondary, #999);
+  }
+}
+
+:host {
+  display: block;
+  width: 100%;
+}
+
+mat-form-field {
+  width: 100%;
+}

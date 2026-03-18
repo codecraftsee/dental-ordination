@@ -13,6 +13,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { forkJoin } from 'rxjs';
 import { TranslatePipe } from '../../shared/translate.pipe';
+import { SearchableSelect } from '../../shared/searchable-select/searchable-select';
 import { LocalizedDatePipe } from '../../shared/localized-date.pipe';
 import { CurrencyFormatPipe } from '../../shared/currency-format.pipe';
 import { VisitService } from '../../services/visit.service';
@@ -21,10 +22,12 @@ import { DoctorService } from '../../services/doctor.service';
 import { DiagnosisService } from '../../services/diagnosis.service';
 import { TreatmentService } from '../../services/treatment.service';
 import { Visit } from '../../models/visit.model';
+import { Patient } from '../../models/patient.model';
+import { Doctor } from '../../models/doctor.model';
 
 @Component({
   selector: 'app-visit-list',
-  imports: [RouterLink, TranslatePipe, LocalizedDatePipe, CurrencyFormatPipe, MatFormFieldModule, MatInputModule, MatSelectModule, MatTableModule, MatPaginatorModule, MatCardModule, MatDatepickerModule, MatNativeDateModule, MatButtonModule, MatIconModule, MatTooltipModule],
+  imports: [RouterLink, TranslatePipe, SearchableSelect, LocalizedDatePipe, CurrencyFormatPipe, MatFormFieldModule, MatInputModule, MatSelectModule, MatTableModule, MatPaginatorModule, MatCardModule, MatDatepickerModule, MatNativeDateModule, MatButtonModule, MatIconModule, MatTooltipModule],
   templateUrl: './visit-list.html',
   styleUrl: './visit-list.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -47,6 +50,11 @@ export default class VisitList implements OnInit {
 
   patients = computed(() => this.patientService.getAll());
   doctors = computed(() => this.doctorService.getAll());
+
+  displayPatient = (p: Patient): string => `${p.firstName} ${p.lastName}`;
+  valuePatient = (p: Patient): string => p.id;
+  displayDoctor = (d: Doctor): string => `Dr. ${d.firstName} ${d.lastName}`;
+  valueDoctor = (d: Doctor): string => d.id;
 
   private patientNames = computed(() => {
     const map = new Map<string, string>();

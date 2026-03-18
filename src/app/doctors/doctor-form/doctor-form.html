@@ -20,15 +20,13 @@
       </div>
 
       <div class="form-row">
-        <mat-form-field appearance="fill">
-          <mat-label>{{ 'doctor.specialization' | translate }}</mat-label>
-          <mat-select formControlName="specialization">
-            @for (spec of specializations; track spec) {
-              <mat-option [value]="spec">{{ 'specialization.' + spec | translate }}</mat-option>
-            }
-          </mat-select>
-          <mat-error>{{ 'common.required' | translate }}</mat-error>
-        </mat-form-field>
+        <app-searchable-select
+          formControlName="specialization"
+          [options]="specializations"
+          [displayWith]="displaySpec"
+          [valueWith]="valueSpec"
+          [label]="'doctor.specialization' | translate"
+          [errorMessage]="'common.required' | translate" />
         <mat-form-field appearance="fill">
           <mat-label>{{ 'doctor.licenseNumber' | translate }}</mat-label>
           <input matInput type="text" formControlName="licenseNumber" />

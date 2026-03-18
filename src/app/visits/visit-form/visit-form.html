@@ -7,24 +7,20 @@
     <mat-card-content>
     <form [formGroup]="form" (ngSubmit)="onSubmit()">
       <div class="form-row">
-        <mat-form-field appearance="fill">
-          <mat-label>{{ 'visit.patient' | translate }}</mat-label>
-          <mat-select formControlName="patientId">
-            @for (p of patients; track p.id) {
-              <mat-option [value]="p.id">{{ p.firstName }} {{ p.lastName }}</mat-option>
-            }
-          </mat-select>
-          <mat-error>{{ 'common.required' | translate }}</mat-error>
-        </mat-form-field>
-        <mat-form-field appearance="fill">
-          <mat-label>{{ 'visit.doctor' | translate }}</mat-label>
-          <mat-select formControlName="doctorId">
-            @for (d of doctors; track d.id) {
-              <mat-option [value]="d.id">Dr. {{ d.firstName }} {{ d.lastName }}</mat-option>
-            }
-          </mat-select>
-          <mat-error>{{ 'common.required' | translate }}</mat-error>
-        </mat-form-field>
+        <app-searchable-select
+          formControlName="patientId"
+          [options]="patients"
+          [displayWith]="displayPatient"
+          [valueWith]="valuePatient"
+          [label]="'visit.patient' | translate"
+          [errorMessage]="'common.required' | translate" />
+        <app-searchable-select
+          formControlName="doctorId"
+          [options]="doctors"
+          [displayWith]="displayDoctor"
+          [valueWith]="valueDoctor"
+          [label]="'visit.doctor' | translate"
+          [errorMessage]="'common.required' | translate" />
       </div>
 
       <div class="form-row">
@@ -43,15 +39,13 @@
       </div>
 
       <div class="form-row">
-        <mat-form-field appearance="fill">
-          <mat-label>{{ 'visit.diagnosis' | translate }}</mat-label>
-          <mat-select formControlName="diagnosisId">
-            @for (dg of diagnoses; track dg.id) {
-              <mat-option [value]="dg.id">{{ dg.code }} - {{ dg.name }}</mat-option>
-            }
-          </mat-select>
-          <mat-error>{{ 'common.required' | translate }}</mat-error>
-        </mat-form-field>
+        <app-searchable-select
+          formControlName="diagnosisId"
+          [options]="diagnoses"
+          [displayWith]="displayDiagnosis"
+          [valueWith]="valueDiagnosis"
+          [label]="'visit.diagnosis' | translate"
+          [errorMessage]="'common.required' | translate" />
         <mat-form-field appearance="fill">
           <mat-label>{{ 'visit.diagnosisNotes' | translate }}</mat-label>
           <input matInput type="text" formControlName="diagnosisNotes" />
@@ -59,15 +53,13 @@
       </div>
 
       <div class="form-row">
-        <mat-form-field appearance="fill">
-          <mat-label>{{ 'visit.treatment' | translate }}</mat-label>
-          <mat-select formControlName="treatmentId">
-            @for (tx of treatments; track tx.id) {
-              <mat-option [value]="tx.id">{{ tx.code }} - {{ tx.name }}</mat-option>
-            }
-          </mat-select>
-          <mat-error>{{ 'common.required' | translate }}</mat-error>
-        </mat-form-field>
+        <app-searchable-select
+          formControlName="treatmentId"
+          [options]="treatments"
+          [displayWith]="displayTreatment"
+          [valueWith]="valueTreatment"
+          [label]="'visit.treatment' | translate"
+          [errorMessage]="'common.required' | translate" />
         <mat-form-field appearance="fill">
           <mat-label>{{ 'visit.treatmentNotes' | translate }}</mat-label>
           <input matInput type="text" formControlName="treatmentNotes" />

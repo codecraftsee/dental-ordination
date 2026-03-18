@@ -8,12 +8,14 @@ import { MatCardModule } from '@angular/material/card';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { TranslatePipe } from '../../shared/translate.pipe';
+import { SearchableSelect } from '../../shared/searchable-select/searchable-select';
 import { TreatmentService } from '../../services/treatment.service';
+import { TranslateService } from '../../services/translate.service';
 import { TreatmentCategory } from '../../models/treatment.model';
 
 @Component({
   selector: 'app-treatment-form',
-  imports: [ReactiveFormsModule, RouterLink, TranslatePipe, MatFormFieldModule, MatInputModule, MatSelectModule, MatCardModule, MatButtonModule, MatIconModule],
+  imports: [ReactiveFormsModule, RouterLink, TranslatePipe, SearchableSelect, MatFormFieldModule, MatInputModule, MatSelectModule, MatCardModule, MatButtonModule, MatIconModule],
   templateUrl: './treatment-form.html',
   styleUrl: './treatment-form.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -23,8 +25,11 @@ export default class TreatmentForm implements OnInit {
   private route = inject(ActivatedRoute);
   private router = inject(Router);
   private treatmentService = inject(TreatmentService);
+  private translate = inject(TranslateService);
 
   categories = Object.values(TreatmentCategory);
+  displayCategory = (c: string): string => this.translate.translate('treatmentCategory.' + c);
+  valueCategory = (c: string): string => c;
   isEditMode = false;
   treatmentId: string | null = null;
 

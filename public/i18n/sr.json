@@ -208,6 +208,8 @@
   "common.actions": "Akcije",
   "common.confirmDelete": "Da li ste sigurni da želite da obrišete?",
   "common.rowsPerPage": "Redova po stranici",
+  "common.search": "Pretraži...",
+  "common.noResults": "Nema rezultata",
   "common.required": "Ovo polje je obavezno",
   "common.invalidEmail": "Unesite ispravnu email adresu",
   "common.minLength": "Minimalna dužina je {0} karaktera",
