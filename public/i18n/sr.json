@@ -19,6 +19,8 @@
   "home.noRecentVisits": "Nema nedavnih poseta",
   "home.importXlsx": "Uvezi XLSX",
   "home.importing": "Uvoz u toku...",
+  "home.importingFile": "Obrađuje se:",
+  "home.importingFiles": "fajlova",
   "home.importSuccess": "Uvoz uspešno završen",
   "home.importError": "Uvoz završen sa upozorenjima",
 

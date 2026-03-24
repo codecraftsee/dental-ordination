@@ -3,6 +3,7 @@ import { RouterLink } from '@angular/router';
 import { MatCardModule } from '@angular/material/card';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
+import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { forkJoin } from 'rxjs';
 import { TranslatePipe } from '../shared/translate.pipe';
 import { LocalizedDatePipe } from '../shared/localized-date.pipe';
@@ -17,7 +18,7 @@ import { Visit } from '../models/visit.model';
 
 @Component({
   selector: 'app-home',
-  imports: [RouterLink, MatCardModule, MatButtonModule, MatIconModule, TranslatePipe, LocalizedDatePipe, CurrencyFormatPipe, BookTableComponent],
+  imports: [RouterLink, MatCardModule, MatButtonModule, MatIconModule, MatProgressBarModule, TranslatePipe, LocalizedDatePipe, CurrencyFormatPipe, BookTableComponent],
   templateUrl: './home.html',
   styleUrl: './home.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -35,6 +36,9 @@ export default class Home implements OnInit {
   importing = signal(false);
   importMessage = signal('');
   importError = signal(false);
+  importProgress = signal(0);
+  importCurrentFile = signal('');
+  importTotal = signal(0);
   totalPatients = 0;
   totalDoctors = 0;
   visitsThisMonth = 0;
@@ -90,19 +94,36 @@ export default class Home implements OnInit {
     this.importing.set(true);
     this.importMessage.set('');
     this.importError.set(false);
+    this.importProgress.set(0);
+    this.importCurrentFile.set('');
+    this.importTotal.set(0);
 
     this.patientService.importXlsx(Array.from(files)).subscribe({
-      next: (result) => {
-        this.importing.set(false);
-        this.importError.set(result.errors.length > 0);
-        const msg = `Imported ${result.filesProcessed} file(s): ${result.patientsCreated} new patient(s), ${result.visitsCreated} visit(s).`;
-        this.importMessage.set(result.errors.length > 0 ? msg + ` ${result.errors.length} warning(s).` : msg);
-        this.ngOnInit();
+      next: (event) => {
+        if (event.type === 'progress') {
+          this.importTotal.set(event.total);
+          this.importCurrentFile.set(event.file);
+          // Show 0% at START of each file so the bar is visible before processing
+          this.importProgress.set(Math.round(((event.current - 1) / event.total) * 100));
+        } else if (event.type === 'file_done') {
+          // Advance bar to X% when file finishes
+          this.importProgress.set(Math.round((event.current / event.total) * 100));
+        } else if (event.type === 'complete') {
+          this.importing.set(false);
+          const s = event.summary;
+          const msg = `Imported ${s.filesProcessed} file(s): ${s.patientsCreated} new patient(s), ${s.visitsCreated} visit(s).`;
+          this.importError.set(s.errors.length > 0);
+          const warnings = s.errors.length > 0 ? ` Warnings: ${s.errors.join(' | ')}` : '';
+          this.importMessage.set(msg + warnings);
+          this.importProgress.set(100);
+          this.ngOnInit();
+        }
       },
       error: (err) => {
         this.importing.set(false);
         this.importError.set(true);
-        this.importMessage.set('Import failed: ' + (err.error?.detail || err.message));
+        this.importMessage.set('Import failed: ' + (err?.detail || err?.message || 'Unknown error'));
+        this.importProgress.set(0);
       },
     });
 
