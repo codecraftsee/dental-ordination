@@ -6,7 +6,7 @@ Additionally, the progress indicator and result message were styled with custom 
 
 ## What Changes
 
-- Backend streams import progress via Server-Sent Events (SSE) so the frontend can update in real time
+- Backend streams import progress via Server-Sent Events (SSE) so the frontend can update in real-time
 - Frontend subscribes to the SSE stream and drives a determinate `mat-progress-bar`
 - Progress block and result message are wrapped in `mat-card` (Angular Material) instead of custom-styled divs
 - New i18n keys for file-processing labels

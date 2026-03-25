@@ -6,6 +6,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { forkJoin } from 'rxjs';
 import { TranslatePipe } from '../shared/translate.pipe';
+import { TranslateService } from '../services/translate.service';
 import { LocalizedDatePipe } from '../shared/localized-date.pipe';
 import { CurrencyFormatPipe } from '../shared/currency-format.pipe';
 import { PatientService } from '../services/patient.service';
@@ -29,6 +30,7 @@ export default class Home implements OnInit {
   private visitService = inject(VisitService);
   private diagnosisService = inject(DiagnosisService);
   private treatmentService = inject(TreatmentService);
+  private translate = inject(TranslateService);
 
   @ViewChild('xlsxInput') xlsxInput!: ElementRef<HTMLInputElement>;
 
@@ -111,9 +113,16 @@ export default class Home implements OnInit {
         } else if (event.type === 'complete') {
           this.importing.set(false);
           const s = event.summary;
-          const msg = `Imported ${s.filesProcessed} file(s): ${s.patientsCreated} new patient(s), ${s.visitsCreated} visit(s).`;
+          const msg = this.translate.format('home.importSummary', {
+            filesProcessed: s.filesProcessed,
+            patientsCreated: s.patientsCreated,
+            visitsCreated: s.visitsCreated,
+          });
           this.importError.set(s.errors.length > 0);
-          const warnings = s.errors.length > 0 ? ` Warnings: ${s.errors.join(' | ')}` : '';
+          const warnings =
+            s.errors.length > 0
+              ? ' ' + this.translate.format('home.importWarnings', { warnings: s.errors.join(' | ') })
+              : '';
           this.importMessage.set(msg + warnings);
           this.importProgress.set(100);
           this.ngOnInit();
@@ -122,7 +131,8 @@ export default class Home implements OnInit {
       error: (err) => {
         this.importing.set(false);
         this.importError.set(true);
-        this.importMessage.set('Import failed: ' + (err?.detail || err?.message || 'Unknown error'));
+        const detail = err?.detail || err?.message || this.translate.instant('home.importUnknownError');
+        this.importMessage.set(this.translate.format('home.importFailed', { detail }));
         this.importProgress.set(0);
       },
     });

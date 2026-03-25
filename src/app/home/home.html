@@ -79,20 +79,26 @@
   </div>
 
   @if (importing()) {
-    <mat-card class="import-progress-card">
+    <mat-card class="import-progress-card" role="status" aria-live="polite" aria-atomic="true">
       <mat-card-content>
         <div class="import-progress-header">
-          <span class="mat-body-1">{{ 'home.importingFile' | translate }} {{ importCurrentFile() }}</span>
+          <span id="import-progress-label" class="mat-body-1">{{ 'home.importingFile' | translate }} {{ importCurrentFile() }}</span>
           <span class="mat-body-2">{{ importProgress() }}%</span>
         </div>
-        <mat-progress-bar mode="determinate" [value]="importProgress()" />
-        <span class="mat-caption import-total">{{ importTotal() }} {{ 'home.importingFiles' | translate }}</span>
+        <mat-progress-bar mode="determinate" [value]="importProgress()" aria-labelledby="import-progress-label" />
+        <span class="mat-caption import-total">{{ 'home.importingFilesCount' | translate: { count: importTotal() } }}</span>
       </mat-card-content>
     </mat-card>
   }
 
   @if (importMessage()) {
-    <mat-card class="import-message-card" [class.import-message-error]="importError()">
+    <mat-card
+      class="import-message-card"
+      [class.import-message-error]="importError()"
+      role="status"
+      [attr.aria-live]="importError() ? 'assertive' : 'polite'"
+      aria-atomic="true"
+    >
       <mat-card-content>
         <span class="mat-body-2">{{ importMessage() }}</span>
       </mat-card-content>

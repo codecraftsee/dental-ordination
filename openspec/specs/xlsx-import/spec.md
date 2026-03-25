@@ -22,8 +22,9 @@ An admin-only endpoint parses XLSX dental card files and imports patients and vi
 - **THEN** each file is processed independently
 - **AND** the response is a `StreamingResponse` with `Content-Type: text/event-stream`
 - **AND** for each file a `progress` event is emitted: `{ type, current, total, file }`
-- **AND** when a file finishes a `file_done` event is emitted: `{ type, current, total, file, patientsCreated, visitsCreated, errors }`
+- **AND** when a file finishes a `file_done` event is emitted: `{ type, current, total, file, patients_created, visits_created, errors }`
 - **AND** after all files a `complete` event is emitted: `{ type, summary: ImportResult }`
+- **NOTE** all SSE payloads are wire-format snake_case; `patient.service.ts` converts them to camelCase via `snakeToCamel()` before exposing them as `ImportProgressEvent`
 - **AND** the result summary aggregates counts across all files
 
 #### Scenario: Patient deduplication

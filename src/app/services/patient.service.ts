@@ -105,6 +105,9 @@ export class PatientService {
 
   importXlsx(files: File[]): Observable<ImportProgressEvent> {
     return new Observable(observer => {
+      const controller = new AbortController();
+      let reader: ReadableStreamDefaultReader<Uint8Array> | undefined;
+
       const formData = new FormData();
       for (const file of files) formData.append('files', file);
       const token = this.authService.getAccessToken();
@@ -113,13 +116,14 @@ export class PatientService {
         method: 'POST',
         headers: token ? { Authorization: `Bearer ${token}` } : {},
         body: formData,
+        signal: controller.signal,
       }).then(async response => {
         if (!response.ok) {
           const err = await response.json().catch(() => ({}));
           this.ngZone.run(() => observer.error(err));
           return;
         }
-        const reader = response.body!.getReader();
+        reader = response.body!.getReader();
         const decoder = new TextDecoder();
         let buffer = '';
         while (true) {
@@ -136,7 +140,15 @@ export class PatientService {
             }
           }
         }
-      }).catch(err => this.ngZone.run(() => observer.error(err)));
+      }).catch(err => {
+        if (err instanceof DOMException && err.name === 'AbortError') return;
+        this.ngZone.run(() => observer.error(err));
+      });
+
+      return () => {
+        controller.abort();
+        reader?.cancel();
+      };
     });
   }
 
