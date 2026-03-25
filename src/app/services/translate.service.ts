@@ -28,6 +28,24 @@ export class TranslateService {
     return this.translations()[key] || key;
   }
 
+  format(key: string, params: Record<string, string | number>): string {
+    let value = this.translations()[key] || key;
+    for (const [param, replacement] of Object.entries(params)) {
+      value = value.replace(`{${param}}`, String(replacement));
+    }
+    return value;
+  }
+
+  translatePlural(baseKey: string, count: number): string {
+    const category = new Intl.PluralRules(this.currentLang()).select(count);
+    const value =
+      this.translations()[`${baseKey}_${category}`] ??
+      this.translations()[`${baseKey}_other`] ??
+      this.translations()[baseKey] ??
+      baseKey;
+    return value.replace('{count}', String(count));
+  }
+
   instant(key: string): string {
     return this.translate(key);
   }

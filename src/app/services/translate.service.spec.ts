@@ -1,7 +1,14 @@
 import { TestBed } from '@angular/core/testing';
 import { TranslateService } from './translate.service';
 
-const mockTranslations = { 'common.save': 'Save', 'nav.home': 'Home' };
+const mockTranslations = {
+  'common.save': 'Save',
+  'nav.home': 'Home',
+  'home.importingFilesCount_one': '1 file',
+  'home.importingFilesCount_other': '{count} files',
+  'home.importSummary': 'Imported {filesProcessed} file(s): {patientsCreated} new patient(s), {visitsCreated} visit(s).',
+  'home.importFailed': 'Import failed: {detail}',
+};
 
 describe('TranslateService', () => {
   beforeEach(() => {
@@ -48,5 +55,37 @@ describe('TranslateService', () => {
     const service = TestBed.inject(TranslateService);
     await service.setLanguage('en');
     expect(service.translate('common.save')).toBe('Save');
+  });
+
+  it('translatePlural returns singular form for count 1', async () => {
+    const service = TestBed.inject(TranslateService);
+    await service.setLanguage('en');
+    expect(service.translatePlural('home.importingFilesCount', 1)).toBe('1 file');
+  });
+
+  it('translatePlural returns plural form with count substituted', async () => {
+    const service = TestBed.inject(TranslateService);
+    await service.setLanguage('en');
+    expect(service.translatePlural('home.importingFilesCount', 5)).toBe('5 files');
+  });
+
+  it('translatePlural falls back to baseKey when no variant found', async () => {
+    const service = TestBed.inject(TranslateService);
+    await service.setLanguage('en');
+    expect(service.translatePlural('missing.key', 3)).toBe('missing.key');
+  });
+
+  it('format substitutes all named placeholders', async () => {
+    const service = TestBed.inject(TranslateService);
+    await service.setLanguage('en');
+    expect(
+      service.format('home.importSummary', { filesProcessed: 2, patientsCreated: 1, visitsCreated: 5 }),
+    ).toBe('Imported 2 file(s): 1 new patient(s), 5 visit(s).');
+  });
+
+  it('format falls back to key when translation is missing', async () => {
+    const service = TestBed.inject(TranslateService);
+    await service.setLanguage('en');
+    expect(service.format('missing.key', { foo: 'bar' })).toBe('missing.key');
   });
 });
