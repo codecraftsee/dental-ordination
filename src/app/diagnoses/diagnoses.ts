@@ -11,6 +11,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { TranslatePipe } from '../shared/translate.pipe';
 import { DiagnosisService } from '../services/diagnosis.service';
+import { ConfirmDialogService } from '../services/confirm-dialog.service';
 import { Diagnosis, DiagnosisCategory } from '../models/diagnosis.model';
 
 @Component({
@@ -22,6 +23,7 @@ import { Diagnosis, DiagnosisCategory } from '../models/diagnosis.model';
 })
 export default class Diagnoses implements OnInit {
   private diagnosisService = inject(DiagnosisService);
+  private confirmDialogService = inject(ConfirmDialogService);
   private paginator = viewChild(MatPaginator);
 
   categories = Object.values(DiagnosisCategory);
@@ -58,6 +60,12 @@ export default class Diagnoses implements OnInit {
   }
 
   deleteDiagnosis(id: string): void {
-    this.diagnosisService.delete(id).subscribe();
+    this.confirmDialogService
+      .confirm('diagnosis.deleteTitle', 'diagnosis.deleteMessage')
+      .subscribe(confirmed => {
+        if (confirmed) {
+          this.diagnosisService.delete(id).subscribe();
+        }
+      });
   }
 }

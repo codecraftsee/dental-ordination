@@ -4,8 +4,11 @@ import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { provideRouter } from '@angular/router';
 import { ActivatedRoute } from '@angular/router';
 import { signal } from '@angular/core';
+import { of } from 'rxjs';
+import { vi } from 'vitest';
 import PatientDetail from './patient-detail';
 import { Visit } from '../../models/visit.model';
+import { ConfirmDialogService } from '../../services/confirm-dialog.service';
 
 const mockVisits: Visit[] = [
   { id: 'v1', patientId: 'p1', doctorId: 'd1', date: '2024-01-01', toothNumber: null, price: 1000, paid: false, createdAt: '', updatedAt: '' },
@@ -24,6 +27,7 @@ describe('PatientDetail debt signals', () => {
         provideHttpClientTesting(),
         provideRouter([]),
         { provide: ActivatedRoute, useValue: { snapshot: { paramMap: { get: () => 'p1' } } } },
+        { provide: ConfirmDialogService, useValue: { confirm: vi.fn().mockReturnValue(of(false)) } },
       ],
     });
     component = TestBed.createComponent(PatientDetail).componentInstance;

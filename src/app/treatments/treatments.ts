@@ -12,6 +12,7 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 import { TranslatePipe } from '../shared/translate.pipe';
 import { CurrencyFormatPipe } from '../shared/currency-format.pipe';
 import { TreatmentService } from '../services/treatment.service';
+import { ConfirmDialogService } from '../services/confirm-dialog.service';
 import { Treatment, TreatmentCategory } from '../models/treatment.model';
 
 @Component({
@@ -23,6 +24,7 @@ import { Treatment, TreatmentCategory } from '../models/treatment.model';
 })
 export default class Treatments implements OnInit {
   private treatmentService = inject(TreatmentService);
+  private confirmDialogService = inject(ConfirmDialogService);
   private paginator = viewChild(MatPaginator);
 
   categories = Object.values(TreatmentCategory);
@@ -59,6 +61,12 @@ export default class Treatments implements OnInit {
   }
 
   deleteTreatment(id: string): void {
-    this.treatmentService.delete(id).subscribe();
+    this.confirmDialogService
+      .confirm('treatment.deleteTitle', 'treatment.deleteMessage')
+      .subscribe(confirmed => {
+        if (confirmed) {
+          this.treatmentService.delete(id).subscribe();
+        }
+      });
   }
 }

@@ -5,18 +5,18 @@ import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { signal } from '@angular/core';
 import { of } from 'rxjs';
 import { vi } from 'vitest';
-import Diagnoses from './diagnoses';
+import Treatments from './treatments';
 import { TranslateService } from '../services/translate.service';
-import { DiagnosisService } from '../services/diagnosis.service';
+import { TreatmentService } from '../services/treatment.service';
 import { ConfirmDialogService } from '../services/confirm-dialog.service';
 
-describe('Diagnoses', () => {
-  let component: Diagnoses;
-  let fixture: ComponentFixture<Diagnoses>;
+describe('Treatments', () => {
+  let component: Treatments;
+  let fixture: ComponentFixture<Treatments>;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [Diagnoses],
+      imports: [Treatments],
       providers: [
         provideRouter([]),
         provideHttpClient(),
@@ -37,7 +37,7 @@ describe('Diagnoses', () => {
       ],
     }).compileComponents();
 
-    fixture = TestBed.createComponent(Diagnoses);
+    fixture = TestBed.createComponent(Treatments);
     component = fixture.componentInstance;
   });
 
@@ -53,46 +53,34 @@ describe('Diagnoses', () => {
     expect(component.categoryFilter()).toBe('');
   });
 
-  it('updates search query on search event', () => {
-    const event = { target: { value: 'caries' } } as unknown as Event;
-    component.onSearch(event);
-    expect(component.searchQuery()).toBe('caries');
-  });
-
-  it('has diagnosis categories available', () => {
+  it('has treatment categories available', () => {
     expect(component.categories.length).toBeGreaterThan(0);
   });
 
   it('has displayedColumns defined', () => {
-    expect(component.displayedColumns).toEqual(['code', 'name', 'category', 'description', 'actions']);
+    expect(component.displayedColumns).toEqual(['code', 'name', 'category', 'defaultPrice', 'description', 'actions']);
   });
 
-  it('renders add new link pointing to /diagnoses/new', () => {
-    fixture.detectChanges();
-    const link = fixture.nativeElement.querySelector('a[href="/diagnoses/new"]');
-    expect(link).toBeTruthy();
-  });
-
-  it('deleteDiagnosis calls confirm dialog and does not delete when cancelled', () => {
+  it('deleteTreatment calls confirm dialog and does not delete when cancelled', () => {
     const confirmDialogService = TestBed.inject(ConfirmDialogService);
-    const diagnosisService = TestBed.inject(DiagnosisService);
-    const deleteSpy = vi.spyOn(diagnosisService, 'delete');
+    const treatmentService = TestBed.inject(TreatmentService);
+    const deleteSpy = vi.spyOn(treatmentService, 'delete');
     (confirmDialogService.confirm as ReturnType<typeof vi.fn>).mockReturnValue(of(false));
 
-    component.deleteDiagnosis('dg1');
+    component.deleteTreatment('t1');
 
-    expect(confirmDialogService.confirm).toHaveBeenCalledWith('diagnosis.deleteTitle', 'diagnosis.deleteMessage');
+    expect(confirmDialogService.confirm).toHaveBeenCalledWith('treatment.deleteTitle', 'treatment.deleteMessage');
     expect(deleteSpy).not.toHaveBeenCalled();
   });
 
-  it('deleteDiagnosis deletes when confirmed', () => {
+  it('deleteTreatment deletes when confirmed', () => {
     const confirmDialogService = TestBed.inject(ConfirmDialogService);
-    const diagnosisService = TestBed.inject(DiagnosisService);
-    const deleteSpy = vi.spyOn(diagnosisService, 'delete').mockReturnValue(of(undefined));
+    const treatmentService = TestBed.inject(TreatmentService);
+    const deleteSpy = vi.spyOn(treatmentService, 'delete').mockReturnValue(of(undefined));
     (confirmDialogService.confirm as ReturnType<typeof vi.fn>).mockReturnValue(of(true));
 
-    component.deleteDiagnosis('dg1');
+    component.deleteTreatment('t1');
 
-    expect(deleteSpy).toHaveBeenCalledWith('dg1');
+    expect(deleteSpy).toHaveBeenCalledWith('t1');
   });
 });

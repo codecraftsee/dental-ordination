@@ -1,0 +1,15 @@
+<h2 mat-dialog-title>
+  <mat-icon aria-hidden="true">warning</mat-icon>
+  {{ data.title }}
+</h2>
+
+<mat-dialog-content>
+  <p>{{ data.message }}</p>
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+  <button matButton (click)="cancel()">{{ 'common.no' | translate }}</button>
+  <button matButton="flat" color="warn" (click)="confirm()" cdkFocusInitial>
+    {{ 'common.yes' | translate }}
+  </button>
+</mat-dialog-actions>
