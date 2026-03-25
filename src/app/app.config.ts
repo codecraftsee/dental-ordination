@@ -2,6 +2,7 @@ import { ApplicationConfig, provideBrowserGlobalErrorListeners } from '@angular/
 import { provideRouter } from '@angular/router';
 import { provideHttpClient, withInterceptors } from '@angular/common/http';
 import { registerLocaleData } from '@angular/common';
+import { provideAnimationsAsync } from '@angular/platform-browser/animations/async';
 import localeSr from '@angular/common/locales/sr-Latn';
 
 import { routes } from './app.routes';
@@ -18,5 +19,6 @@ export const appConfig: ApplicationConfig = {
     provideHttpClient(
       withInterceptors([caseTransformInterceptor, authInterceptor, errorInterceptor]),
     ),
+    provideAnimationsAsync(),
   ],
 };

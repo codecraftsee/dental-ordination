@@ -9,7 +9,7 @@ import { forkJoin } from 'rxjs';
 import { TranslatePipe } from '../../shared/translate.pipe';
 import { LocalizedDatePipe } from '../../shared/localized-date.pipe';
 import { CurrencyFormatPipe } from '../../shared/currency-format.pipe';
-import { TranslateService } from '../../services/translate.service';
+import { ConfirmDialogService } from '../../services/confirm-dialog.service';
 import { PatientService } from '../../services/patient.service';
 import { VisitService } from '../../services/visit.service';
 import { DoctorService } from '../../services/doctor.service';
@@ -28,7 +28,7 @@ import { Visit } from '../../models/visit.model';
 export default class PatientDetail implements OnInit {
   private route = inject(ActivatedRoute);
   private router = inject(Router);
-  private translateService = inject(TranslateService);
+  private confirmDialogService = inject(ConfirmDialogService);
   private patientService = inject(PatientService);
   private visitService = inject(VisitService);
   private doctorService = inject(DoctorService);
@@ -120,10 +120,15 @@ export default class PatientDetail implements OnInit {
 
   deletePatient(): void {
     const p = this.patient();
-    if (p && confirm(this.translateService.translate('common.confirmDelete'))) {
-      this.patientService.delete(p.id).subscribe(() => {
-        this.router.navigate(['/patients']);
+    if (!p) return;
+    this.confirmDialogService
+      .confirm('patient.deleteTitle', 'patient.deleteMessage')
+      .subscribe(confirmed => {
+        if (confirmed) {
+          this.patientService.delete(p.id).subscribe(() => {
+            this.router.navigate(['/patients']);
+          });
+        }
       });
-    }
   }
 }
