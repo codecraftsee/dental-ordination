@@ -1,15 +1,19 @@
-<h2 mat-dialog-title>
-  <mat-icon aria-hidden="true">warning</mat-icon>
-  {{ data.title }}
-</h2>
+<div class="confirm-dialog">
+  <div class="confirm-dialog__header">
+    <div class="confirm-dialog__icon-wrap">
+      <mat-icon aria-hidden="true">warning</mat-icon>
+    </div>
+    <h2>{{ data.title }}</h2>
+  </div>
 
-<mat-dialog-content>
-  <p>{{ data.message }}</p>
-</mat-dialog-content>
+  <div class="confirm-dialog__body">
+    <p>{{ data.message }}</p>
+  </div>
 
-<mat-dialog-actions align="end">
-  <button matButton (click)="cancel()">{{ 'common.no' | translate }}</button>
-  <button matButton="filled" color="warn" (click)="confirm()" cdkFocusInitial>
-    {{ 'common.yes' | translate }}
-  </button>
-</mat-dialog-actions>
+  <div class="confirm-dialog__actions">
+    <button matButton="outlined" (click)="cancel()">{{ 'common.no' | translate }}</button>
+    <button matButton="elevated" color="warn" (click)="confirm()" cdkFocusInitial>
+      {{ 'common.yes' | translate }}
+    </button>
+  </div>
+</div>
