@@ -93,6 +93,10 @@
           <mat-icon>assignment</mat-icon>
           {{ 'patients.viewDentalCard' | translate }}
         </a>
+        <button mat-button color="warn" (click)="deletePatient(patient.id)">
+          <mat-icon>delete</mat-icon>
+          {{ 'common.delete' | translate }}
+        </button>
       </div>
     </ng-template>
   </app-book-table>
@@ -140,6 +144,9 @@
           <a mat-icon-button class="icon-btn--success" [routerLink]="['/patients', p.id, 'dental-card']" [matTooltip]="'patients.viewDentalCard' | translate">
             <mat-icon>assignment</mat-icon>
           </a>
+          <button mat-icon-button class="icon-btn--danger" (click)="deletePatient(p.id)" [matTooltip]="'common.delete' | translate">
+            <mat-icon>delete</mat-icon>
+          </button>
         </div>
       </td>
     </ng-container>

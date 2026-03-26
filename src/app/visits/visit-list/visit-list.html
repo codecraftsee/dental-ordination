@@ -96,6 +96,9 @@
           <a mat-icon-button class="icon-btn--primary" [routerLink]="['/visits', v.id]" [matTooltip]="'common.view' | translate">
             <mat-icon>visibility</mat-icon>
           </a>
+          <button mat-icon-button class="icon-btn--danger" (click)="deleteVisit(v.id)" [matTooltip]="'common.delete' | translate">
+            <mat-icon>delete</mat-icon>
+          </button>
         </div>
       </td>
     </ng-container>
