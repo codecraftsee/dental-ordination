@@ -144,7 +144,7 @@
           <a mat-icon-button class="icon-btn--success" [routerLink]="['/patients', p.id, 'dental-card']" [matTooltip]="'patients.viewDentalCard' | translate">
             <mat-icon>assignment</mat-icon>
           </a>
-          <button mat-icon-button class="icon-btn--danger" (click)="deletePatient(p.id)" [matTooltip]="'common.delete' | translate">
+          <button mat-icon-button class="icon-btn--danger" (click)="deletePatient(p.id)" [matTooltip]="'common.delete' | translate" [attr.aria-label]="'common.delete' | translate">
             <mat-icon>delete</mat-icon>
           </button>
         </div>
