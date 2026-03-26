@@ -20,6 +20,7 @@ import { PatientService } from '../../services/patient.service';
 import { DoctorService } from '../../services/doctor.service';
 import { DiagnosisService } from '../../services/diagnosis.service';
 import { TreatmentService } from '../../services/treatment.service';
+import { ConfirmDialogService } from '../../services/confirm-dialog.service';
 import { Visit } from '../../models/visit.model';
 
 @Component({
@@ -35,6 +36,7 @@ export default class VisitList implements OnInit {
   private doctorService = inject(DoctorService);
   private diagnosisService = inject(DiagnosisService);
   private treatmentService = inject(TreatmentService);
+  private confirmDialogService = inject(ConfirmDialogService);
   private paginator = viewChild(MatPaginator);
 
   displayedColumns = ['date', 'patient', 'doctor', 'tooth', 'diagnosis', 'treatment', 'price', 'actions'];
@@ -137,6 +139,16 @@ export default class VisitList implements OnInit {
 
   onDateToChange(event: MatDatepickerInputEvent<Date>): void {
     this.dateToFilter.set(event.value ? this.formatDate(event.value) : '');
+  }
+
+  deleteVisit(id: string): void {
+    this.confirmDialogService
+      .confirm('visit.deleteTitle', 'visit.deleteMessage')
+      .subscribe(confirmed => {
+        if (confirmed) {
+          this.visitService.delete(id).subscribe();
+        }
+      });
   }
 
   private formatDate(date: Date): string {

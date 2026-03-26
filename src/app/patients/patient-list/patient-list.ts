@@ -12,6 +12,7 @@ import { TranslatePipe } from '../../shared/translate.pipe';
 import { LocalizedDatePipe } from '../../shared/localized-date.pipe';
 import { PatientService } from '../../services/patient.service';
 import { VisitService } from '../../services/visit.service';
+import { ConfirmDialogService } from '../../services/confirm-dialog.service';
 import { Patient } from '../../models/patient.model';
 import { MatCardModule } from '@angular/material/card';
 import { BookTableComponent } from '../../shared/book-table/book-table';
@@ -26,6 +27,7 @@ import { BookTableComponent } from '../../shared/book-table/book-table';
 export default class PatientList implements OnInit {
   private patientService = inject(PatientService);
   private visitService = inject(VisitService);
+  private confirmDialogService = inject(ConfirmDialogService);
   private paginator = viewChild(MatPaginator);
 
   readonly displayedColumns = ['name', 'parentName', 'dateOfBirth', 'city', 'phone', 'actions'];
@@ -78,5 +80,15 @@ export default class PatientList implements OnInit {
 
   onGenderChange(event: Event): void {
     this.genderFilter.set((event.target as HTMLSelectElement).value);
+  }
+
+  deletePatient(id: string): void {
+    this.confirmDialogService
+      .confirm('patient.deleteTitle', 'patient.deleteMessage')
+      .subscribe(confirmed => {
+        if (confirmed) {
+          this.patientService.delete(id).subscribe();
+        }
+      });
   }
 }
