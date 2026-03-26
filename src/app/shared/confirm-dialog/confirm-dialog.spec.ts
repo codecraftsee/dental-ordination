@@ -42,12 +42,12 @@ describe('ConfirmDialog', () => {
   });
 
   it('renders the title from dialog data', () => {
-    const title = fixture.nativeElement.querySelector('[mat-dialog-title]');
+    const title = fixture.nativeElement.querySelector('.confirm-dialog__header h2');
     expect(title.textContent).toContain(mockData.title);
   });
 
   it('renders the message from dialog data', () => {
-    const content = fixture.nativeElement.querySelector('mat-dialog-content p');
+    const content = fixture.nativeElement.querySelector('.confirm-dialog__body p');
     expect(content.textContent).toContain(mockData.message);
   });
 
@@ -62,20 +62,16 @@ describe('ConfirmDialog', () => {
   });
 
   it('clicking the Yes button closes the dialog with true', () => {
-    const buttons = fixture.nativeElement.querySelectorAll('button');
-    const yesButton = Array.from(buttons).find((btn: Element) =>
-      (btn as HTMLElement).textContent?.includes('common.yes'),
-    ) as HTMLElement;
-    yesButton.click();
+    const buttons: HTMLButtonElement[] = Array.from(fixture.nativeElement.querySelectorAll('button'));
+    const yesButton = buttons.find(btn => btn.textContent?.includes('common.yes'));
+    yesButton!.click();
     expect(mockDialogRef.close).toHaveBeenCalledWith(true);
   });
 
   it('clicking the No button closes the dialog with no value', () => {
-    const buttons = fixture.nativeElement.querySelectorAll('button');
-    const noButton = Array.from(buttons).find((btn: Element) =>
-      (btn as HTMLElement).textContent?.includes('common.no'),
-    ) as HTMLElement;
-    noButton.click();
+    const buttons: HTMLButtonElement[] = Array.from(fixture.nativeElement.querySelectorAll('button'));
+    const noButton = buttons.find(btn => btn.textContent?.includes('common.no'));
+    noButton!.click();
     expect(mockDialogRef.close).toHaveBeenCalledWith();
   });
 });

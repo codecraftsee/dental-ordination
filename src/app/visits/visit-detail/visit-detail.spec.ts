@@ -1,7 +1,7 @@
 import { TestBed } from '@angular/core/testing';
 import { provideHttpClient } from '@angular/common/http';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
-import { provideRouter, ActivatedRoute } from '@angular/router';
+import { provideRouter, ActivatedRoute, Router } from '@angular/router';
 import { of } from 'rxjs';
 import { vi } from 'vitest';
 import VisitDetail from './visit-detail';
@@ -34,16 +34,21 @@ describe('VisitDetail', () => {
     const visitService = TestBed.inject(VisitService);
     const deleteSpy = vi.spyOn(visitService, 'delete');
     (confirmDialogService.confirm as ReturnType<typeof vi.fn>).mockReturnValue(of(false));
+    const mockVisit: Visit = { id: 'v1', patientId: 'p1', doctorId: 'd1', date: '2024-01-01', toothNumber: null, paid: false, createdAt: '', updatedAt: '' };
+    component.visit.set(mockVisit);
 
     component.deleteVisit();
 
+    expect(confirmDialogService.confirm).toHaveBeenCalled();
     expect(deleteSpy).not.toHaveBeenCalled();
   });
 
   it('deleteVisit deletes and navigates when confirmed', () => {
     const confirmDialogService = TestBed.inject(ConfirmDialogService);
     const visitService = TestBed.inject(VisitService);
+    const router = TestBed.inject(Router);
     const deleteSpy = vi.spyOn(visitService, 'delete').mockReturnValue(of(undefined));
+    const navigateSpy = vi.spyOn(router, 'navigate').mockResolvedValue(true);
     (confirmDialogService.confirm as ReturnType<typeof vi.fn>).mockReturnValue(of(true));
     const mockVisit: Visit = { id: 'v1', patientId: 'p1', doctorId: 'd1', date: '2024-01-01', toothNumber: null, paid: false, createdAt: '', updatedAt: '' };
     component.visit.set(mockVisit);
@@ -51,5 +56,6 @@ describe('VisitDetail', () => {
     component.deleteVisit();
 
     expect(deleteSpy).toHaveBeenCalledWith('v1');
+    expect(navigateSpy).toHaveBeenCalledWith(['/visits']);
   });
 });
