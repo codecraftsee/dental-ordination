@@ -14,7 +14,7 @@ If no token exists in `localStorage`, redirect to `/login` immediately (no HTTP 
 
 ### Guard Contract
 
-```
+```typescript
 authGuard(route, state) → boolean | UrlTree | Observable<boolean | UrlTree>
 ```
 
