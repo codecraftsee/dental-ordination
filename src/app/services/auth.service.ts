@@ -3,7 +3,7 @@ import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Router } from '@angular/router';
 import { Observable, tap, catchError, of } from 'rxjs';
 import { environment } from '../../environments/environment';
-import { LoginRequest, TokenResponse } from '../models/auth.model';
+import { ChangePasswordRequest, LoginRequest, TokenResponse } from '../models/auth.model';
 import { User, UserRole } from '../models/user.model';
 
 const ACCESS_TOKEN_KEY = 'access_token';
@@ -90,5 +90,9 @@ export class AuthService {
   hasRole(...roles: UserRole[]): boolean {
     const role = this.userRole();
     return role !== null && roles.includes(role);
+  }
+
+  changePassword(request: ChangePasswordRequest): Observable<void> {
+    return this.http.put<void>(`${this.apiUrl}/change-password`, request);
   }
 }

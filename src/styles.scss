@@ -1246,3 +1246,9 @@ mat-paginator {
     background: var(--color-sidebar-hover);
   }
 }
+
+// Validation error messages — ensure they are always visible in light red
+mat-error,
+.mat-mdc-form-field-error {
+  color: var(--color-error) !important;
+}

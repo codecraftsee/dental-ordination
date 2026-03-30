@@ -13,7 +13,8 @@ export const errorInterceptor: HttpInterceptorFn = (req, next) => {
         error.status === 401 &&
         req.url.startsWith(environment.apiUrl) &&
         !req.url.includes('/auth/login') &&
-        !req.url.includes('/auth/refresh')
+        !req.url.includes('/auth/refresh') &&
+        !req.url.includes('/auth/change-password')
       ) {
         return authService.refreshToken().pipe(
           switchMap(tokenResponse => {
