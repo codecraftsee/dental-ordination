@@ -134,6 +134,9 @@ describe('Admin', () => {
     expect(component.pwIsError()).toBe(false);
     expect(component.pwLoading()).toBe(false);
     expect(component.passwordForm.pristine).toBe(true);
+    expect(component.passwordForm.get('currentPassword')?.value).toBeNull();
+    expect(component.passwordForm.get('newPassword')?.value).toBeNull();
+    expect(component.passwordForm.get('confirmPassword')?.value).toBeNull();
   });
 
   it('submitPasswordChange sets error message on failure', () => {
@@ -182,32 +185,30 @@ describe('Admin', () => {
     expect(action.message()).toBe('admin.error');
   });
 
-  // Cache refresh logic
+  // Cache refresh logic — parameterized across all non-visits branches
 
-  it('refreshCaches for patients calls patientService and visitService', () => {
-    const action = component.actions.find(a => a.key === 'patients')!;
+  it.each([
+    { key: 'patients' as const, deleteFn: 'deletePatients' as const },
+    { key: 'doctors' as const, deleteFn: 'deleteDoctors' as const },
+    { key: 'diagnoses' as const, deleteFn: 'deleteDiagnoses' as const },
+    { key: 'treatments' as const, deleteFn: 'deleteTreatments' as const },
+    { key: 'all' as const, deleteFn: 'deleteAll' as const },
+  ])('execute dispatches $deleteFn and refreshes correct caches for $key action', ({ key, deleteFn }) => {
+    const serviceMap: Record<string, Array<{ loadAll: ReturnType<typeof vi.fn> }>> = {
+      patients: [patientService, visitService],
+      doctors: [doctorService],
+      diagnoses: [diagnosisService],
+      treatments: [treatmentService],
+      all: [patientService, visitService, doctorService, diagnosisService, treatmentService],
+    };
+
+    const action = component.actions.find(a => a.key === key)!;
     action.confirmInput.set('DELETE');
     component.execute(action);
-    expect(patientService.loadAll).toHaveBeenCalled();
-    expect(visitService.loadAll).toHaveBeenCalled();
-  });
 
-  it('refreshCaches for all calls all five services', () => {
-    const action = component.actions.find(a => a.key === 'all')!;
-    action.confirmInput.set('DELETE');
-    component.execute(action);
-    expect(patientService.loadAll).toHaveBeenCalled();
-    expect(visitService.loadAll).toHaveBeenCalled();
-    expect(doctorService.loadAll).toHaveBeenCalled();
-    expect(diagnosisService.loadAll).toHaveBeenCalled();
-    expect(treatmentService.loadAll).toHaveBeenCalled();
-  });
-
-  it('refreshCaches for doctors calls only doctorService', () => {
-    const action = component.actions.find(a => a.key === 'doctors')!;
-    action.confirmInput.set('DELETE');
-    component.execute(action);
-    expect(doctorService.loadAll).toHaveBeenCalled();
-    expect(patientService.loadAll).not.toHaveBeenCalled();
+    expect(adminService[deleteFn]).toHaveBeenCalled();
+    for (const svc of serviceMap[key]) {
+      expect(svc.loadAll).toHaveBeenCalled();
+    }
   });
 });
