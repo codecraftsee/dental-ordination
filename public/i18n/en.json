@@ -235,6 +235,9 @@
   "common.passwordMismatch": "Passwords do not match",
   "common.saving": "Saving...",
   "common.togglePasswordVisibility": "Toggle password visibility",
+  "common.toggleCurrentPasswordVisibility": "Toggle current password visibility",
+  "common.toggleNewPasswordVisibility": "Toggle new password visibility",
+  "common.toggleConfirmPasswordVisibility": "Toggle confirm password visibility",
 
   "nav.admin": "Admin",
 

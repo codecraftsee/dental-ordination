@@ -1,4 +1,5 @@
-import { ChangeDetectionStrategy, Component, inject, signal, WritableSignal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, DestroyRef, inject, signal, WritableSignal } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { AbstractControl, FormBuilder, FormControl, FormGroupDirective, NgForm, ReactiveFormsModule, ValidationErrors, Validators } from '@angular/forms';
 import { ErrorStateMatcher } from '@angular/material/core';
 import { MatCardModule } from '@angular/material/card';
@@ -51,6 +52,7 @@ interface ActionState {
 export default class Admin {
   private adminService = inject(AdminService);
   private authService = inject(AuthService);
+  private destroyRef = inject(DestroyRef);
   private fb = inject(FormBuilder);
   private patientService = inject(PatientService);
   private doctorService = inject(DoctorService);
@@ -102,6 +104,7 @@ export default class Admin {
         newPassword: newPassword!,
         confirmPassword: confirmPassword!,
       })
+      .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: () => {
           this.pwLoading.set(false);

@@ -236,6 +236,9 @@
   "common.passwordMismatch": "Lozinke se ne podudaraju",
   "common.saving": "Čuvanje...",
   "common.togglePasswordVisibility": "Prikaži/sakrij lozinku",
+  "common.toggleCurrentPasswordVisibility": "Prikaži/sakrij trenutnu lozinku",
+  "common.toggleNewPasswordVisibility": "Prikaži/sakrij novu lozinku",
+  "common.toggleConfirmPasswordVisibility": "Prikaži/sakrij potvrdu lozinke",
 
   "nav.admin": "Admin",
 

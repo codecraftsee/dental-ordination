@@ -96,4 +96,26 @@ describe('AuthService', () => {
     service.refreshToken().subscribe(r => (result = r));
     expect(result).toBeNull();
   });
+
+  it('changePassword sends PUT to change-password endpoint with request body', () => {
+    const request = { currentPassword: 'old', newPassword: 'newPass1', confirmPassword: 'newPass1' };
+    let completed = false;
+    service.changePassword(request).subscribe({ complete: () => (completed = true) });
+    const req = httpMock.expectOne(`${environment.apiUrl}/api/auth/change-password`);
+    expect(req.request.method).toBe('PUT');
+    expect(req.request.body).toEqual(request);
+    req.flush(null);
+    expect(completed).toBe(true);
+  });
+
+  it('changePassword propagates HTTP errors', () => {
+    const request = { currentPassword: 'wrong', newPassword: 'newPass1', confirmPassword: 'newPass1' };
+    let errorOccurred = false;
+    service.changePassword(request).subscribe({ error: () => (errorOccurred = true) });
+    httpMock.expectOne(`${environment.apiUrl}/api/auth/change-password`).flush(
+      { detail: 'Wrong password' },
+      { status: 400, statusText: 'Bad Request' },
+    );
+    expect(errorOccurred).toBe(true);
+  });
 });
