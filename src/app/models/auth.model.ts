@@ -8,3 +8,9 @@ export interface TokenResponse {
   refreshToken: string;
   tokenType: string;
 }
+
+export interface ChangePasswordRequest {
+  currentPassword: string;
+  newPassword: string;
+  confirmPassword: string;
+}

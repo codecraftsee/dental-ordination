@@ -232,6 +232,13 @@
   "common.required": "Ovo polje je obavezno",
   "common.invalidEmail": "Unesite ispravnu email adresu",
   "common.minLength": "Minimalna dužina je {0} karaktera",
+  "common.minLength8": "Minimalno 8 karaktera",
+  "common.passwordMismatch": "Lozinke se ne podudaraju",
+  "common.saving": "Čuvanje...",
+  "common.togglePasswordVisibility": "Prikaži/sakrij lozinku",
+  "common.toggleCurrentPasswordVisibility": "Prikaži/sakrij trenutnu lozinku",
+  "common.toggleNewPasswordVisibility": "Prikaži/sakrij novu lozinku",
+  "common.toggleConfirmPasswordVisibility": "Prikaži/sakrij potvrdu lozinke",
 
   "nav.admin": "Admin",
 
@@ -255,6 +262,14 @@
   "admin.deleteAllDesc": "Trajno briše sve pacijente, posete, lekare, dijagnoze i terapije. Sistem će biti potpuno prazan nakon ove akcije.",
   "admin.success": "Gotovo. Svi zapisi su obrisani.",
   "admin.error": "Došlo je do greške. Pokušajte ponovo.",
+  "admin.changePassword": "Promena Lozinke",
+  "admin.changePasswordDesc": "Ažurirajte lozinku svog naloga",
+  "admin.currentPassword": "Trenutna Lozinka",
+  "admin.newPassword": "Nova Lozinka",
+  "admin.confirmPassword": "Potvrdi Novu Lozinku",
+  "admin.changePasswordSubmit": "Promeni Lozinku",
+  "admin.changePasswordSuccess": "Lozinka je uspešno promenjena",
+  "admin.changePasswordError": "Promena lozinke nije uspela. Proverite trenutnu lozinku.",
 
   "nav.darkMode": "Prebaci na tamni mod",
   "nav.lightMode": "Prebaci na svetli mod",
