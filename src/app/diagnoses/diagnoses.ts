@@ -5,6 +5,7 @@ import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
 import { MatTableModule, MatTableDataSource } from '@angular/material/table';
 import { MatPaginator, MatPaginatorModule } from '@angular/material/paginator';
+import { MatSort, MatSortModule } from '@angular/material/sort';
 import { MatCardModule } from '@angular/material/card';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
@@ -16,7 +17,7 @@ import { Diagnosis, DiagnosisCategory } from '../models/diagnosis.model';
 
 @Component({
   selector: 'app-diagnoses',
-  imports: [RouterLink, TranslatePipe, MatFormFieldModule, MatInputModule, MatSelectModule, MatTableModule, MatPaginatorModule, MatCardModule, MatButtonModule, MatIconModule, MatTooltipModule],
+  imports: [RouterLink, TranslatePipe, MatFormFieldModule, MatInputModule, MatSelectModule, MatTableModule, MatPaginatorModule, MatSortModule, MatCardModule, MatButtonModule, MatIconModule, MatTooltipModule],
   templateUrl: './diagnoses.html',
   styleUrl: './diagnoses.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -25,6 +26,7 @@ export default class Diagnoses implements OnInit {
   private diagnosisService = inject(DiagnosisService);
   private confirmDialogService = inject(ConfirmDialogService);
   private paginator = viewChild(MatPaginator);
+  private sort = viewChild(MatSort);
 
   categories = Object.values(DiagnosisCategory);
   displayedColumns = ['code', 'name', 'category', 'description', 'actions'];
@@ -41,9 +43,9 @@ export default class Diagnoses implements OnInit {
   constructor() {
     effect(() => {
       const pag = this.paginator();
-      if (pag) {
-        this.dataSource.paginator = pag;
-      }
+      const sort = this.sort();
+      if (pag) this.dataSource.paginator = pag;
+      if (sort) this.dataSource.sort = sort;
     });
 
     effect(() => {

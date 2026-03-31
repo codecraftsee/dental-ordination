@@ -5,6 +5,7 @@ import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
 import { MatTableModule, MatTableDataSource } from '@angular/material/table';
 import { MatPaginator, MatPaginatorModule } from '@angular/material/paginator';
+import { MatSort, MatSortModule } from '@angular/material/sort';
 import { MatCardModule } from '@angular/material/card';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
@@ -15,7 +16,7 @@ import { Doctor, Specialization } from '../../models/doctor.model';
 
 @Component({
   selector: 'app-doctor-list',
-  imports: [RouterLink, TranslatePipe, MatFormFieldModule, MatInputModule, MatSelectModule, MatTableModule, MatPaginatorModule, MatCardModule, MatButtonModule, MatIconModule, MatTooltipModule],
+  imports: [RouterLink, TranslatePipe, MatFormFieldModule, MatInputModule, MatSelectModule, MatTableModule, MatPaginatorModule, MatSortModule, MatCardModule, MatButtonModule, MatIconModule, MatTooltipModule],
   templateUrl: './doctor-list.html',
   styleUrl: './doctor-list.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -23,6 +24,7 @@ import { Doctor, Specialization } from '../../models/doctor.model';
 export default class DoctorList implements OnInit {
   private doctorService = inject(DoctorService);
   private paginator = viewChild(MatPaginator);
+  private sort = viewChild(MatSort);
 
   specializations = Object.values(Specialization);
   displayedColumns = ['name', 'specialization', 'phone', 'email', 'actions'];
@@ -39,14 +41,22 @@ export default class DoctorList implements OnInit {
   constructor() {
     effect(() => {
       const pag = this.paginator();
-      if (pag) {
-        this.dataSource.paginator = pag;
-      }
+      const sort = this.sort();
+      if (pag) this.dataSource.paginator = pag;
+      if (sort) this.dataSource.sort = sort;
     });
 
     effect(() => {
       this.dataSource.data = this.filteredDoctors();
     });
+
+    this.dataSource.sortingDataAccessor = (item: Doctor, header: string): string => {
+      if (header === 'name') return `${item.firstName} ${item.lastName}`.toLowerCase();
+      if (header === 'specialization') return item.specialization;
+      if (header === 'phone') return item.phone ?? '';
+      if (header === 'email') return item.email ?? '';
+      return '';
+    };
   }
 
   ngOnInit(): void {

@@ -2,6 +2,7 @@ import { ChangeDetectionStrategy, Component, inject, signal, computed, effect, v
 import { RouterLink } from '@angular/router';
 import { MatTableModule, MatTableDataSource } from '@angular/material/table';
 import { MatPaginator, MatPaginatorModule } from '@angular/material/paginator';
+import { MatSort, MatSortModule } from '@angular/material/sort';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
@@ -19,7 +20,7 @@ import { BookTableComponent } from '../../shared/book-table/book-table';
 
 @Component({
   selector: 'app-patient-list',
-  imports: [RouterLink, MatTableModule, MatPaginatorModule, MatFormFieldModule, MatInputModule, MatCardModule, MatSelectModule, MatButtonModule, MatIconModule, MatTooltipModule, TranslatePipe, LocalizedDatePipe, BookTableComponent],
+  imports: [RouterLink, MatTableModule, MatPaginatorModule, MatSortModule, MatFormFieldModule, MatInputModule, MatCardModule, MatSelectModule, MatButtonModule, MatIconModule, MatTooltipModule, TranslatePipe, LocalizedDatePipe, BookTableComponent],
   templateUrl: './patient-list.html',
   styleUrl: './patient-list.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -29,6 +30,7 @@ export default class PatientList implements OnInit {
   private visitService = inject(VisitService);
   private confirmDialogService = inject(ConfirmDialogService);
   private paginator = viewChild(MatPaginator);
+  private sort = viewChild(MatSort);
 
   readonly displayedColumns = ['name', 'parentName', 'dateOfBirth', 'city', 'phone', 'actions'];
   dataSource = new MatTableDataSource<Patient>();
@@ -49,14 +51,20 @@ export default class PatientList implements OnInit {
   constructor() {
     effect(() => {
       const pag = this.paginator();
-      if (pag) {
-        this.dataSource.paginator = pag;
-      }
+      const sort = this.sort();
+      if (pag) this.dataSource.paginator = pag;
+      if (sort) this.dataSource.sort = sort;
     });
 
     effect(() => {
       this.dataSource.data = this.filteredPatients();
     });
+
+    this.dataSource.sortingDataAccessor = (item: Patient, header: keyof Patient | 'name'): string | number => {
+      if (header === 'name') return `${item.firstName} ${item.lastName}`.toLowerCase();
+      if (header === 'dateOfBirth') return new Date(item.dateOfBirth).getTime() || 0;
+      return String(item[header as keyof Patient] ?? '');
+    };
   }
 
   ngOnInit(): void {

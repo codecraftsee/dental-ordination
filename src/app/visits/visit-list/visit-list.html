@@ -46,24 +46,24 @@
     </mat-card-content>
   </mat-card>
 
-  <table mat-table [dataSource]="dataSource" class="visits-table" [class.no-paginator]="filteredVisits().length <= 5">
+  <table mat-table [dataSource]="dataSource" matSort matSortActive="date" matSortDirection="desc" class="visits-table" [class.no-paginator]="filteredVisits().length <= 5">
 
     <ng-container matColumnDef="date">
-      <th mat-header-cell *matHeaderCellDef>{{ 'visits.date' | translate }}</th>
+      <th mat-header-cell *matHeaderCellDef mat-sort-header>{{ 'visits.date' | translate }}</th>
       <td mat-cell *matCellDef="let v">
         <a [routerLink]="['/visits', v.id]">{{ v.date | localizedDate:'mediumDate' }}</a>
       </td>
     </ng-container>
 
     <ng-container matColumnDef="patient">
-      <th mat-header-cell *matHeaderCellDef>{{ 'visits.patient' | translate }}</th>
+      <th mat-header-cell *matHeaderCellDef mat-sort-header>{{ 'visits.patient' | translate }}</th>
       <td mat-cell *matCellDef="let v">
         <a [routerLink]="['/patients', v.patientId]">{{ getPatientName(v.patientId) }}</a>
       </td>
     </ng-container>
 
     <ng-container matColumnDef="doctor">
-      <th mat-header-cell *matHeaderCellDef>{{ 'visits.doctor' | translate }}</th>
+      <th mat-header-cell *matHeaderCellDef mat-sort-header>{{ 'visits.doctor' | translate }}</th>
       <td mat-cell *matCellDef="let v">
         <a [routerLink]="['/doctors', v.doctorId]">{{ getDoctorName(v.doctorId) }}</a>
       </td>
@@ -85,7 +85,7 @@
     </ng-container>
 
     <ng-container matColumnDef="price">
-      <th mat-header-cell *matHeaderCellDef>{{ 'visits.price' | translate }}</th>
+      <th mat-header-cell *matHeaderCellDef mat-sort-header>{{ 'visits.price' | translate }}</th>
       <td mat-cell *matCellDef="let v">{{ v.price | currencyFormat }}</td>
     </ng-container>
 

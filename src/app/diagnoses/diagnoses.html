@@ -25,20 +25,20 @@
     </mat-card-content>
   </mat-card>
 
-  <table mat-table [dataSource]="dataSource" class="diagnoses-table" [class.no-paginator]="filteredDiagnoses().length <= 5">
+  <table mat-table [dataSource]="dataSource" matSort matSortActive="name" matSortDirection="asc" class="diagnoses-table" [class.no-paginator]="filteredDiagnoses().length <= 5">
 
     <ng-container matColumnDef="code">
-      <th mat-header-cell *matHeaderCellDef>{{ 'diagnoses.code' | translate }}</th>
+      <th mat-header-cell *matHeaderCellDef mat-sort-header>{{ 'diagnoses.code' | translate }}</th>
       <td mat-cell *matCellDef="let dg">{{ dg.code }}</td>
     </ng-container>
 
     <ng-container matColumnDef="name">
-      <th mat-header-cell *matHeaderCellDef>{{ 'diagnoses.name' | translate }}</th>
+      <th mat-header-cell *matHeaderCellDef mat-sort-header>{{ 'diagnoses.name' | translate }}</th>
       <td mat-cell *matCellDef="let dg">{{ dg.name }}</td>
     </ng-container>
 
     <ng-container matColumnDef="category">
-      <th mat-header-cell *matHeaderCellDef>{{ 'diagnoses.category' | translate }}</th>
+      <th mat-header-cell *matHeaderCellDef mat-sort-header>{{ 'diagnoses.category' | translate }}</th>
       <td mat-cell *matCellDef="let dg">
         <span class="badge badge-info">{{ 'diagnosisCategory.' + dg.category | translate }}</span>
       </td>
