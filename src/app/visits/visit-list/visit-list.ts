@@ -5,6 +5,7 @@ import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
 import { MatTableModule, MatTableDataSource } from '@angular/material/table';
 import { MatPaginator, MatPaginatorModule } from '@angular/material/paginator';
+import { MatSort, MatSortModule } from '@angular/material/sort';
 import { MatCardModule } from '@angular/material/card';
 import { MatDatepickerModule, MatDatepickerInputEvent } from '@angular/material/datepicker';
 import { MatNativeDateModule } from '@angular/material/core';
@@ -25,7 +26,7 @@ import { Visit } from '../../models/visit.model';
 
 @Component({
   selector: 'app-visit-list',
-  imports: [RouterLink, TranslatePipe, LocalizedDatePipe, CurrencyFormatPipe, MatFormFieldModule, MatInputModule, MatSelectModule, MatTableModule, MatPaginatorModule, MatCardModule, MatDatepickerModule, MatNativeDateModule, MatButtonModule, MatIconModule, MatTooltipModule],
+  imports: [RouterLink, TranslatePipe, LocalizedDatePipe, CurrencyFormatPipe, MatFormFieldModule, MatInputModule, MatSelectModule, MatTableModule, MatPaginatorModule, MatSortModule, MatCardModule, MatDatepickerModule, MatNativeDateModule, MatButtonModule, MatIconModule, MatTooltipModule],
   templateUrl: './visit-list.html',
   styleUrl: './visit-list.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -38,6 +39,7 @@ export default class VisitList implements OnInit {
   private treatmentService = inject(TreatmentService);
   private confirmDialogService = inject(ConfirmDialogService);
   private paginator = viewChild(MatPaginator);
+  private sort = viewChild(MatSort);
 
   displayedColumns = ['date', 'patient', 'doctor', 'tooth', 'diagnosis', 'treatment', 'price', 'actions'];
   dataSource = new MatTableDataSource<Visit>();
@@ -83,14 +85,20 @@ export default class VisitList implements OnInit {
   constructor() {
     effect(() => {
       const pag = this.paginator();
-      if (pag) {
-        this.dataSource.paginator = pag;
-      }
+      const sort = this.sort();
+      if (pag) this.dataSource.paginator = pag;
+      if (sort) this.dataSource.sort = sort;
     });
 
     effect(() => {
       this.dataSource.data = this.filteredVisits();
     });
+
+    this.dataSource.sortingDataAccessor = (item: Visit, header: string) => {
+      if (header === 'patient') return this.patientNames().get(item.patientId) ?? '';
+      if (header === 'doctor') return this.doctorNames().get(item.doctorId) ?? '';
+      return (item as unknown as Record<string, unknown>)[header] as string | number ?? '';
+    };
   }
 
   ngOnInit(): void {

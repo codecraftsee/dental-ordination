@@ -25,17 +25,17 @@
     </mat-card-content>
   </mat-card>
 
-  <table mat-table [dataSource]="dataSource" class="doctors-table" [class.no-paginator]="filteredDoctors().length <= 5">
+  <table mat-table [dataSource]="dataSource" matSort matSortActive="name" matSortDirection="asc" class="doctors-table" [class.no-paginator]="filteredDoctors().length <= 5">
 
     <ng-container matColumnDef="name">
-      <th mat-header-cell *matHeaderCellDef>{{ 'doctors.name' | translate }}</th>
+      <th mat-header-cell *matHeaderCellDef mat-sort-header>{{ 'doctors.name' | translate }}</th>
       <td mat-cell *matCellDef="let d">
         <a [routerLink]="['/doctors', d.id]">Dr. {{ d.firstName }} {{ d.lastName }}</a>
       </td>
     </ng-container>
 
     <ng-container matColumnDef="specialization">
-      <th mat-header-cell *matHeaderCellDef>{{ 'doctors.specialization' | translate }}</th>
+      <th mat-header-cell *matHeaderCellDef mat-sort-header>{{ 'doctors.specialization' | translate }}</th>
       <td mat-cell *matCellDef="let d">
         <span class="badge badge-primary">{{ 'specialization.' + d.specialization | translate }}</span>
       </td>

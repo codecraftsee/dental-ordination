@@ -1118,6 +1118,13 @@ mat-card.stat-card {
   }
 }
 
+// ── Angular Material sort header — always-visible sort indicator ─────────────
+// Show a faint arrow on unsorted-but-sortable columns so users know they can sort.
+// aria-sort="none" is set by MatSortHeader when the column is sortable but not active.
+[aria-sort='none'] .mat-sort-header-arrow {
+  opacity: 0.3 !important;
+}
+
 // ── Angular Material table — no-paginator override ──────────────────────────
 
 .mat-mdc-table.no-paginator {

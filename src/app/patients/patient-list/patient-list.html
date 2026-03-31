@@ -102,10 +102,10 @@
   </app-book-table>
   </div>
 
-  <table mat-table [dataSource]="dataSource" class="patients-table desktop-table" [class.no-paginator]="filteredPatients().length <= 5">
+  <table mat-table [dataSource]="dataSource" matSort matSortActive="name" matSortDirection="asc" class="patients-table desktop-table" [class.no-paginator]="filteredPatients().length <= 5">
 
     <ng-container matColumnDef="name">
-      <th mat-header-cell *matHeaderCellDef>{{ 'patients.name' | translate }}</th>
+      <th mat-header-cell *matHeaderCellDef mat-sort-header>{{ 'patients.name' | translate }}</th>
       <td mat-cell *matCellDef="let p">
         <a [routerLink]="['/patients', p.id]">{{ p.firstName }} {{ p.lastName }}</a>
         @if (hasDebt(p.id)) {
@@ -120,12 +120,12 @@
     </ng-container>
 
     <ng-container matColumnDef="dateOfBirth">
-      <th mat-header-cell *matHeaderCellDef>{{ 'patients.dateOfBirth' | translate }}</th>
+      <th mat-header-cell *matHeaderCellDef mat-sort-header>{{ 'patients.dateOfBirth' | translate }}</th>
       <td mat-cell *matCellDef="let p">{{ p.dateOfBirth | localizedDate:'mediumDate' }}</td>
     </ng-container>
 
     <ng-container matColumnDef="city">
-      <th mat-header-cell *matHeaderCellDef>{{ 'patients.city' | translate }}</th>
+      <th mat-header-cell *matHeaderCellDef mat-sort-header>{{ 'patients.city' | translate }}</th>
       <td mat-cell *matCellDef="let p">{{ p.city }}</td>
     </ng-container>
 
