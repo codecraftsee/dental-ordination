@@ -9,6 +9,7 @@ import Diagnoses from './diagnoses';
 import { TranslateService } from '../services/translate.service';
 import { DiagnosisService } from '../services/diagnosis.service';
 import { ConfirmDialogService } from '../services/confirm-dialog.service';
+import { Diagnosis, DiagnosisCategory } from '../models/diagnosis.model';
 
 describe('Diagnoses', () => {
   let component: Diagnoses;
@@ -83,6 +84,38 @@ describe('Diagnoses', () => {
 
     expect(confirmDialogService.confirm).toHaveBeenCalledWith('diagnosis.deleteTitle', 'diagnosis.deleteMessage');
     expect(deleteSpy).not.toHaveBeenCalled();
+  });
+
+  it('dataSource.sort is connected and reflects default active sort after template renders', () => {
+    fixture.detectChanges();
+    expect(component.dataSource.sort).not.toBeNull();
+    expect(component.dataSource.sort!.active).toBe('name');
+    expect(component.dataSource.sort!.direction).toBe('asc');
+  });
+
+  it('dataSource.data updates when filteredDiagnoses signal changes', () => {
+    const diagnosisService = TestBed.inject(DiagnosisService);
+    const mockDiagnoses: Diagnosis[] = [
+      { id: '1', code: 'K01', name: 'Alpha', category: DiagnosisCategory.Caries, createdAt: '' },
+      { id: '2', code: 'K02', name: 'Beta', category: DiagnosisCategory.Periodontal, createdAt: '' },
+    ];
+    vi.spyOn(diagnosisService, 'search').mockReturnValue(mockDiagnoses);
+    component.searchQuery.set('test');
+    fixture.detectChanges();
+    expect(component.dataSource.data).toEqual(mockDiagnoses);
+    expect(component.filteredDiagnoses()).toEqual(mockDiagnoses);
+  });
+
+  it('sortData sorts diagnoses by name ascending', () => {
+    fixture.detectChanges();
+    const diagA: Diagnosis = { id: '1', code: 'K02', name: 'Zebra', category: DiagnosisCategory.Caries, createdAt: '' };
+    const diagB: Diagnosis = { id: '2', code: 'K01', name: 'Alpha', category: DiagnosisCategory.Periodontal, createdAt: '' };
+    component.dataSource.data = [diagA, diagB];
+    const sort = component.dataSource.sort!;
+    sort.sort({ id: 'name', start: 'asc', disableClear: false });
+    const sorted = component.dataSource.sortData([diagA, diagB], sort);
+    expect(sorted[0].name).toBe('Alpha');
+    expect(sorted[1].name).toBe('Zebra');
   });
 
   it('deleteDiagnosis deletes when confirmed', () => {

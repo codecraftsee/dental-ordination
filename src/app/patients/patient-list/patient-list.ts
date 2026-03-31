@@ -60,9 +60,10 @@ export default class PatientList implements OnInit {
       this.dataSource.data = this.filteredPatients();
     });
 
-    this.dataSource.sortingDataAccessor = (item: Patient, header: string) => {
+    this.dataSource.sortingDataAccessor = (item: Patient, header: keyof Patient | 'name'): string | number => {
       if (header === 'name') return `${item.firstName} ${item.lastName}`.toLowerCase();
-      return (item as unknown as Record<string, unknown>)[header] as string ?? '';
+      if (header === 'dateOfBirth') return new Date(item.dateOfBirth).getTime() || 0;
+      return String(item[header as keyof Patient] ?? '');
     };
   }
 

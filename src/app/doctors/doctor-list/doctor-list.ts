@@ -50,9 +50,12 @@ export default class DoctorList implements OnInit {
       this.dataSource.data = this.filteredDoctors();
     });
 
-    this.dataSource.sortingDataAccessor = (item: Doctor, header: string) => {
+    this.dataSource.sortingDataAccessor = (item: Doctor, header: string): string => {
       if (header === 'name') return `${item.firstName} ${item.lastName}`.toLowerCase();
-      return (item as unknown as Record<string, unknown>)[header] as string ?? '';
+      if (header === 'specialization') return item.specialization;
+      if (header === 'phone') return item.phone ?? '';
+      if (header === 'email') return item.email ?? '';
+      return '';
     };
   }
 
