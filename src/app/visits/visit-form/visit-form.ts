@@ -1,7 +1,7 @@
 import { ChangeDetectionStrategy, Component, inject, OnInit, OnDestroy } from '@angular/core';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import { Router, RouterLink, ActivatedRoute } from '@angular/router';
-import { Subscription, forkJoin } from 'rxjs';
+import { Subscription, forkJoin, of, switchMap } from 'rxjs';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
@@ -93,28 +93,30 @@ export default class VisitForm implements OnInit, OnDestroy {
       this.doctorService.loadAll(),
       this.diagnosisService.loadAll(),
       this.treatmentService.loadAll(),
-    ]).subscribe(() => {
-      if (this.isEditMode && this.visitId) {
-        this.visitService.loadById(this.visitId).subscribe({
-          next: visit => {
-            this.patchingForm = true;
-            this.form.patchValue({
-              patientId: visit.patientId,
-              doctorId: visit.doctorId,
-              date: this.parseDate(visit.date),
-              toothNumber: visit.toothNumber,
-              diagnosisId: visit.diagnosisId ?? '',
-              diagnosisNotes: visit.diagnosisNotes ?? '',
-              treatmentId: visit.treatmentId ?? '',
-              treatmentNotes: visit.treatmentNotes ?? '',
-              price: visit.price ?? 0,
-              paid: visit.paid ?? false,
-            });
-            this.patchingForm = false;
-          },
-          error: () => this.router.navigate(['/visits']),
-        });
-      }
+    ]).pipe(
+      switchMap(() =>
+        this.isEditMode && this.visitId ? this.visitService.loadById(this.visitId) : of(null),
+      ),
+    ).subscribe({
+      next: visit => {
+        if (visit) {
+          this.patchingForm = true;
+          this.form.patchValue({
+            patientId: visit.patientId,
+            doctorId: visit.doctorId,
+            date: this.parseDate(visit.date),
+            toothNumber: visit.toothNumber,
+            diagnosisId: visit.diagnosisId ?? '',
+            diagnosisNotes: visit.diagnosisNotes ?? '',
+            treatmentId: visit.treatmentId ?? '',
+            treatmentNotes: visit.treatmentNotes ?? '',
+            price: visit.price ?? 0,
+            paid: visit.paid ?? false,
+          });
+          this.patchingForm = false;
+        }
+      },
+      error: () => this.router.navigate(['/visits']),
     });
 
     this.treatmentSub = this.form.get('treatmentId')!.valueChanges.subscribe(treatmentId => {
@@ -151,7 +153,7 @@ export default class VisitForm implements OnInit, OnDestroy {
     };
 
     if (this.isEditMode && this.visitId) {
-      const { date, ...updatePayload } = payload;
+      const { date: _date, ...updatePayload } = payload;
       this.visitService.update(this.visitId, updatePayload).subscribe(visit => {
         this.router.navigate(['/visits', visit.id]);
       });
