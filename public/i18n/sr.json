@@ -208,6 +208,10 @@
   "bookTable.nextPage": "Sledeća stranica",
   "bookTable.ariaLabel": "Prikaz podataka u formi knjige",
 
+  "common.importIncomplete": "Nepotpun Uvoz",
+  "common.importIncompleteDesc": "Ovaj zapis je uvezen sa nepotpunim podacima. Molimo pregledajte i ažurirajte nedostajuće informacije.",
+  "common.dismissImportWarningTitle": "Odbaci Upozorenje",
+  "common.dismissImportWarningMessage": "Da li ste sigurni da želite da odbacite ovo upozorenje o uvozu? Ovo će označiti zapis kao kompletan.",
   "common.save": "Sačuvaj",
   "common.cancel": "Otkaži",
   "common.delete": "Obriši",

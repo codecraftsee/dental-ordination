@@ -10,6 +10,7 @@ export interface Visit {
   treatmentNotes?: string;
   price?: number;
   paid: boolean;
+  importIncomplete?: boolean;
   createdAt: string;
   updatedAt: string;
 }
@@ -38,4 +39,5 @@ export interface VisitUpdate {
   treatmentNotes?: string;
   price?: number;
   paid?: boolean;
+  importIncomplete?: boolean;
 }

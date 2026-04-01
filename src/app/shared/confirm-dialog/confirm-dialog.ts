@@ -7,6 +7,8 @@ import { TranslatePipe } from '../translate.pipe';
 export interface ConfirmDialogData {
   title: string;
   message: string;
+  icon?: string;
+  iconColor?: 'danger' | 'warning';
 }
 
 @Component({

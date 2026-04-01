@@ -58,6 +58,14 @@ export class VisitService {
     );
   }
 
+  dismissImportWarning(id: string): Observable<Visit> {
+    return this.http.patch<Visit>(`${this.apiUrl}/${id}/dismiss-warning`, {}).pipe(
+      tap(updated => {
+        this.items.set(this.items().map(v => (v.id === id ? updated : v)));
+      }),
+    );
+  }
+
   delete(id: string): Observable<void> {
     return this.http.delete<void>(`${this.apiUrl}/${id}`).pipe(
       tap(() => this.items.set(this.items().filter(v => v.id !== id))),

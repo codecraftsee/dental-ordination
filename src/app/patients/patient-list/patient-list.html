@@ -42,10 +42,17 @@
       <div class="book-page-header">
         <mat-icon class="book-page-avatar">person</mat-icon>
         <div class="book-page-name">
-          <a [routerLink]="['/patients', patient.id]">{{ patient.firstName }} {{ patient.lastName }}</a>
-          @if (hasDebt(patient.id)) {
-            <span class="badge badge-danger badge-sm">{{ 'patients.hasDebt' | translate }}</span>
-          }
+          <div class="cell-with-indicator">
+            <div>
+              <a [routerLink]="['/patients', patient.id]">{{ patient.firstName }} {{ patient.lastName }}</a>
+              @if (hasDebt(patient.id)) {
+                <span class="badge badge-danger badge-sm">{{ 'patients.hasDebt' | translate }}</span>
+              }
+            </div>
+            @if (patient.importIncomplete) {
+              <mat-icon class="import-incomplete-icon" [matTooltip]="'common.importIncomplete' | translate" (click)="dismissImportWarning(patient.id, $event)">error_outline</mat-icon>
+            }
+          </div>
         </div>
       </div>
       <div class="book-page-fields">
@@ -107,10 +114,17 @@
     <ng-container matColumnDef="name">
       <th mat-header-cell *matHeaderCellDef mat-sort-header>{{ 'patients.name' | translate }}</th>
       <td mat-cell *matCellDef="let p">
-        <a [routerLink]="['/patients', p.id]">{{ p.firstName }} {{ p.lastName }}</a>
-        @if (hasDebt(p.id)) {
-          <span class="badge badge-danger badge-sm">{{ 'patients.hasDebt' | translate }}</span>
-        }
+        <div class="cell-with-indicator">
+          <div>
+            <a [routerLink]="['/patients', p.id]">{{ p.firstName }} {{ p.lastName }}</a>
+            @if (hasDebt(p.id)) {
+              <span class="badge badge-danger badge-sm">{{ 'patients.hasDebt' | translate }}</span>
+            }
+          </div>
+          @if (p.importIncomplete) {
+            <mat-icon class="import-incomplete-icon" [matTooltip]="'common.importIncomplete' | translate" (click)="dismissImportWarning(p.id, $event)">error_outline</mat-icon>
+          }
+        </div>
       </td>
     </ng-container>
 

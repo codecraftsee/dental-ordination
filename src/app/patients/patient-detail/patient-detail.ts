@@ -5,6 +5,7 @@ import { MatTableModule, MatTableDataSource } from '@angular/material/table';
 import { MatPaginator, MatPaginatorModule } from '@angular/material/paginator';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
+import { MatTooltipModule } from '@angular/material/tooltip';
 import { forkJoin } from 'rxjs';
 import { TranslatePipe } from '../../shared/translate.pipe';
 import { LocalizedDatePipe } from '../../shared/localized-date.pipe';
@@ -20,7 +21,7 @@ import { Visit } from '../../models/visit.model';
 
 @Component({
   selector: 'app-patient-detail',
-  imports: [RouterLink, TranslatePipe, LocalizedDatePipe, CurrencyFormatPipe, MatCardModule, MatTableModule, MatPaginatorModule, MatButtonModule, MatIconModule],
+  imports: [RouterLink, TranslatePipe, LocalizedDatePipe, CurrencyFormatPipe, MatCardModule, MatTableModule, MatPaginatorModule, MatButtonModule, MatIconModule, MatTooltipModule],
   templateUrl: './patient-detail.html',
   styleUrl: './patient-detail.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -116,6 +117,24 @@ export default class PatientDetail implements OnInit {
   getTreatmentName(id: string | undefined): string {
     if (!id) return '';
     return this.treatmentService.getById(id)?.name || '';
+  }
+
+  dismissImportWarning(event: MouseEvent): void {
+    const p = this.patient();
+    if (!p) return;
+    event.stopPropagation();
+    this.confirmDialogService
+      .confirm('common.dismissImportWarningTitle', 'common.dismissImportWarningMessage', {
+        icon: 'error_outline',
+        iconColor: 'warning',
+      })
+      .subscribe(confirmed => {
+        if (confirmed) {
+          this.patientService.dismissImportWarning(p.id).subscribe(updated => {
+            this.patient.set(updated);
+          });
+        }
+      });
   }
 
   deletePatient(): void {

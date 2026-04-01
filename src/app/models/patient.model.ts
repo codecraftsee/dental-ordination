@@ -10,6 +10,7 @@ export interface Patient {
   phone?: string;
   email?: string;
   userId?: string;
+  importIncomplete?: boolean;
   createdAt: string;
   updatedAt: string;
 }
@@ -36,4 +37,5 @@ export interface PatientUpdate {
   city?: string;
   phone?: string;
   email?: string;
+  importIncomplete?: boolean;
 }

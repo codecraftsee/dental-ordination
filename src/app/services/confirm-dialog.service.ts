@@ -9,10 +9,16 @@ export class ConfirmDialogService {
   private dialog = inject(MatDialog);
   private translateService = inject(TranslateService);
 
-  confirm(titleKey: string, messageKey: string): Observable<boolean> {
+  confirm(
+    titleKey: string,
+    messageKey: string,
+    options?: { icon?: string; iconColor?: 'danger' | 'warning' },
+  ): Observable<boolean> {
     const data: ConfirmDialogData = {
       title: this.translateService.translate(titleKey),
       message: this.translateService.translate(messageKey),
+      icon: options?.icon,
+      iconColor: options?.iconColor,
     };
 
     return this.dialog

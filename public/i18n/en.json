@@ -207,6 +207,10 @@
   "bookTable.nextPage": "Next page",
   "bookTable.ariaLabel": "Data book view",
 
+  "common.importIncomplete": "Import Incomplete",
+  "common.importIncompleteDesc": "This record was imported with incomplete data. Please review and update any missing information.",
+  "common.dismissImportWarningTitle": "Dismiss Warning",
+  "common.dismissImportWarningMessage": "Are you sure you want to dismiss this import warning? This will mark the record as complete.",
   "common.save": "Save",
   "common.cancel": "Cancel",
   "common.delete": "Delete",

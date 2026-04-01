@@ -10,7 +10,12 @@
               <mat-icon class="avatar-icon">event_note</mat-icon>
             </div>
             <div class="profile-info">
-              <h2 class="profile-name">{{ getPatientName(v.patientId) }}</h2>
+              <h2 class="profile-name">
+                {{ getPatientName(v.patientId) }}
+                @if (v.importIncomplete) {
+                  <mat-icon class="import-incomplete-icon" [matTooltip]="'common.importIncomplete' | translate" (click)="dismissImportWarning($event)">error_outline</mat-icon>
+                }
+              </h2>
               <div class="profile-meta">
                 <span class="badge badge-primary">{{ v.date | localizedDate:'longDate' }}</span>
                 <span class="badge" [class]="v.paid ? 'badge-success' : 'badge-danger'">

@@ -90,6 +90,20 @@ export default class PatientList implements OnInit {
     this.genderFilter.set((event.target as HTMLSelectElement).value);
   }
 
+  dismissImportWarning(id: string, event: MouseEvent): void {
+    event.stopPropagation();
+    this.confirmDialogService
+      .confirm('common.dismissImportWarningTitle', 'common.dismissImportWarningMessage', {
+        icon: 'error_outline',
+        iconColor: 'warning',
+      })
+      .subscribe(confirmed => {
+        if (confirmed) {
+          this.patientService.dismissImportWarning(id).subscribe();
+        }
+      });
+  }
+
   deletePatient(id: string): void {
     this.confirmDialogService
       .confirm('patient.deleteTitle', 'patient.deleteMessage')

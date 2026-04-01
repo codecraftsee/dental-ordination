@@ -149,6 +149,20 @@ export default class VisitList implements OnInit {
     this.dateToFilter.set(event.value ? this.formatDate(event.value) : '');
   }
 
+  dismissImportWarning(id: string, event: MouseEvent): void {
+    event.stopPropagation();
+    this.confirmDialogService
+      .confirm('common.dismissImportWarningTitle', 'common.dismissImportWarningMessage', {
+        icon: 'error_outline',
+        iconColor: 'warning',
+      })
+      .subscribe(confirmed => {
+        if (confirmed) {
+          this.visitService.dismissImportWarning(id).subscribe();
+        }
+      });
+  }
+
   deleteVisit(id: string): void {
     this.confirmDialogService
       .confirm('visit.deleteTitle', 'visit.deleteMessage')

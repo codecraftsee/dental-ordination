@@ -1,50 +1,89 @@
 .confirm-dialog {
-  padding: var(--spacing-lg);
+  padding: 0;
 }
 
 .confirm-dialog__header {
   display: flex;
   align-items: center;
+  justify-content: space-between;
   gap: var(--spacing-md);
-  margin-bottom: var(--spacing-lg);
+  padding: 10px var(--spacing-lg);
+  border-bottom: 1px solid var(--color-border);
+
+  h2 {
+    // reset Material's mat-mdc-dialog-title padding/margin/pseudo-element spacer
+    margin: 0;
+    padding: 0;
+    font-family: var(--font-heading);
+    font-size: 1rem;
+    font-weight: 600;
+    line-height: 28px;
+    color: var(--color-text);
+
+    &::before {
+      display: none;
+      height: 0;
+    }
+  }
 }
 
 .confirm-dialog__icon-wrap {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 48px;
-  height: 48px;
+  width: 28px;
+  height: 28px;
   border-radius: 50%;
   background: var(--color-danger-bg);
   flex-shrink: 0;
 
   mat-icon {
     color: var(--color-danger);
-    font-size: 28px;
-    width: 28px;
-    height: 28px;
+    font-size: 16px;
+    width: 16px;
+    height: 16px;
+  }
+
+  &.confirm-dialog__icon-wrap--warning {
+    background: var(--color-warning-bg);
+
+    mat-icon {
+      color: var(--color-warning);
+    }
   }
 }
 
-.confirm-dialog__header h2 {
-  margin: 0;
-  font-family: var(--font-heading);
-  font-size: 1.25rem;
-  font-weight: 600;
-  color: var(--color-text);
-}
+.confirm-dialog__body {
+  // reset Material's mat-mdc-dialog-content padding/margin
+  padding: var(--spacing-md) var(--spacing-lg) !important;
+  margin: 0 !important;
+  max-height: none !important;
 
-.confirm-dialog__body p {
-  margin: 0;
-  font-size: 0.9375rem;
-  line-height: 1.6;
-  color: var(--color-text-secondary);
+  p {
+    margin: 0;
+    font-size: 0.875rem;
+    line-height: 1.6;
+    color: var(--color-text-secondary);
+  }
 }
 
 .confirm-dialog__actions {
+  // reset Material's mat-mdc-dialog-actions padding/min-height
+  padding: var(--spacing-md) var(--spacing-lg) !important;
+  margin: 0 !important;
+  min-height: unset !important;
   display: flex;
   justify-content: flex-end;
+  align-items: center;
   gap: var(--spacing-sm);
-  margin-top: var(--spacing-lg);
+  border-top: 1px solid var(--color-border);
+
+  button {
+    --mdc-protected-button-container-height: 30px;
+    --mdc-outlined-button-container-height: 30px;
+    height: 30px;
+    max-height: 30px;
+    line-height: 30px;
+    padding-block: 0;
+  }
 }

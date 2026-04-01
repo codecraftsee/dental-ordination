@@ -3,6 +3,7 @@ import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { MatCardModule } from '@angular/material/card';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
+import { MatTooltipModule } from '@angular/material/tooltip';
 import { forkJoin } from 'rxjs';
 import { TranslatePipe } from '../../shared/translate.pipe';
 import { LocalizedDatePipe } from '../../shared/localized-date.pipe';
@@ -17,7 +18,7 @@ import { Visit } from '../../models/visit.model';
 
 @Component({
   selector: 'app-visit-detail',
-  imports: [RouterLink, TranslatePipe, LocalizedDatePipe, CurrencyFormatPipe, MatCardModule, MatButtonModule, MatIconModule],
+  imports: [RouterLink, TranslatePipe, LocalizedDatePipe, CurrencyFormatPipe, MatCardModule, MatButtonModule, MatIconModule, MatTooltipModule],
   templateUrl: './visit-detail.html',
   styleUrl: './visit-detail.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -89,6 +90,24 @@ export default class VisitDetail implements OnInit {
     this.visitService.update(v.id, { paid: !v.paid }).subscribe(updated => {
       this.visit.set(updated);
     });
+  }
+
+  dismissImportWarning(event: MouseEvent): void {
+    const v = this.visit();
+    if (!v) return;
+    event.stopPropagation();
+    this.confirmDialogService
+      .confirm('common.dismissImportWarningTitle', 'common.dismissImportWarningMessage', {
+        icon: 'error_outline',
+        iconColor: 'warning',
+      })
+      .subscribe(confirmed => {
+        if (confirmed) {
+          this.visitService.dismissImportWarning(v.id).subscribe(updated => {
+            this.visit.set(updated);
+          });
+        }
+      });
   }
 
   deleteVisit(): void {

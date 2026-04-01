@@ -1,9 +1,9 @@
 <div class="confirm-dialog">
   <div class="confirm-dialog__header">
-    <div class="confirm-dialog__icon-wrap">
-      <mat-icon aria-hidden="true">warning</mat-icon>
-    </div>
     <h2 mat-dialog-title>{{ data.title }}</h2>
+    <div class="confirm-dialog__icon-wrap" [class.confirm-dialog__icon-wrap--warning]="data.iconColor === 'warning'">
+      <mat-icon aria-hidden="true">{{ data.icon ?? 'warning' }}</mat-icon>
+    </div>
   </div>
 
   <mat-dialog-content class="confirm-dialog__body">
