@@ -125,6 +125,7 @@
   "visits.addNew": "New Visit",
 
   "visit.title.new": "New Visit",
+  "visit.title.edit": "Edit Visit",
   "visit.title.detail": "Visit Details",
   "visit.patient": "Patient",
   "visit.doctor": "Doctor",
@@ -139,6 +140,8 @@
   "visit.selectDoctor": "Select doctor...",
   "visit.selectDiagnosis": "Select diagnosis...",
   "visit.selectTreatment": "Select treatment...",
+  "visit.add": "Add Visit",
+  "visit.addForPatient": "Add visit for this patient",
   "visit.paid": "Paid",
   "visit.unpaid": "Unpaid",
   "visit.markPaid": "Mark as paid",
