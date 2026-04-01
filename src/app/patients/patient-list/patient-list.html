@@ -50,7 +50,9 @@
               }
             </div>
             @if (patient.importIncomplete) {
-              <mat-icon class="import-incomplete-icon" [matTooltip]="'common.importIncomplete' | translate" (click)="dismissImportWarning(patient.id, $event)">error_outline</mat-icon>
+              <button mat-icon-button type="button" [matTooltip]="'common.importIncomplete' | translate" [attr.aria-label]="'common.importIncomplete' | translate" (click)="dismissImportWarning(patient.id, $event)">
+                <mat-icon class="import-incomplete-icon">error_outline</mat-icon>
+              </button>
             }
           </div>
         </div>
@@ -122,7 +124,9 @@
             }
           </div>
           @if (p.importIncomplete) {
-            <mat-icon class="import-incomplete-icon" [matTooltip]="'common.importIncomplete' | translate" (click)="dismissImportWarning(p.id, $event)">error_outline</mat-icon>
+            <button mat-icon-button type="button" [matTooltip]="'common.importIncomplete' | translate" [attr.aria-label]="'common.importIncomplete' | translate" (click)="dismissImportWarning(p.id, $event)">
+              <mat-icon class="import-incomplete-icon">error_outline</mat-icon>
+            </button>
           }
         </div>
       </td>

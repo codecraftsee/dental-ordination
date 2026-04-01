@@ -149,7 +149,7 @@ export default class VisitList implements OnInit {
     this.dateToFilter.set(event.value ? this.formatDate(event.value) : '');
   }
 
-  dismissImportWarning(id: string, event: MouseEvent): void {
+  dismissImportWarning(id: string, event: Event): void {
     event.stopPropagation();
     this.confirmDialogService
       .confirm('common.dismissImportWarningTitle', 'common.dismissImportWarningMessage', {

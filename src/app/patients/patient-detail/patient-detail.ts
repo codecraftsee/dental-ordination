@@ -119,7 +119,7 @@ export default class PatientDetail implements OnInit {
     return this.treatmentService.getById(id)?.name || '';
   }
 
-  dismissImportWarning(event: MouseEvent): void {
+  dismissImportWarning(event: Event): void {
     const p = this.patient();
     if (!p) return;
     event.stopPropagation();

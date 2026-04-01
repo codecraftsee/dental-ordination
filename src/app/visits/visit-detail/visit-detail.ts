@@ -92,7 +92,7 @@ export default class VisitDetail implements OnInit {
     });
   }
 
-  dismissImportWarning(event: MouseEvent): void {
+  dismissImportWarning(event: Event): void {
     const v = this.visit();
     if (!v) return;
     event.stopPropagation();

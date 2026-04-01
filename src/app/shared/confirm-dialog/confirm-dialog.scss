@@ -51,6 +51,14 @@
       color: var(--color-warning);
     }
   }
+
+  &.confirm-dialog__icon-wrap--danger {
+    background: var(--color-danger-bg);
+
+    mat-icon {
+      color: var(--color-danger);
+    }
+  }
 }
 
 .confirm-dialog__body {
@@ -79,6 +87,7 @@
   border-top: 1px solid var(--color-border);
 
   button {
+
     --mdc-protected-button-container-height: 30px;
     --mdc-outlined-button-container-height: 30px;
     height: 30px;
