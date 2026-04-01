@@ -42,6 +42,28 @@
     gap: 2px;
   }
 }
+.cell-with-indicator {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--spacing-sm);
+}
+
+.import-incomplete-icon {
+  font-size: 18px;
+  width: 18px;
+  height: 18px;
+  color: var(--color-warning);
+  opacity: 0.85;
+  flex-shrink: 0;
+  cursor: pointer;
+  transition: opacity 0.15s ease;
+
+  &:hover {
+    opacity: 1;
+  }
+}
+
 // Book page content styles
 .book-page-header {
   display: flex;

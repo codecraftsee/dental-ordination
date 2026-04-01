@@ -42,10 +42,19 @@
       <div class="book-page-header">
         <mat-icon class="book-page-avatar">person</mat-icon>
         <div class="book-page-name">
-          <a [routerLink]="['/patients', patient.id]">{{ patient.firstName }} {{ patient.lastName }}</a>
-          @if (hasDebt(patient.id)) {
-            <span class="badge badge-danger badge-sm">{{ 'patients.hasDebt' | translate }}</span>
-          }
+          <div class="cell-with-indicator">
+            <div>
+              <a [routerLink]="['/patients', patient.id]">{{ patient.firstName }} {{ patient.lastName }}</a>
+              @if (hasDebt(patient.id)) {
+                <span class="badge badge-danger badge-sm">{{ 'patients.hasDebt' | translate }}</span>
+              }
+            </div>
+            @if (patient.importIncomplete) {
+              <button mat-icon-button type="button" [matTooltip]="'common.importIncomplete' | translate" [attr.aria-label]="'common.importIncomplete' | translate" (click)="dismissImportWarning(patient.id, $event)">
+                <mat-icon class="import-incomplete-icon">error_outline</mat-icon>
+              </button>
+            }
+          </div>
         </div>
       </div>
       <div class="book-page-fields">
@@ -107,10 +116,19 @@
     <ng-container matColumnDef="name">
       <th mat-header-cell *matHeaderCellDef mat-sort-header>{{ 'patients.name' | translate }}</th>
       <td mat-cell *matCellDef="let p">
-        <a [routerLink]="['/patients', p.id]">{{ p.firstName }} {{ p.lastName }}</a>
-        @if (hasDebt(p.id)) {
-          <span class="badge badge-danger badge-sm">{{ 'patients.hasDebt' | translate }}</span>
-        }
+        <div class="cell-with-indicator">
+          <div>
+            <a [routerLink]="['/patients', p.id]">{{ p.firstName }} {{ p.lastName }}</a>
+            @if (hasDebt(p.id)) {
+              <span class="badge badge-danger badge-sm">{{ 'patients.hasDebt' | translate }}</span>
+            }
+          </div>
+          @if (p.importIncomplete) {
+            <button mat-icon-button type="button" [matTooltip]="'common.importIncomplete' | translate" [attr.aria-label]="'common.importIncomplete' | translate" (click)="dismissImportWarning(p.id, $event)">
+              <mat-icon class="import-incomplete-icon">error_outline</mat-icon>
+            </button>
+          }
+        </div>
       </td>
     </ng-container>
 

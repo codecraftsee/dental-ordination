@@ -67,6 +67,14 @@ export class PatientService {
     );
   }
 
+  dismissImportWarning(id: string): Observable<Patient> {
+    return this.http.patch<Patient>(`${this.apiUrl}/${id}/dismiss-warning`, {}).pipe(
+      tap(updated => {
+        this.items.set(this.items().map(p => (p.id === id ? updated : p)));
+      }),
+    );
+  }
+
   delete(id: string): Observable<void> {
     return this.http.delete<void>(`${this.apiUrl}/${id}`).pipe(
       tap(() => this.items.set(this.items().filter(p => p.id !== id))),

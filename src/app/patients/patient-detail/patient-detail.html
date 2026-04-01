@@ -10,7 +10,12 @@
               <span class="avatar-initials">{{ getInitials(p) }}</span>
             </div>
             <div class="profile-info">
-              <h2 class="profile-name">{{ p.firstName }} {{ p.lastName }}</h2>
+              <h2 class="profile-name">
+                {{ p.firstName }} {{ p.lastName }}
+                @if (p.importIncomplete) {
+                  <mat-icon class="import-incomplete-icon" role="button" tabindex="0" [matTooltip]="'common.importIncomplete' | translate" [attr.aria-label]="'common.importIncomplete' | translate" (click)="dismissImportWarning($event)" (keydown.enter)="dismissImportWarning($event)" (keydown.space)="dismissImportWarning($event)">error_outline</mat-icon>
+                }
+              </h2>
               <div class="profile-meta">
                 <span class="badge" [class]="p.gender === 'male' ? 'badge-info' : 'badge-success'">
                   {{ 'patient.gender.' + p.gender | translate }}

@@ -50,11 +50,28 @@
 }
 
 .profile-name {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xs);
   font-size: 1.75rem;
   font-weight: 700;
   color: var(--color-text);
   margin: 0 0 var(--spacing-xs) 0;
   font-family: var(--font-heading);
+}
+
+.import-incomplete-icon {
+  font-size: 22px;
+  width: 22px;
+  height: 22px;
+  color: var(--color-warning);
+  opacity: 0.85;
+  cursor: pointer;
+  transition: opacity 0.15s ease;
+
+  &:hover {
+    opacity: 1;
+  }
 }
 
 .profile-meta {

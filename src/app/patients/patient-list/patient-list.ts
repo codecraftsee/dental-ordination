@@ -60,7 +60,7 @@ export default class PatientList implements OnInit {
       this.dataSource.data = this.filteredPatients();
     });
 
-    this.dataSource.sortingDataAccessor = (item: Patient, header: keyof Patient | 'name'): string | number => {
+    this.dataSource.sortingDataAccessor = (item: Patient, header: string): string | number => {
       if (header === 'name') return `${item.firstName} ${item.lastName}`.toLowerCase();
       if (header === 'dateOfBirth') return new Date(item.dateOfBirth).getTime() || 0;
       return String(item[header as keyof Patient] ?? '');
@@ -88,6 +88,20 @@ export default class PatientList implements OnInit {
 
   onGenderChange(event: Event): void {
     this.genderFilter.set((event.target as HTMLSelectElement).value);
+  }
+
+  dismissImportWarning(id: string, event: Event): void {
+    event.stopPropagation();
+    this.confirmDialogService
+      .confirm('common.dismissImportWarningTitle', 'common.dismissImportWarningMessage', {
+        icon: 'error_outline',
+        iconColor: 'warning',
+      })
+      .subscribe(confirmed => {
+        if (confirmed) {
+          this.patientService.dismissImportWarning(id).subscribe();
+        }
+      });
   }
 
   deletePatient(id: string): void {
