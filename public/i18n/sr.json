@@ -126,6 +126,7 @@
   "visits.addNew": "Nova Poseta",
 
   "visit.title.new": "Nova Poseta",
+  "visit.title.edit": "Izmeni Posetu",
   "visit.title.detail": "Detalji Posete",
   "visit.patient": "Pacijent",
   "visit.doctor": "Lekar",
@@ -140,6 +141,8 @@
   "visit.selectDoctor": "Izaberite lekara...",
   "visit.selectDiagnosis": "Izaberite dijagnozu...",
   "visit.selectTreatment": "Izaberite terapiju...",
+  "visit.add": "Dodaj Posetu",
+  "visit.addForPatient": "Dodaj posetu za ovog pacijenta",
   "visit.paid": "Plaćeno",
   "visit.unpaid": "Neplaćeno",
   "visit.markPaid": "Označi kao plaćeno",

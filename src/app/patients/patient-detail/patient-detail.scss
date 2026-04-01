@@ -103,6 +103,32 @@
   margin-bottom: var(--spacing-lg);
 }
 
+// ── Stat card action button ───────────────────────────────────────────────────
+
+mat-card.stat-card--with-action {
+  position: relative;
+
+  .stat-card-action-btn {
+    position: absolute;
+    top: 4px;
+    right: 4px;
+
+    mat-icon {
+      color: var(--color-text-secondary);
+      transition: color 0.2s ease, transform 0.2s ease;
+    }
+
+    &:hover mat-icon {
+      color: var(--color-primary);
+      transform: scale(1.15);
+    }
+
+    &:active mat-icon {
+      transform: scale(0.95);
+    }
+  }
+}
+
 // ── Two-column info section ───────────────────────────────────────────────────
 
 .info-section {

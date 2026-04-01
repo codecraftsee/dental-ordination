@@ -32,6 +32,7 @@
               <mat-icon>{{ v.paid ? 'money_off' : 'paid' }}</mat-icon>
               {{ (v.paid ? 'visit.markUnpaid' : 'visit.markPaid') | translate }}
             </button>
+            <a [routerLink]="['/visits', v.id, 'edit']" matButton="outlined"><mat-icon>edit</mat-icon>{{ 'common.edit' | translate }}</a>
             <button matButton="outlined" class="btn-danger-outlined" (click)="deleteVisit()"><mat-icon>delete</mat-icon>{{ 'common.delete' | translate }}</button>
             <a routerLink="/visits" matButton="outlined"><mat-icon>arrow_back</mat-icon>{{ 'common.back' | translate }}</a>
           </div>

@@ -1,6 +1,6 @@
 <div class="container page">
   <div class="page-header">
-    <h1 class="section-title">{{ 'visit.title.new' | translate }}</h1>
+    <h1 class="section-title">{{ (isEditMode ? 'visit.title.edit' : 'visit.title.new') | translate }}</h1>
   </div>
 
   <mat-card class="form-card">
@@ -14,7 +14,9 @@
               <mat-option [value]="p.id">{{ p.firstName }} {{ p.lastName }}</mat-option>
             }
           </mat-select>
-          <mat-error>{{ 'common.required' | translate }}</mat-error>
+          @if (!prefilledPatientId) {
+            <mat-error>{{ 'common.required' | translate }}</mat-error>
+          }
         </mat-form-field>
         <mat-form-field appearance="fill">
           <mat-label>{{ 'visit.doctor' | translate }}</mat-label>
@@ -87,7 +89,7 @@
 
       <div class="form-actions">
         <button type="submit" matButton="elevated" color="primary"><mat-icon>save</mat-icon>{{ 'common.save' | translate }}</button>
-        <a routerLink="/visits" matButton="outlined"><mat-icon>close</mat-icon>{{ 'common.cancel' | translate }}</a>
+        <a [routerLink]="returnTo ?? '/visits'" matButton="outlined"><mat-icon>close</mat-icon>{{ 'common.cancel' | translate }}</a>
       </div>
     </form>
     </mat-card-content>

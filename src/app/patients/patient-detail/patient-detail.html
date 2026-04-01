@@ -43,7 +43,7 @@
 
     <!-- STATS BAR -->
     <div class="stats-bar">
-      <mat-card class="stat-card stat-card--primary">
+      <mat-card class="stat-card stat-card--primary stat-card--with-action">
         <mat-card-content>
           <div class="stat-icon-wrap">
             <mat-icon>bar_chart</mat-icon>
@@ -53,6 +53,9 @@
             <div class="stat-label">{{ 'patient.totalVisits' | translate }}</div>
           </div>
         </mat-card-content>
+        <a [routerLink]="['/visits/new']" [queryParams]="{ patientId: p.id, returnTo: '/patients/' + p.id }" matIconButton class="stat-card-action-btn" [matTooltip]="'visit.addForPatient' | translate" [attr.aria-label]="'visit.addForPatient' | translate">
+          <mat-icon>add_circle_outline</mat-icon>
+        </a>
       </mat-card>
       <mat-card class="stat-card stat-card--info">
         <mat-card-content>

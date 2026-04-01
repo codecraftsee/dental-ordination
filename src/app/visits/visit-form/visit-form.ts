@@ -1,6 +1,6 @@
 import { ChangeDetectionStrategy, Component, inject, OnInit, OnDestroy } from '@angular/core';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
-import { Router, RouterLink } from '@angular/router';
+import { Router, RouterLink, ActivatedRoute } from '@angular/router';
 import { Subscription, forkJoin } from 'rxjs';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
@@ -41,6 +41,7 @@ import { TreatmentService } from '../../services/treatment.service';
 export default class VisitForm implements OnInit, OnDestroy {
   private fb = inject(FormBuilder);
   private router = inject(Router);
+  private route = inject(ActivatedRoute);
   private visitService = inject(VisitService);
   private patientService = inject(PatientService);
   private doctorService = inject(DoctorService);
@@ -53,11 +54,25 @@ export default class VisitForm implements OnInit, OnDestroy {
   get treatments() { return this.treatmentService.getAll(); }
 
   form!: FormGroup;
+  isEditMode = false;
+  visitId: string | null = null;
+  prefilledPatientId: string | null = null;
+  returnTo: string | null = null;
+  private patchingForm = false;
   private treatmentSub?: Subscription;
 
   ngOnInit(): void {
+    this.visitId = this.route.snapshot.paramMap.get('id');
+    this.isEditMode = !!this.visitId;
+
+    if (!this.isEditMode) {
+      const params = this.route.snapshot.queryParams;
+      this.prefilledPatientId = params['patientId'] ?? null;
+      this.returnTo = params['returnTo'] ?? null;
+    }
+
     this.form = this.fb.group({
-      patientId: ['', Validators.required],
+      patientId: [this.prefilledPatientId ?? '', Validators.required],
       doctorId: ['', Validators.required],
       date: [new Date(), Validators.required],
       toothNumber: [null],
@@ -69,15 +84,41 @@ export default class VisitForm implements OnInit, OnDestroy {
       paid: [false],
     });
 
+    if (this.prefilledPatientId) {
+      this.form.get('patientId')!.disable();
+    }
+
     forkJoin([
       this.patientService.loadAll(),
       this.doctorService.loadAll(),
       this.diagnosisService.loadAll(),
       this.treatmentService.loadAll(),
-    ]).subscribe();
+    ]).subscribe(() => {
+      if (this.isEditMode && this.visitId) {
+        this.visitService.loadById(this.visitId).subscribe({
+          next: visit => {
+            this.patchingForm = true;
+            this.form.patchValue({
+              patientId: visit.patientId,
+              doctorId: visit.doctorId,
+              date: this.parseDate(visit.date),
+              toothNumber: visit.toothNumber,
+              diagnosisId: visit.diagnosisId ?? '',
+              diagnosisNotes: visit.diagnosisNotes ?? '',
+              treatmentId: visit.treatmentId ?? '',
+              treatmentNotes: visit.treatmentNotes ?? '',
+              price: visit.price ?? 0,
+              paid: visit.paid ?? false,
+            });
+            this.patchingForm = false;
+          },
+          error: () => this.router.navigate(['/visits']),
+        });
+      }
+    });
 
     this.treatmentSub = this.form.get('treatmentId')!.valueChanges.subscribe(treatmentId => {
-      if (treatmentId) {
+      if (treatmentId && !this.patchingForm) {
         const treatment = this.treatmentService.getById(treatmentId);
         if (treatment) {
           this.form.get('price')!.setValue(treatment.defaultPrice);
@@ -100,16 +141,34 @@ export default class VisitForm implements OnInit, OnDestroy {
       return;
     }
 
-    const formValue = this.form.value;
-    this.visitService.create({
+    const formValue = this.form.getRawValue();
+    const payload = {
       ...formValue,
       date: this.formatDate(formValue.date),
       toothNumber: formValue.toothNumber ? Number(formValue.toothNumber) : null,
       price: Number(formValue.price),
       paid: formValue.paid ?? false,
-    }).subscribe(visit => {
-      this.router.navigate(['/visits', visit.id]);
-    });
+    };
+
+    if (this.isEditMode && this.visitId) {
+      const { date, ...updatePayload } = payload;
+      this.visitService.update(this.visitId, updatePayload).subscribe(visit => {
+        this.router.navigate(['/visits', visit.id]);
+      });
+    } else {
+      this.visitService.create(payload).subscribe(visit => {
+        if (this.returnTo) {
+          this.router.navigateByUrl(this.returnTo);
+        } else {
+          this.router.navigate(['/visits', visit.id]);
+        }
+      });
+    }
+  }
+
+  private parseDate(dateStr: string): Date {
+    const [y, m, d] = dateStr.split('-').map(Number);
+    return new Date(y, m - 1, d);
   }
 
   private formatDate(date: Date): string {
