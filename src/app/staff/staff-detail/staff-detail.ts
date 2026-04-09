@@ -10,26 +10,26 @@ import { TranslatePipe } from '../../shared/translate.pipe';
 import { LocalizedDatePipe } from '../../shared/localized-date.pipe';
 import { CurrencyFormatPipe } from '../../shared/currency-format.pipe';
 import { ConfirmDialogService } from '../../services/confirm-dialog.service';
-import { DoctorService } from '../../services/doctor.service';
+import { UserService } from '../../services/user.service';
 import { VisitService } from '../../services/visit.service';
 import { PatientService } from '../../services/patient.service';
 import { DiagnosisService } from '../../services/diagnosis.service';
 import { TreatmentService } from '../../services/treatment.service';
-import { Doctor } from '../../models/doctor.model';
+import { User, UserRole } from '../../models/user.model';
 import { Visit } from '../../models/visit.model';
 
 @Component({
-  selector: 'app-doctor-detail',
+  selector: 'app-staff-detail',
   imports: [RouterLink, TranslatePipe, LocalizedDatePipe, CurrencyFormatPipe, MatCardModule, MatTableModule, MatPaginatorModule, MatButtonModule, MatIconModule],
-  templateUrl: './doctor-detail.html',
-  styleUrl: './doctor-detail.scss',
+  templateUrl: './staff-detail.html',
+  styleUrl: './staff-detail.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export default class DoctorDetail implements OnInit {
+export default class StaffDetail implements OnInit {
   private route = inject(ActivatedRoute);
   private router = inject(Router);
   private confirmDialogService = inject(ConfirmDialogService);
-  private doctorService = inject(DoctorService);
+  private userService = inject(UserService);
   private visitService = inject(VisitService);
   private patientService = inject(PatientService);
   private diagnosisService = inject(DiagnosisService);
@@ -37,46 +37,52 @@ export default class DoctorDetail implements OnInit {
 
   private paginator = viewChild(MatPaginator);
 
+  protected readonly UserRole = UserRole;
   visitColumns = ['date', 'patient', 'tooth', 'diagnosis', 'treatment', 'price'];
-  doctor = signal<Doctor | undefined>(undefined);
+  member = signal<User | undefined>(undefined);
   visits = signal<Visit[]>([]);
   visitsDataSource = new MatTableDataSource<Visit>();
 
   constructor() {
     effect(() => {
       const pag = this.paginator();
-      if (pag) {
-        this.visitsDataSource.paginator = pag;
-      }
+      if (pag) this.visitsDataSource.paginator = pag;
     });
   }
 
   ngOnInit(): void {
     const id = this.route.snapshot.paramMap.get('id');
     if (!id) {
-      this.router.navigate(['/doctors']);
+      this.router.navigate(['/staff']);
       return;
     }
 
     forkJoin([
-      this.doctorService.loadById(id),
+      this.userService.loadById(id),
       this.visitService.loadAll({ doctorId: id }),
       this.patientService.loadAll(),
       this.diagnosisService.loadAll(),
       this.treatmentService.loadAll(),
     ]).subscribe({
-      next: ([doctor]) => {
-        this.doctor.set(doctor);
-        const doctorVisits = this.visitService.getByDoctorId(id);
-        this.visits.set(doctorVisits);
-        this.visitsDataSource.data = doctorVisits;
+      next: ([user]) => {
+        this.member.set(user);
+        const memberVisits = this.visitService.getByDoctorId(id);
+        this.visits.set(memberVisits);
+        this.visitsDataSource.data = memberVisits;
       },
-      error: () => this.router.navigate(['/doctors']),
+      error: () => this.router.navigate(['/staff']),
     });
   }
 
-  getInitials(doc: Doctor): string {
-    return `${doc.firstName[0]}${doc.lastName[0]}`.toUpperCase();
+  getInitials(u: User): string {
+    const f = u.firstName?.[0] ?? '';
+    const l = u.lastName?.[0] ?? '';
+    return `${f}${l}`.toUpperCase() || u.email[0].toUpperCase();
+  }
+
+  getDisplayName(u: User): string {
+    const name = [u.firstName, u.lastName].filter(Boolean).join(' ');
+    return u.role === UserRole.Doctor ? `Dr. ${name}` : name;
   }
 
   getVisitsThisYear(): number {
@@ -85,8 +91,7 @@ export default class DoctorDetail implements OnInit {
   }
 
   getUniquePatients(): number {
-    const ids = new Set(this.visits().map(v => v.patientId));
-    return ids.size;
+    return new Set(this.visits().map(v => v.patientId)).size;
   }
 
   getPatientName(id: string): string {
@@ -104,15 +109,21 @@ export default class DoctorDetail implements OnInit {
     return this.treatmentService.getById(id)?.name || '';
   }
 
-  deleteDoctor(): void {
-    const d = this.doctor();
-    if (!d) return;
+  resendInvite(): void {
+    const u = this.member();
+    if (!u) return;
+    this.userService.resendInvite(u.id).subscribe();
+  }
+
+  deleteStaff(): void {
+    const u = this.member();
+    if (!u) return;
     this.confirmDialogService
-      .confirm('doctor.deleteTitle', 'doctor.deleteMessage')
+      .confirm('staff.deleteTitle', 'staff.deleteMessage')
       .subscribe(confirmed => {
         if (confirmed) {
-          this.doctorService.delete(d.id).subscribe(() => {
-            this.router.navigate(['/doctors']);
+          this.userService.delete(u.id).subscribe(() => {
+            this.router.navigate(['/staff']);
           });
         }
       });

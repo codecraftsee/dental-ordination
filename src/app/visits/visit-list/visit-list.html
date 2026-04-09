@@ -26,7 +26,7 @@
           <mat-select (selectionChange)="doctorFilter.set($event.value)">
             <mat-option value="">{{ 'visits.filterDoctor' | translate }}</mat-option>
             @for (d of doctors(); track d.id) {
-              <mat-option [value]="d.id">Dr. {{ d.firstName }} {{ d.lastName }}</mat-option>
+              <mat-option [value]="d.id">{{ d.role === UserRole.Doctor ? 'Dr. ' : '' }}{{ d.firstName }} {{ d.lastName }}</mat-option>
             }
           </mat-select>
         </mat-form-field>
@@ -70,7 +70,7 @@
     <ng-container matColumnDef="doctor">
       <th mat-header-cell *matHeaderCellDef mat-sort-header>{{ 'visits.doctor' | translate }}</th>
       <td mat-cell *matCellDef="let v">
-        <a [routerLink]="['/doctors', v.doctorId]">{{ getDoctorName(v.doctorId) }}</a>
+        <a [routerLink]="['/staff', v.doctorId]">{{ getDoctorName(v.doctorId) }}</a>
       </td>
     </ng-container>
 

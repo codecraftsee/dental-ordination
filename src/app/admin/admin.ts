@@ -12,7 +12,7 @@ import { TranslatePipe } from '../shared/translate.pipe';
 import { AdminService } from '../services/admin.service';
 import { AuthService } from '../services/auth.service';
 import { PatientService } from '../services/patient.service';
-import { DoctorService } from '../services/doctor.service';
+import { UserService } from '../services/user.service';
 import { VisitService } from '../services/visit.service';
 import { DiagnosisService } from '../services/diagnosis.service';
 import { TreatmentService } from '../services/treatment.service';
@@ -29,7 +29,7 @@ class PasswordMismatchErrorMatcher implements ErrorStateMatcher {
   }
 }
 
-type ActionKey = 'visits' | 'patients' | 'doctors' | 'diagnoses' | 'treatments' | 'all';
+type ActionKey = 'visits' | 'patients' | 'diagnoses' | 'treatments' | 'all';
 
 interface ActionState {
   key: ActionKey;
@@ -55,7 +55,7 @@ export default class Admin {
   private destroyRef = inject(DestroyRef);
   private fb = inject(FormBuilder);
   private patientService = inject(PatientService);
-  private doctorService = inject(DoctorService);
+  private userService = inject(UserService);
   private visitService = inject(VisitService);
   private diagnosisService = inject(DiagnosisService);
   private treatmentService = inject(TreatmentService);
@@ -80,7 +80,6 @@ export default class Admin {
   readonly actions: ActionState[] = [
     this.makeAction('visits', 'admin.deleteVisits', 'admin.deleteVisitsDesc', false),
     this.makeAction('patients', 'admin.deletePatients', 'admin.deletePatientsDesc', false),
-    this.makeAction('doctors', 'admin.deleteDoctors', 'admin.deleteDoctorsDesc', false),
     this.makeAction('diagnoses', 'admin.deleteDiagnoses', 'admin.deleteDiagnosesDesc', false),
     this.makeAction('treatments', 'admin.deleteTreatments', 'admin.deleteTreatmentsDesc', false),
     this.makeAction('all', 'admin.deleteAll', 'admin.deleteAllDesc', true),
@@ -150,7 +149,6 @@ export default class Admin {
     switch (key) {
       case 'visits':     return this.adminService.deleteVisits();
       case 'patients':   return this.adminService.deletePatients();
-      case 'doctors':    return this.adminService.deleteDoctors();
       case 'diagnoses':  return this.adminService.deleteDiagnoses();
       case 'treatments': return this.adminService.deleteTreatments();
       case 'all':        return this.adminService.deleteAll();
@@ -166,9 +164,6 @@ export default class Admin {
         this.patientService.loadAll().subscribe();
         this.visitService.loadAll().subscribe();
         break;
-      case 'doctors':
-        this.doctorService.loadAll().subscribe();
-        break;
       case 'diagnoses':
         this.diagnosisService.loadAll().subscribe();
         break;
@@ -178,7 +173,7 @@ export default class Admin {
       case 'all':
         this.patientService.loadAll().subscribe();
         this.visitService.loadAll().subscribe();
-        this.doctorService.loadAll().subscribe();
+        this.userService.loadAll().subscribe();
         this.diagnosisService.loadAll().subscribe();
         this.treatmentService.loadAll().subscribe();
         break;

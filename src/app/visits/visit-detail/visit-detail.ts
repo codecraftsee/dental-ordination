@@ -11,7 +11,7 @@ import { CurrencyFormatPipe } from '../../shared/currency-format.pipe';
 import { ConfirmDialogService } from '../../services/confirm-dialog.service';
 import { VisitService } from '../../services/visit.service';
 import { PatientService } from '../../services/patient.service';
-import { DoctorService } from '../../services/doctor.service';
+import { UserService } from '../../services/user.service';
 import { DiagnosisService } from '../../services/diagnosis.service';
 import { TreatmentService } from '../../services/treatment.service';
 import { Visit } from '../../models/visit.model';
@@ -29,7 +29,7 @@ export default class VisitDetail implements OnInit {
   private confirmDialogService = inject(ConfirmDialogService);
   private visitService = inject(VisitService);
   private patientService = inject(PatientService);
-  private doctorService = inject(DoctorService);
+  private userService = inject(UserService);
   private diagnosisService = inject(DiagnosisService);
   private treatmentService = inject(TreatmentService);
 
@@ -45,7 +45,7 @@ export default class VisitDetail implements OnInit {
     forkJoin([
       this.visitService.loadById(id),
       this.patientService.loadAll(),
-      this.doctorService.loadAll(),
+      this.userService.loadAll(),
       this.diagnosisService.loadAll(),
       this.treatmentService.loadAll(),
     ]).subscribe({
@@ -60,8 +60,7 @@ export default class VisitDetail implements OnInit {
   }
 
   getDoctorName(id: string): string {
-    const d = this.doctorService.getById(id);
-    return d ? `Dr. ${d.firstName} ${d.lastName}` : '';
+    return this.userService.getDisplayName(id);
   }
 
   getDiagnosisName(id: string | undefined): string {

@@ -1,0 +1,194 @@
+@if (member(); as u) {
+  <div class="container page">
+
+    <!-- PROFILE HEADER -->
+    <mat-card class="profile-card">
+      <mat-card-content>
+        <div class="profile-top">
+          <div class="profile-main">
+            <div class="avatar">
+              <span class="avatar-initials">{{ getInitials(u) }}</span>
+            </div>
+            <div class="profile-info">
+              <h2 class="profile-name">{{ getDisplayName(u) }}</h2>
+              <div class="profile-meta">
+                <span [class]="'badge badge-' + (u.role === UserRole.Doctor ? 'primary' : 'info')">
+                  {{ 'role.' + u.role | translate }}
+                </span>
+                @if (u.specialization) {
+                  <span class="badge badge-secondary">{{ 'specialization.' + u.specialization | translate }}</span>
+                }
+                @if (u.licenseNumber) {
+                  <span class="profile-registered">
+                    {{ 'staffMember.licenseNumber' | translate }}: {{ u.licenseNumber }}
+                  </span>
+                }
+                @if (u.mustSetPassword) {
+                  <span class="badge badge-warning">{{ 'staff.pendingInvite' | translate }}</span>
+                }
+              </div>
+            </div>
+          </div>
+          <div class="profile-actions">
+            <a [routerLink]="['/staff', u.id, 'edit']" matButton="outlined"><mat-icon>edit</mat-icon>{{ 'common.edit' | translate }}</a>
+            @if (u.mustSetPassword) {
+              <button matButton="outlined" (click)="resendInvite()"><mat-icon>email</mat-icon>{{ 'staff.resendInvite' | translate }}</button>
+            }
+            <button matButton="outlined" class="btn-danger-outlined" (click)="deleteStaff()"><mat-icon>delete</mat-icon>{{ 'common.delete' | translate }}</button>
+            <a routerLink="/staff" matButton="outlined"><mat-icon>arrow_back</mat-icon>{{ 'common.back' | translate }}</a>
+          </div>
+        </div>
+      </mat-card-content>
+    </mat-card>
+
+    <!-- STATS BAR -->
+    @if (u.role === UserRole.Doctor || u.role === UserRole.Nurse) {
+      <div class="stats-bar">
+        <mat-card class="stat-card stat-card--primary">
+          <mat-card-content>
+            <div class="stat-icon-wrap"><mat-icon>bar_chart</mat-icon></div>
+            <div class="stat-body">
+              <div class="stat-value">{{ visits().length }}</div>
+              <div class="stat-label">{{ 'staffMember.totalVisits' | translate }}</div>
+            </div>
+          </mat-card-content>
+        </mat-card>
+        <mat-card class="stat-card stat-card--info">
+          <mat-card-content>
+            <div class="stat-icon-wrap"><mat-icon>today</mat-icon></div>
+            <div class="stat-body">
+              <div class="stat-value">{{ getVisitsThisYear() }}</div>
+              <div class="stat-label">{{ 'staffMember.visitsThisYear' | translate }}</div>
+            </div>
+          </mat-card-content>
+        </mat-card>
+        <mat-card class="stat-card stat-card--highlight">
+          <mat-card-content>
+            <div class="stat-icon-wrap"><mat-icon>people</mat-icon></div>
+            <div class="stat-body">
+              <div class="stat-value">{{ getUniquePatients() }}</div>
+              <div class="stat-label">{{ 'staffMember.uniquePatients' | translate }}</div>
+            </div>
+          </mat-card-content>
+        </mat-card>
+      </div>
+    }
+
+    <!-- INFO SECTION -->
+    <div class="info-section">
+
+      <!-- CONTACT CARD -->
+      <mat-card class="info-card info-card--info">
+        <mat-card-content>
+          <h3 class="card-section-title">
+            <mat-icon class="card-section-icon">contact_phone</mat-icon>
+            {{ 'staffMember.contactInfo' | translate }}
+          </h3>
+          @if (u.phone) {
+            <div class="contact-row">
+              <mat-icon class="contact-icon">phone</mat-icon>
+              <span class="contact-value">{{ u.phone }}</span>
+            </div>
+          }
+          <div class="contact-row">
+            <mat-icon class="contact-icon">email</mat-icon>
+            <span class="contact-value">{{ u.email }}</span>
+          </div>
+        </mat-card-content>
+      </mat-card>
+
+      <!-- PROFESSIONAL INFO CARD -->
+      <mat-card class="info-card info-card--primary">
+        <mat-card-content>
+          <h3 class="card-section-title">
+            <mat-icon class="card-section-icon">person</mat-icon>
+            {{ 'staffMember.professionalInfo' | translate }}
+          </h3>
+          <div class="personal-grid">
+            <div class="personal-row">
+              <span class="personal-label">{{ 'staffMember.firstName' | translate }}</span>
+              <span class="personal-value">{{ u.firstName }}</span>
+            </div>
+            <div class="personal-row">
+              <span class="personal-label">{{ 'staffMember.lastName' | translate }}</span>
+              <span class="personal-value">{{ u.lastName }}</span>
+            </div>
+            <div class="personal-row">
+              <span class="personal-label">{{ 'staffMember.role' | translate }}</span>
+              <span class="personal-value">{{ 'role.' + u.role | translate }}</span>
+            </div>
+            @if (u.role === UserRole.Doctor) {
+              <div class="personal-row">
+                <span class="personal-label">{{ 'staffMember.specialization' | translate }}</span>
+                <span class="personal-value">{{ u.specialization ? ('specialization.' + u.specialization | translate) : '—' }}</span>
+              </div>
+              <div class="personal-row">
+                <span class="personal-label">{{ 'staffMember.licenseNumber' | translate }}</span>
+                <span class="personal-value">{{ u.licenseNumber || '—' }}</span>
+              </div>
+            }
+          </div>
+        </mat-card-content>
+      </mat-card>
+
+    </div>
+
+    <!-- VISIT HISTORY -->
+    @if (u.role === UserRole.Doctor || u.role === UserRole.Nurse) {
+      <div class="visit-history-section">
+        <h2 class="section-subtitle">{{ 'staffMember.visitHistory' | translate }}</h2>
+
+        <table mat-table [dataSource]="visitsDataSource" class="visits-table" [class.no-paginator]="visits().length <= 5">
+
+          <ng-container matColumnDef="date">
+            <th mat-header-cell *matHeaderCellDef>{{ 'visits.date' | translate }}</th>
+            <td mat-cell *matCellDef="let v">{{ v.date | localizedDate:'mediumDate' }}</td>
+          </ng-container>
+
+          <ng-container matColumnDef="patient">
+            <th mat-header-cell *matHeaderCellDef>{{ 'visits.patient' | translate }}</th>
+            <td mat-cell *matCellDef="let v">
+              <a [routerLink]="['/patients', v.patientId]">{{ getPatientName(v.patientId) }}</a>
+            </td>
+          </ng-container>
+
+          <ng-container matColumnDef="tooth">
+            <th mat-header-cell *matHeaderCellDef>{{ 'visits.tooth' | translate }}</th>
+            <td mat-cell *matCellDef="let v">{{ v.toothNumber || '—' }}</td>
+          </ng-container>
+
+          <ng-container matColumnDef="diagnosis">
+            <th mat-header-cell *matHeaderCellDef>{{ 'visits.diagnosis' | translate }}</th>
+            <td mat-cell *matCellDef="let v">{{ getDiagnosisName(v.diagnosisId) }}</td>
+          </ng-container>
+
+          <ng-container matColumnDef="treatment">
+            <th mat-header-cell *matHeaderCellDef>{{ 'visits.treatment' | translate }}</th>
+            <td mat-cell *matCellDef="let v">{{ getTreatmentName(v.treatmentId) }}</td>
+          </ng-container>
+
+          <ng-container matColumnDef="price">
+            <th mat-header-cell *matHeaderCellDef>{{ 'visits.price' | translate }}</th>
+            <td mat-cell *matCellDef="let v">{{ v.price | currencyFormat }}</td>
+          </ng-container>
+
+          <tr mat-header-row *matHeaderRowDef="visitColumns"></tr>
+          <tr mat-row *matRowDef="let row; columns: visitColumns"></tr>
+
+          <tr class="mat-mdc-no-data-row" *matNoDataRow>
+            <td [colSpan]="visitColumns.length">
+              <div class="empty-state">
+                <p class="empty-state-text">{{ 'staffMember.noVisits' | translate }}</p>
+              </div>
+            </td>
+          </tr>
+
+        </table>
+        @if (visits().length > 5) {
+          <mat-paginator [pageSizeOptions]="[5, 10, 25]" [pageSize]="10" showFirstLastButtons></mat-paginator>
+        }
+      </div>
+    }
+
+  </div>
+}

@@ -11,31 +11,34 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { TranslatePipe } from '../../shared/translate.pipe';
-import { DoctorService } from '../../services/doctor.service';
-import { Doctor, Specialization } from '../../models/doctor.model';
+import { UserService } from '../../services/user.service';
+import { User, UserRole } from '../../models/user.model';
 
 @Component({
-  selector: 'app-doctor-list',
+  selector: 'app-staff-list',
   imports: [RouterLink, TranslatePipe, MatFormFieldModule, MatInputModule, MatSelectModule, MatTableModule, MatPaginatorModule, MatSortModule, MatCardModule, MatButtonModule, MatIconModule, MatTooltipModule],
-  templateUrl: './doctor-list.html',
-  styleUrl: './doctor-list.scss',
+  templateUrl: './staff-list.html',
+  styleUrl: './staff-list.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export default class DoctorList implements OnInit {
-  private doctorService = inject(DoctorService);
+export default class StaffList implements OnInit {
+  private userService = inject(UserService);
   private paginator = viewChild(MatPaginator);
   private sort = viewChild(MatSort);
 
-  specializations = Object.values(Specialization);
-  displayedColumns = ['name', 'specialization', 'phone', 'email', 'actions'];
-  dataSource = new MatTableDataSource<Doctor>();
+  protected readonly UserRole = UserRole;
+  readonly roles: UserRole[] = [UserRole.Doctor, UserRole.Nurse];
+  displayedColumns = ['name', 'role', 'specialization', 'phone', 'email', 'actions'];
+  dataSource = new MatTableDataSource<User>();
   searchQuery = signal('');
-  specializationFilter = signal<string>('');
+  roleFilter = signal<UserRole | ''>('');
 
-  filteredDoctors = computed(() => {
-    return this.doctorService.search(this.searchQuery(), {
-      specialization: this.specializationFilter() || undefined,
-    });
+  filteredStaff = computed(() => {
+    const role = this.roleFilter() as UserRole | undefined;
+    const rolesToShow: UserRole[] = role ? [role] : [UserRole.Doctor, UserRole.Nurse];
+    return this.userService.search(this.searchQuery(), { role: undefined }).filter(u =>
+      rolesToShow.includes(u.role),
+    );
   });
 
   constructor() {
@@ -47,27 +50,24 @@ export default class DoctorList implements OnInit {
     });
 
     effect(() => {
-      this.dataSource.data = this.filteredDoctors();
+      this.dataSource.data = this.filteredStaff();
     });
 
-    this.dataSource.sortingDataAccessor = (item: Doctor, header: string): string => {
-      if (header === 'name') return `${item.firstName} ${item.lastName}`.toLowerCase();
-      if (header === 'specialization') return item.specialization;
+    this.dataSource.sortingDataAccessor = (item: User, header: string): string => {
+      if (header === 'name') return `${item.firstName ?? ''} ${item.lastName ?? ''}`.toLowerCase();
+      if (header === 'role') return item.role;
+      if (header === 'specialization') return item.specialization ?? '';
       if (header === 'phone') return item.phone ?? '';
-      if (header === 'email') return item.email ?? '';
+      if (header === 'email') return item.email;
       return '';
     };
   }
 
   ngOnInit(): void {
-    this.doctorService.loadAll().subscribe();
+    this.userService.loadAll().subscribe();
   }
 
   onSearch(event: Event): void {
     this.searchQuery.set((event.target as HTMLInputElement).value);
-  }
-
-  onSpecializationChange(event: Event): void {
-    this.specializationFilter.set((event.target as HTMLSelectElement).value);
   }
 }

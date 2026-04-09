@@ -7,7 +7,7 @@ import { CurrencyFormatPipe } from '../shared/currency-format.pipe';
 import { TranslateService } from '../services/translate.service';
 import { PatientService } from '../services/patient.service';
 import { VisitService } from '../services/visit.service';
-import { DoctorService } from '../services/doctor.service';
+import { UserService } from '../services/user.service';
 import { DiagnosisService } from '../services/diagnosis.service';
 import { TreatmentService } from '../services/treatment.service';
 import { Patient } from '../models/patient.model';
@@ -32,7 +32,7 @@ export default class DentalCard implements OnInit {
   private translateService = inject(TranslateService);
   private patientService = inject(PatientService);
   private visitService = inject(VisitService);
-  private doctorService = inject(DoctorService);
+  private userService = inject(UserService);
   private diagnosisService = inject(DiagnosisService);
   private treatmentService = inject(TreatmentService);
 
@@ -56,7 +56,7 @@ export default class DentalCard implements OnInit {
     forkJoin([
       this.patientService.loadById(id),
       this.visitService.loadAll({ patientId: id }),
-      this.doctorService.loadAll(),
+      this.userService.loadAll(),
       this.diagnosisService.loadAll(),
       this.treatmentService.loadAll(),
     ]).subscribe({
@@ -71,8 +71,7 @@ export default class DentalCard implements OnInit {
   }
 
   getDoctorName(id: string): string {
-    const d = this.doctorService.getById(id);
-    return d ? `Dr. ${d.firstName} ${d.lastName}` : '';
+    return this.userService.getDisplayName(id);
   }
 
   formatDiagnosis(visit: Visit): string {

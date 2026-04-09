@@ -3,7 +3,7 @@ import { provideHttpClient } from '@angular/common/http';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { provideRouter } from '@angular/router';
 import { AuthService } from './auth.service';
-import { User } from '../models/user.model';
+import { User, UserRole } from '../models/user.model';
 import { environment } from '../../environments/environment';
 
 const mockUser: User = {
@@ -11,7 +11,7 @@ const mockUser: User = {
   email: 'admin@test.com',
   firstName: 'Admin',
   lastName: 'User',
-  role: 'admin',
+  role: UserRole.Admin,
   isActive: true,
   createdAt: '2024-01-01',
   updatedAt: '2024-01-01',
@@ -47,7 +47,7 @@ describe('AuthService', () => {
   });
 
   it('hasRole returns false when no user is set', () => {
-    expect(service.hasRole('admin')).toBe(false);
+    expect(service.hasRole(UserRole.Admin)).toBe(false);
   });
 
   it('getAccessToken returns null when localStorage is empty', () => {
@@ -86,9 +86,9 @@ describe('AuthService', () => {
     service.loadCurrentUser().subscribe();
     httpMock.expectOne(`${environment.apiUrl}/api/auth/me`).flush(mockUser);
     expect(service.isAuthenticated()).toBe(true);
-    expect(service.userRole()).toBe('admin');
-    expect(service.hasRole('admin')).toBe(true);
-    expect(service.hasRole('doctor')).toBe(false);
+    expect(service.userRole()).toBe(UserRole.Admin);
+    expect(service.hasRole(UserRole.Admin)).toBe(true);
+    expect(service.hasRole(UserRole.Doctor)).toBe(false);
   });
 
   it('refreshToken calls logout when no refresh token exists', () => {

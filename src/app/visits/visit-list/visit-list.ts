@@ -18,11 +18,12 @@ import { LocalizedDatePipe } from '../../shared/localized-date.pipe';
 import { CurrencyFormatPipe } from '../../shared/currency-format.pipe';
 import { VisitService } from '../../services/visit.service';
 import { PatientService } from '../../services/patient.service';
-import { DoctorService } from '../../services/doctor.service';
+import { UserService } from '../../services/user.service';
 import { DiagnosisService } from '../../services/diagnosis.service';
 import { TreatmentService } from '../../services/treatment.service';
 import { ConfirmDialogService } from '../../services/confirm-dialog.service';
 import { Visit } from '../../models/visit.model';
+import { UserRole } from '../../models/user.model';
 
 @Component({
   selector: 'app-visit-list',
@@ -32,9 +33,11 @@ import { Visit } from '../../models/visit.model';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export default class VisitList implements OnInit {
+  protected readonly UserRole = UserRole;
+
   private visitService = inject(VisitService);
   private patientService = inject(PatientService);
-  private doctorService = inject(DoctorService);
+  private userService = inject(UserService);
   private diagnosisService = inject(DiagnosisService);
   private treatmentService = inject(TreatmentService);
   private confirmDialogService = inject(ConfirmDialogService);
@@ -50,7 +53,7 @@ export default class VisitList implements OnInit {
   dateToFilter = signal<string>('');
 
   patients = computed(() => this.patientService.getAll());
-  doctors = computed(() => this.doctorService.getAll());
+  doctors = computed(() => this.userService.getByRole(UserRole.Doctor, UserRole.Nurse));
 
   private patientNames = computed(() => {
     const map = new Map<string, string>();
@@ -62,8 +65,8 @@ export default class VisitList implements OnInit {
 
   private doctorNames = computed(() => {
     const map = new Map<string, string>();
-    for (const d of this.doctorService.getAll()) {
-      map.set(d.id, `Dr. ${d.firstName} ${d.lastName}`);
+    for (const u of this.userService.getAll()) {
+      map.set(u.id, this.userService.getDisplayName(u.id));
     }
     return map;
   });
@@ -105,7 +108,7 @@ export default class VisitList implements OnInit {
     forkJoin([
       this.visitService.loadAll(),
       this.patientService.loadAll(),
-      this.doctorService.loadAll(),
+      this.userService.loadAll(),
       this.diagnosisService.loadAll(),
       this.treatmentService.loadAll(),
     ]).subscribe();

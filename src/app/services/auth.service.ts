@@ -3,7 +3,7 @@ import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Router } from '@angular/router';
 import { Observable, tap, catchError, of } from 'rxjs';
 import { environment } from '../../environments/environment';
-import { ChangePasswordRequest, LoginRequest, TokenResponse } from '../models/auth.model';
+import { ChangePasswordRequest, LoginRequest, SetPasswordRequest, TokenResponse } from '../models/auth.model';
 import { User, UserRole } from '../models/user.model';
 
 const ACCESS_TOKEN_KEY = 'access_token';
@@ -94,5 +94,14 @@ export class AuthService {
 
   changePassword(request: ChangePasswordRequest): Observable<void> {
     return this.http.put<void>(`${this.apiUrl}/change-password`, request);
+  }
+
+  setPassword(request: SetPasswordRequest): Observable<TokenResponse> {
+    return this.http.post<TokenResponse>(`${this.apiUrl}/set-password`, request).pipe(
+      tap(response => {
+        localStorage.setItem(ACCESS_TOKEN_KEY, response.accessToken);
+        localStorage.setItem(REFRESH_TOKEN_KEY, response.refreshToken);
+      }),
+    );
   }
 }

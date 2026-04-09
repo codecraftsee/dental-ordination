@@ -16,10 +16,6 @@ export class AdminService {
     return this.http.delete<void>(`${this.baseUrl}/patients`);
   }
 
-  deleteDoctors(): Observable<void> {
-    return this.http.delete<void>(`${this.baseUrl}/doctors`);
-  }
-
   deleteDiagnoses(): Observable<void> {
     return this.http.delete<void>(`${this.baseUrl}/diagnoses`);
   }
