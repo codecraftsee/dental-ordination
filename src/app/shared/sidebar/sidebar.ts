@@ -21,7 +21,7 @@ export class Sidebar {
   readonly navLinks = [
     { route: '/', label: 'nav.home', icon: 'home', exact: true },
     { route: '/patients', label: 'nav.patients', icon: 'people', exact: false },
-    { route: '/doctors', label: 'nav.doctors', icon: 'medical_services', exact: false },
+    { route: '/staff', label: 'nav.staff', icon: 'badge', exact: false },
     { route: '/visits', label: 'nav.visits', icon: 'calendar_month', exact: false },
     { route: '/diagnoses', label: 'nav.diagnoses', icon: 'biotech', exact: false },
     { route: '/treatments', label: 'nav.treatments', icon: 'medication', exact: false },

@@ -14,3 +14,9 @@ export interface ChangePasswordRequest {
   newPassword: string;
   confirmPassword: string;
 }
+
+export interface SetPasswordRequest {
+  token: string;
+  password: string;
+  passwordConfirm: string;
+}

@@ -14,9 +14,10 @@ import { MatSlideToggleModule } from '@angular/material/slide-toggle';
 import { TranslatePipe } from '../../shared/translate.pipe';
 import { VisitService } from '../../services/visit.service';
 import { PatientService } from '../../services/patient.service';
-import { DoctorService } from '../../services/doctor.service';
+import { UserService } from '../../services/user.service';
 import { DiagnosisService } from '../../services/diagnosis.service';
 import { TreatmentService } from '../../services/treatment.service';
+import { UserRole } from '../../models/user.model';
 
 @Component({
   selector: 'app-visit-form',
@@ -44,12 +45,12 @@ export default class VisitForm implements OnInit, OnDestroy {
   private route = inject(ActivatedRoute);
   private visitService = inject(VisitService);
   private patientService = inject(PatientService);
-  private doctorService = inject(DoctorService);
+  private userService = inject(UserService);
   private diagnosisService = inject(DiagnosisService);
   private treatmentService = inject(TreatmentService);
 
   get patients() { return this.patientService.getAll(); }
-  get doctors() { return this.doctorService.getAll(); }
+  get doctors() { return this.userService.getByRole(UserRole.Doctor, UserRole.Nurse); }
   get diagnoses() { return this.diagnosisService.getAll(); }
   get treatments() { return this.treatmentService.getAll(); }
 
@@ -90,7 +91,7 @@ export default class VisitForm implements OnInit, OnDestroy {
 
     forkJoin([
       this.patientService.loadAll(),
-      this.doctorService.loadAll(),
+      this.userService.loadAll(),
       this.diagnosisService.loadAll(),
       this.treatmentService.loadAll(),
     ]).pipe(

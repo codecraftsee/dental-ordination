@@ -6,7 +6,7 @@ import { of, firstValueFrom, isObservable } from 'rxjs';
 import { vi } from 'vitest';
 import { authGuard, loginGuard } from './auth.guard';
 import { AuthService } from '../services/auth.service';
-import { User } from '../models/user.model';
+import { User, UserRole } from '../models/user.model';
 
 const mockRoute = {} as ActivatedRouteSnapshot;
 const mockState = {} as RouterStateSnapshot;
@@ -40,7 +40,7 @@ describe('authGuard', () => {
   });
 
   it('restores session and returns true when token exists and user loads', async () => {
-    const mockUser: User = { id: 'u1', email: 'a@b.com', firstName: 'A', lastName: 'B', role: 'admin' } as User;
+    const mockUser: User = { id: 'u1', email: 'a@b.com', firstName: 'A', lastName: 'B', role: UserRole.Admin } as User;
     setup(false, 'valid-token', mockUser);
     const result = TestBed.runInInjectionContext(() => authGuard(mockRoute, mockState));
     expect(isObservable(result)).toBe(true);

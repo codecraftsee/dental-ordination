@@ -10,7 +10,7 @@ import { TranslateService } from '../services/translate.service';
 import { AdminService } from '../services/admin.service';
 import { AuthService } from '../services/auth.service';
 import { PatientService } from '../services/patient.service';
-import { DoctorService } from '../services/doctor.service';
+import { UserService } from '../services/user.service';
 import { VisitService } from '../services/visit.service';
 import { DiagnosisService } from '../services/diagnosis.service';
 import { TreatmentService } from '../services/treatment.service';
@@ -24,13 +24,12 @@ describe('Admin', () => {
   let adminService: {
     deleteVisits: ReturnType<typeof vi.fn>;
     deletePatients: ReturnType<typeof vi.fn>;
-    deleteDoctors: ReturnType<typeof vi.fn>;
     deleteDiagnoses: ReturnType<typeof vi.fn>;
     deleteTreatments: ReturnType<typeof vi.fn>;
     deleteAll: ReturnType<typeof vi.fn>;
   };
   let patientService: { loadAll: ReturnType<typeof vi.fn> };
-  let doctorService: { loadAll: ReturnType<typeof vi.fn> };
+  let userService: { loadAll: ReturnType<typeof vi.fn> };
   let visitService: { loadAll: ReturnType<typeof vi.fn> };
   let diagnosisService: { loadAll: ReturnType<typeof vi.fn> };
   let treatmentService: { loadAll: ReturnType<typeof vi.fn> };
@@ -40,13 +39,12 @@ describe('Admin', () => {
     adminService = {
       deleteVisits: vi.fn().mockReturnValue(of(undefined)),
       deletePatients: vi.fn().mockReturnValue(of(undefined)),
-      deleteDoctors: vi.fn().mockReturnValue(of(undefined)),
       deleteDiagnoses: vi.fn().mockReturnValue(of(undefined)),
       deleteTreatments: vi.fn().mockReturnValue(of(undefined)),
       deleteAll: vi.fn().mockReturnValue(of(undefined)),
     };
     patientService = makeLoadAllMock();
-    doctorService = makeLoadAllMock();
+    userService = makeLoadAllMock();
     visitService = makeLoadAllMock();
     diagnosisService = makeLoadAllMock();
     treatmentService = makeLoadAllMock();
@@ -69,7 +67,7 @@ describe('Admin', () => {
         { provide: AuthService, useValue: authService },
         { provide: AdminService, useValue: adminService },
         { provide: PatientService, useValue: patientService },
-        { provide: DoctorService, useValue: doctorService },
+        { provide: UserService, useValue: userService },
         { provide: VisitService, useValue: visitService },
         { provide: DiagnosisService, useValue: diagnosisService },
         { provide: TreatmentService, useValue: treatmentService },
@@ -185,21 +183,19 @@ describe('Admin', () => {
     expect(action.message()).toBe('admin.error');
   });
 
-  // Cache refresh logic — parameterized across all non-visits branches
+  // Cache refresh logic — parameterized
 
   it.each([
-    { key: 'patients' as const, deleteFn: 'deletePatients' as const },
-    { key: 'doctors' as const, deleteFn: 'deleteDoctors' as const },
-    { key: 'diagnoses' as const, deleteFn: 'deleteDiagnoses' as const },
-    { key: 'treatments' as const, deleteFn: 'deleteTreatments' as const },
-    { key: 'all' as const, deleteFn: 'deleteAll' as const },
-  ])('execute dispatches $deleteFn and refreshes correct caches for $key action', ({ key, deleteFn }) => {
-    const serviceMap: Record<string, Array<{ loadAll: ReturnType<typeof vi.fn> }>> = {
-      patients: [patientService, visitService],
-      doctors: [doctorService],
-      diagnoses: [diagnosisService],
-      treatments: [treatmentService],
-      all: [patientService, visitService, doctorService, diagnosisService, treatmentService],
+    { key: 'patients' as const, deleteFn: 'deletePatients' as const, caches: ['patientService', 'visitService'] },
+    { key: 'diagnoses' as const, deleteFn: 'deleteDiagnoses' as const, caches: ['diagnosisService'] },
+    { key: 'treatments' as const, deleteFn: 'deleteTreatments' as const, caches: ['treatmentService'] },
+  ])('execute dispatches $deleteFn and refreshes correct caches for $key action', ({ key, deleteFn, caches }) => {
+    const serviceMap: Record<string, { loadAll: ReturnType<typeof vi.fn> }> = {
+      patientService,
+      userService,
+      visitService,
+      diagnosisService,
+      treatmentService,
     };
 
     const action = component.actions.find(a => a.key === key)!;
@@ -207,8 +203,20 @@ describe('Admin', () => {
     component.execute(action);
 
     expect(adminService[deleteFn]).toHaveBeenCalled();
-    for (const svc of serviceMap[key]) {
-      expect(svc.loadAll).toHaveBeenCalled();
+    for (const svcKey of caches) {
+      expect(serviceMap[svcKey].loadAll).toHaveBeenCalled();
     }
+  });
+
+  it('execute for all action refreshes all caches', () => {
+    const action = component.actions.find(a => a.key === 'all')!;
+    action.confirmInput.set('DELETE');
+    component.execute(action);
+    expect(adminService.deleteAll).toHaveBeenCalled();
+    expect(patientService.loadAll).toHaveBeenCalled();
+    expect(visitService.loadAll).toHaveBeenCalled();
+    expect(userService.loadAll).toHaveBeenCalled();
+    expect(diagnosisService.loadAll).toHaveBeenCalled();
+    expect(treatmentService.loadAll).toHaveBeenCalled();
   });
 });

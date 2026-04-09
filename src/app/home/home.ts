@@ -10,12 +10,13 @@ import { TranslateService } from '../services/translate.service';
 import { LocalizedDatePipe } from '../shared/localized-date.pipe';
 import { CurrencyFormatPipe } from '../shared/currency-format.pipe';
 import { PatientService } from '../services/patient.service';
-import { DoctorService } from '../services/doctor.service';
+import { UserService } from '../services/user.service';
 import { VisitService } from '../services/visit.service';
 import { DiagnosisService } from '../services/diagnosis.service';
 import { TreatmentService } from '../services/treatment.service';
 import { BookTableComponent } from '../shared/book-table/book-table';
 import { Visit } from '../models/visit.model';
+import { UserRole } from '../models/user.model';
 
 @Component({
   selector: 'app-home',
@@ -26,7 +27,7 @@ import { Visit } from '../models/visit.model';
 })
 export default class Home implements OnInit {
   private patientService = inject(PatientService);
-  private doctorService = inject(DoctorService);
+  private userService = inject(UserService);
   private visitService = inject(VisitService);
   private diagnosisService = inject(DiagnosisService);
   private treatmentService = inject(TreatmentService);
@@ -50,13 +51,13 @@ export default class Home implements OnInit {
   ngOnInit(): void {
     forkJoin([
       this.patientService.loadAll(),
-      this.doctorService.loadAll(),
+      this.userService.loadAll(),
       this.visitService.loadAll(),
       this.diagnosisService.loadAll(),
       this.treatmentService.loadAll(),
     ]).subscribe(() => {
       this.totalPatients = this.patientService.getAll().length;
-      this.totalDoctors = this.doctorService.getAll().length;
+      this.totalDoctors = this.userService.getByRole(UserRole.Doctor).length;
       this.totalVisits = this.visitService.getAll().length;
       this.visitsThisMonth = this.visitService.getThisMonthCount();
       this.recentVisits.set(this.visitService.getRecent(5));
@@ -70,8 +71,7 @@ export default class Home implements OnInit {
   }
 
   getDoctorName(id: string): string {
-    const d = this.doctorService.getById(id);
-    return d ? `Dr. ${d.firstName} ${d.lastName}` : '';
+    return this.userService.getDisplayName(id);
   }
 
   getDiagnosisName(id: string | undefined): string {

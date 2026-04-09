@@ -54,22 +54,6 @@ describe('AdminService', () => {
     expect(errored).toBe(true);
   });
 
-  it('deleteDoctors sends DELETE to /admin/doctors', () => {
-    let completed = false;
-    service.deleteDoctors().subscribe({ complete: () => (completed = true) });
-    const req = httpMock.expectOne(`${BASE}/doctors`);
-    expect(req.request.method).toBe('DELETE');
-    req.flush(null);
-    expect(completed).toBe(true);
-  });
-
-  it('deleteDoctors propagates HTTP errors', () => {
-    let errored = false;
-    service.deleteDoctors().subscribe({ error: () => (errored = true) });
-    httpMock.expectOne(`${BASE}/doctors`).flush(null, { status: 500, statusText: 'Server Error' });
-    expect(errored).toBe(true);
-  });
-
   it('deleteDiagnoses sends DELETE to /admin/diagnoses', () => {
     let completed = false;
     service.deleteDiagnoses().subscribe({ complete: () => (completed = true) });
