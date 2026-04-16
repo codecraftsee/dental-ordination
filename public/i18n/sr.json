@@ -107,9 +107,9 @@
   "staffMember.noVisits": "Nema poseta",
   "staffMember.sendInvite": "Sačuvaj i Pošalji Pozivnicu",
 
-  "role.admin": "Admin",
-  "role.doctor": "Lekar",
-  "role.nurse": "Medicinska Sestra",
+  "role.ADMIN": "Admin",
+  "role.DOCTOR": "Lekar",
+  "role.NURSE": "Medicinska Sestra",
 
   "specialization.GeneralDentistry": "Opšta Stomatologija",
   "specialization.Orthodontics": "Ortodoncija",
@@ -257,6 +257,8 @@
   "common.toggleConfirmPasswordVisibility": "Prikaži/sakrij potvrdu lozinke",
 
   "nav.admin": "Admin",
+  "nav.profile": "Profil",
+  "nav.userMenu": "Korisnički meni",
 
   "admin.title": "Administracija",
   "admin.dangerZone": "Opasna Zona",
@@ -276,14 +278,6 @@
   "admin.deleteAllDesc": "Trajno briše sve pacijente, posete, lekare, dijagnoze i terapije. Sistem će biti potpuno prazan nakon ove akcije.",
   "admin.success": "Gotovo. Svi zapisi su obrisani.",
   "admin.error": "Došlo je do greške. Pokušajte ponovo.",
-  "admin.changePassword": "Promena Lozinke",
-  "admin.changePasswordDesc": "Ažurirajte lozinku svog naloga",
-  "admin.currentPassword": "Trenutna Lozinka",
-  "admin.newPassword": "Nova Lozinka",
-  "admin.confirmPassword": "Potvrdi Novu Lozinku",
-  "admin.changePasswordSubmit": "Promeni Lozinku",
-  "admin.changePasswordSuccess": "Lozinka je uspešno promenjena",
-  "admin.changePasswordError": "Promena lozinke nije uspela. Proverite trenutnu lozinku.",
 
   "nav.darkMode": "Prebaci na tamni mod",
   "nav.lightMode": "Prebaci na svetli mod",
@@ -296,10 +290,38 @@
   "login.error": "Pogrešan email ili lozinka",
   "login.loading": "Prijavljivanje...",
 
+  "profile.title": "Profil",
+  "profile.changePassword": "Promena Lozinke",
+  "profile.changePasswordDesc": "Ažurirajte lozinku svog naloga",
+  "profile.currentPassword": "Trenutna Lozinka",
+  "profile.newPassword": "Nova Lozinka",
+  "profile.confirmPassword": "Potvrdi Novu Lozinku",
+  "profile.changePasswordSubmit": "Promeni Lozinku",
+  "profile.changePasswordSuccess": "Lozinka je uspešno promenjena",
+  "profile.changePasswordError": "Promena lozinke nije uspela. Proverite trenutnu lozinku.",
+
   "setPassword.title": "Postavite Lozinku",
   "setPassword.subtitle": "Kreirajte lozinku da biste aktivirali nalog",
   "setPassword.password": "Nova Lozinka",
   "setPassword.passwordConfirm": "Potvrdi Lozinku",
   "setPassword.submit": "Aktiviraj Nalog",
-  "setPassword.error": "Ovaj pozivni link je nevažeći ili je istekao."
+  "setPassword.error": "Ovaj pozivni link je nevažeći ili je istekao.",
+
+  "toast.patientCreated": "Pacijent je uspešno kreiran",
+  "toast.patientUpdated": "Pacijent je uspešno ažuriran",
+  "toast.patientDeleted": "Pacijent je uspešno obrisan",
+  "toast.staffCreated": "Član osoblja je uspešno kreiran",
+  "toast.staffUpdated": "Član osoblja je uspešno ažuriran",
+  "toast.staffDeleted": "Član osoblja je uspešno obrisan",
+  "toast.visitCreated": "Poseta je uspešno kreirana",
+  "toast.visitUpdated": "Poseta je uspešno ažurirana",
+  "toast.visitDeleted": "Poseta je uspešno obrisana",
+  "toast.diagnosisCreated": "Dijagnoza je uspešno kreirana",
+  "toast.diagnosisUpdated": "Dijagnoza je uspešno ažurirana",
+  "toast.diagnosisDeleted": "Dijagnoza je uspešno obrisana",
+  "toast.treatmentCreated": "Terapija je uspešno kreirana",
+  "toast.treatmentUpdated": "Terapija je uspešno ažurirana",
+  "toast.treatmentDeleted": "Terapija je uspešno obrisana",
+  "toast.inviteResent": "Pozivnica je uspešno ponovo poslata",
+  "toast.unknownError": "Došlo je do neočekivane greške"
 }

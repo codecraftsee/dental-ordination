@@ -6,6 +6,7 @@ import { signal } from '@angular/core';
 import { of } from 'rxjs';
 import { vi } from 'vitest';
 import StaffList from './staff-list';
+import { AuthService } from '../../services/auth.service';
 import { UserService } from '../../services/user.service';
 import { UserRole } from '../../models/user.model';
 import { TranslateService } from '../../services/translate.service';
@@ -18,6 +19,7 @@ const mockUser = {
   role: UserRole.Doctor,
   isActive: true,
   mustSetPassword: false,
+  permissions: [],
   createdAt: '2024-01-01T00:00:00',
   updatedAt: '2024-01-01T00:00:00',
 };
@@ -40,8 +42,17 @@ describe('StaffList', () => {
         provideRouter([]),
         provideHttpClient(),
         provideHttpClientTesting(),
+        {
+          provide: AuthService,
+          useValue: {
+            user: signal({ id: 'current-user-id' }),
+            hasPermission: () => true,
+            hasAnyPermission: () => true,
+            userPermissions: signal([]),
+          },
+        },
         { provide: UserService, useValue: userService },
-        { provide: TranslateService, useValue: { instant: (k: string) => k, get: (k: string) => of(k), currentLang: signal('en') } },
+        { provide: TranslateService, useValue: { instant: (k: string) => k, translate: (k: string) => k, get: (k: string) => of(k), currentLang: signal('en'), version: signal('en') } },
       ],
     }).compileComponents();
 

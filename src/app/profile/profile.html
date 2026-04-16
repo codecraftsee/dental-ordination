@@ -1,0 +1,81 @@
+<div class="container page">
+  <div class="page-header">
+    <h1 class="section-title">{{ 'profile.title' | translate }}</h1>
+  </div>
+
+  <div class="account-section">
+    <div class="account-section-header">
+      <mat-icon class="account-icon">lock</mat-icon>
+      <div>
+        <h2 class="account-title">{{ 'profile.changePassword' | translate }}</h2>
+        <p class="account-desc">{{ 'profile.changePasswordDesc' | translate }}</p>
+      </div>
+    </div>
+
+    <mat-card>
+      <mat-card-content>
+        <form [formGroup]="passwordForm" (ngSubmit)="submitPasswordChange()" class="password-form">
+          <mat-form-field appearance="fill">
+            <mat-label>{{ 'profile.currentPassword' | translate }}</mat-label>
+            <input matInput [type]="showCurrentPassword() ? 'text' : 'password'" formControlName="currentPassword" autocomplete="current-password" />
+            <button type="button" mat-icon-button matSuffix (click)="showCurrentPassword.set(!showCurrentPassword())" [attr.aria-label]="'common.toggleCurrentPasswordVisibility' | translate">
+              <mat-icon>{{ showCurrentPassword() ? 'visibility_off' : 'visibility' }}</mat-icon>
+            </button>
+            @if (passwordForm.get('currentPassword')?.errors?.['required'] && passwordForm.get('currentPassword')?.touched) {
+              <mat-error>{{ 'common.required' | translate }}</mat-error>
+            }
+          </mat-form-field>
+
+          <mat-form-field appearance="fill">
+            <mat-label>{{ 'profile.newPassword' | translate }}</mat-label>
+            <input matInput [type]="showNewPassword() ? 'text' : 'password'" formControlName="newPassword" autocomplete="new-password" />
+            <button type="button" mat-icon-button matSuffix (click)="showNewPassword.set(!showNewPassword())" [attr.aria-label]="'common.toggleNewPasswordVisibility' | translate">
+              <mat-icon>{{ showNewPassword() ? 'visibility_off' : 'visibility' }}</mat-icon>
+            </button>
+            @if (passwordForm.get('newPassword')?.errors?.['required'] && passwordForm.get('newPassword')?.touched) {
+              <mat-error>{{ 'common.required' | translate }}</mat-error>
+            } @else if (passwordForm.get('newPassword')?.errors?.['minlength'] && passwordForm.get('newPassword')?.touched) {
+              <mat-error>{{ 'common.minLength8' | translate }}</mat-error>
+            }
+          </mat-form-field>
+
+          <mat-form-field appearance="fill">
+            <mat-label>{{ 'profile.confirmPassword' | translate }}</mat-label>
+            <input matInput [type]="showConfirmPassword() ? 'text' : 'password'" formControlName="confirmPassword" autocomplete="new-password" [errorStateMatcher]="passwordMismatchMatcher" />
+            <button type="button" mat-icon-button matSuffix (click)="showConfirmPassword.set(!showConfirmPassword())" [attr.aria-label]="'common.toggleConfirmPasswordVisibility' | translate">
+              <mat-icon>{{ showConfirmPassword() ? 'visibility_off' : 'visibility' }}</mat-icon>
+            </button>
+            @if (passwordForm.get('confirmPassword')?.errors?.['required'] && passwordForm.get('confirmPassword')?.touched) {
+              <mat-error>{{ 'common.required' | translate }}</mat-error>
+            } @else if (passwordForm.errors?.['passwordMismatch'] && passwordForm.get('confirmPassword')?.touched) {
+              <mat-error>{{ 'common.passwordMismatch' | translate }}</mat-error>
+            }
+          </mat-form-field>
+
+          <div class="password-form-actions">
+            <button type="submit" matButton="elevated" color="primary" [disabled]="pwLoading()">
+              <mat-icon>lock_reset</mat-icon>
+              @if (pwLoading()) {
+                {{ 'common.saving' | translate }}
+              } @else {
+                {{ 'profile.changePasswordSubmit' | translate }}
+              }
+            </button>
+
+            @if (pwMessage()) {
+              <div
+                class="action-message"
+                [class.action-message--error]="pwIsError()"
+                role="status"
+                aria-atomic="true"
+                [attr.aria-live]="pwIsError() ? 'assertive' : 'polite'"
+              >
+                {{ pwMessage() | translate }}
+              </div>
+            }
+          </div>
+        </form>
+      </mat-card-content>
+    </mat-card>
+  </div>
+</div>

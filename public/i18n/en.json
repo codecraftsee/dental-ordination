@@ -106,9 +106,9 @@
   "staffMember.noVisits": "No visits yet",
   "staffMember.sendInvite": "Save & Send Invite",
 
-  "role.admin": "Admin",
-  "role.doctor": "Doctor",
-  "role.nurse": "Nurse",
+  "role.ADMIN": "Admin",
+  "role.DOCTOR": "Doctor",
+  "role.NURSE": "Nurse",
 
   "specialization.GeneralDentistry": "General Dentistry",
   "specialization.Orthodontics": "Orthodontics",
@@ -256,6 +256,8 @@
   "common.toggleConfirmPasswordVisibility": "Toggle confirm password visibility",
 
   "nav.admin": "Admin",
+  "nav.profile": "Profile",
+  "nav.userMenu": "User menu",
 
   "admin.title": "Admin",
   "admin.dangerZone": "Danger Zone",
@@ -275,14 +277,6 @@
   "admin.deleteAllDesc": "Permanently wipes all patients, visits, doctors, diagnoses, and treatments. The system will be completely empty after this action.",
   "admin.success": "Done. All records have been deleted.",
   "admin.error": "An error occurred. Please try again.",
-  "admin.changePassword": "Change Password",
-  "admin.changePasswordDesc": "Update your account password",
-  "admin.currentPassword": "Current Password",
-  "admin.newPassword": "New Password",
-  "admin.confirmPassword": "Confirm New Password",
-  "admin.changePasswordSubmit": "Change Password",
-  "admin.changePasswordSuccess": "Password changed successfully",
-  "admin.changePasswordError": "Failed to change password. Please check your current password.",
 
   "nav.darkMode": "Switch to dark mode",
   "nav.lightMode": "Switch to light mode",
@@ -295,10 +289,38 @@
   "login.error": "Invalid email or password",
   "login.loading": "Logging in...",
 
+  "profile.title": "Profile",
+  "profile.changePassword": "Change Password",
+  "profile.changePasswordDesc": "Update your account password",
+  "profile.currentPassword": "Current Password",
+  "profile.newPassword": "New Password",
+  "profile.confirmPassword": "Confirm New Password",
+  "profile.changePasswordSubmit": "Change Password",
+  "profile.changePasswordSuccess": "Password changed successfully",
+  "profile.changePasswordError": "Failed to change password. Please check your current password.",
+
   "setPassword.title": "Set Your Password",
   "setPassword.subtitle": "Create a password to activate your account",
   "setPassword.password": "New Password",
   "setPassword.passwordConfirm": "Confirm Password",
   "setPassword.submit": "Activate Account",
-  "setPassword.error": "This invite link is invalid or has expired."
+  "setPassword.error": "This invite link is invalid or has expired.",
+
+  "toast.patientCreated": "Patient created successfully",
+  "toast.patientUpdated": "Patient updated successfully",
+  "toast.patientDeleted": "Patient deleted successfully",
+  "toast.staffCreated": "Staff member created successfully",
+  "toast.staffUpdated": "Staff member updated successfully",
+  "toast.staffDeleted": "Staff member deleted successfully",
+  "toast.visitCreated": "Visit created successfully",
+  "toast.visitUpdated": "Visit updated successfully",
+  "toast.visitDeleted": "Visit deleted successfully",
+  "toast.diagnosisCreated": "Diagnosis created successfully",
+  "toast.diagnosisUpdated": "Diagnosis updated successfully",
+  "toast.diagnosisDeleted": "Diagnosis deleted successfully",
+  "toast.treatmentCreated": "Treatment created successfully",
+  "toast.treatmentUpdated": "Treatment updated successfully",
+  "toast.treatmentDeleted": "Treatment deleted successfully",
+  "toast.inviteResent": "Invite resent successfully",
+  "toast.unknownError": "An unexpected error occurred"
 }

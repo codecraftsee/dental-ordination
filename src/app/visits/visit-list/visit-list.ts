@@ -16,31 +16,37 @@ import { forkJoin } from 'rxjs';
 import { TranslatePipe } from '../../shared/translate.pipe';
 import { LocalizedDatePipe } from '../../shared/localized-date.pipe';
 import { CurrencyFormatPipe } from '../../shared/currency-format.pipe';
+import { AuthService } from '../../services/auth.service';
 import { VisitService } from '../../services/visit.service';
 import { PatientService } from '../../services/patient.service';
 import { UserService } from '../../services/user.service';
 import { DiagnosisService } from '../../services/diagnosis.service';
 import { TreatmentService } from '../../services/treatment.service';
 import { ConfirmDialogService } from '../../services/confirm-dialog.service';
+import { ToastService } from '../../services/toast.service';
+import { HasPermissionPipe } from '../../shared/has-permission.pipe';
 import { Visit } from '../../models/visit.model';
-import { UserRole } from '../../models/user.model';
+import { Permission, UserRole } from '../../models/user.model';
 
 @Component({
   selector: 'app-visit-list',
-  imports: [RouterLink, TranslatePipe, LocalizedDatePipe, CurrencyFormatPipe, MatFormFieldModule, MatInputModule, MatSelectModule, MatTableModule, MatPaginatorModule, MatSortModule, MatCardModule, MatDatepickerModule, MatNativeDateModule, MatButtonModule, MatIconModule, MatTooltipModule],
+  imports: [RouterLink, TranslatePipe, LocalizedDatePipe, CurrencyFormatPipe, HasPermissionPipe, MatFormFieldModule, MatInputModule, MatSelectModule, MatTableModule, MatPaginatorModule, MatSortModule, MatCardModule, MatDatepickerModule, MatNativeDateModule, MatButtonModule, MatIconModule, MatTooltipModule],
   templateUrl: './visit-list.html',
   styleUrl: './visit-list.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export default class VisitList implements OnInit {
+  readonly Permission = Permission;
   protected readonly UserRole = UserRole;
 
+  private authService = inject(AuthService);
   private visitService = inject(VisitService);
   private patientService = inject(PatientService);
   private userService = inject(UserService);
   private diagnosisService = inject(DiagnosisService);
   private treatmentService = inject(TreatmentService);
   private confirmDialogService = inject(ConfirmDialogService);
+  private toastService = inject(ToastService);
   private paginator = viewChild(MatPaginator);
   private sort = viewChild(MatSort);
 
@@ -111,7 +117,14 @@ export default class VisitList implements OnInit {
       this.userService.loadAll(),
       this.diagnosisService.loadAll(),
       this.treatmentService.loadAll(),
-    ]).subscribe();
+    ]).subscribe(() => {
+      if (this.authService.hasRole(UserRole.Doctor)) {
+        const userId = this.authService.user()?.id;
+        if (userId) {
+          this.doctorFilter.set(userId);
+        }
+      }
+    });
   }
 
   getPatientName(id: string): string {
@@ -171,7 +184,10 @@ export default class VisitList implements OnInit {
       .confirm('visit.deleteTitle', 'visit.deleteMessage')
       .subscribe(confirmed => {
         if (confirmed) {
-          this.visitService.delete(id).subscribe();
+          this.visitService.delete(id).subscribe({
+            next: () => this.toastService.success('toast.visitDeleted'),
+            error: err => this.toastService.error(err),
+          });
         }
       });
   }

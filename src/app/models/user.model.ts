@@ -9,9 +9,39 @@ export enum Specialization {
 }
 
 export enum UserRole {
-  Admin = 'admin',
-  Doctor = 'doctor',
-  Nurse = 'nurse',
+  Admin = 'ADMIN',
+  Doctor = 'DOCTOR',
+  Nurse = 'NURSE',
+}
+
+export enum Permission {
+  PatientsRead = 'patients:read',
+  PatientsCreate = 'patients:create',
+  PatientsUpdate = 'patients:update',
+  PatientsDelete = 'patients:delete',
+
+  VisitsRead = 'visits:read',
+  VisitsCreate = 'visits:create',
+  VisitsUpdate = 'visits:update',
+  VisitsDelete = 'visits:delete',
+
+  DiagnosesRead = 'diagnoses:read',
+  DiagnosesCreate = 'diagnoses:create',
+  DiagnosesUpdate = 'diagnoses:update',
+  DiagnosesDelete = 'diagnoses:delete',
+
+  TreatmentsRead = 'treatments:read',
+  TreatmentsCreate = 'treatments:create',
+  TreatmentsUpdate = 'treatments:update',
+  TreatmentsDelete = 'treatments:delete',
+
+  UsersRead = 'users:read',
+  UsersCreate = 'users:create',
+  UsersUpdate = 'users:update',
+  UsersDelete = 'users:delete',
+
+  AdminImport = 'admin:import',
+  AdminBulkDelete = 'admin:bulk_delete',
 }
 
 export interface User {
@@ -25,6 +55,7 @@ export interface User {
   phone?: string;
   specialization?: Specialization;
   licenseNumber?: string;
+  permissions: Permission[];
   createdAt: string;
   updatedAt: string;
 }

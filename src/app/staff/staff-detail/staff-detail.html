@@ -30,11 +30,15 @@
             </div>
           </div>
           <div class="profile-actions">
-            <a [routerLink]="['/staff', u.id, 'edit']" matButton="outlined"><mat-icon>edit</mat-icon>{{ 'common.edit' | translate }}</a>
-            @if (u.mustSetPassword) {
-              <button matButton="outlined" (click)="resendInvite()"><mat-icon>email</mat-icon>{{ 'staff.resendInvite' | translate }}</button>
+            @if (Permission.UsersUpdate | hasPermission) {
+              <a [routerLink]="['/staff', u.id, 'edit']" matButton="outlined"><mat-icon>edit</mat-icon>{{ 'common.edit' | translate }}</a>
+              @if (u.mustSetPassword) {
+                <button matButton="outlined" (click)="resendInvite()"><mat-icon>email</mat-icon>{{ 'staff.resendInvite' | translate }}</button>
+              }
             }
-            <button matButton="outlined" class="btn-danger-outlined" (click)="deleteStaff()"><mat-icon>delete</mat-icon>{{ 'common.delete' | translate }}</button>
+            @if (Permission.UsersDelete | hasPermission) {
+              <button matButton="outlined" class="btn-danger-outlined" (click)="deleteStaff()"><mat-icon>delete</mat-icon>{{ 'common.delete' | translate }}</button>
+            }
             <a routerLink="/staff" matButton="outlined"><mat-icon>arrow_back</mat-icon>{{ 'common.back' | translate }}</a>
           </div>
         </div>

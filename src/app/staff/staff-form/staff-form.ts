@@ -9,6 +9,7 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { TranslatePipe } from '../../shared/translate.pipe';
 import { UserService } from '../../services/user.service';
+import { ToastService } from '../../services/toast.service';
 import { Specialization, UserRole } from '../../models/user.model';
 
 @Component({
@@ -23,6 +24,7 @@ export default class StaffForm implements OnInit {
   private route = inject(ActivatedRoute);
   private router = inject(Router);
   private userService = inject(UserService);
+  private toastService = inject(ToastService);
 
   protected readonly UserRole = UserRole;
   readonly roles: UserRole[] = [UserRole.Doctor, UserRole.Nurse];
@@ -107,12 +109,20 @@ export default class StaffForm implements OnInit {
 
     if (this.isEditMode && this.userId) {
       const { email: _email, ...updatePayload } = payload;
-      this.userService.update(this.userId, updatePayload).subscribe(user => {
-        this.router.navigate(['/staff', user.id]);
+      this.userService.update(this.userId, updatePayload).subscribe({
+        next: user => {
+          this.toastService.success('toast.staffUpdated');
+          this.router.navigate(['/staff', user.id]);
+        },
+        error: err => this.toastService.error(err),
       });
     } else {
-      this.userService.create(payload).subscribe(user => {
-        this.router.navigate(['/staff', user.id]);
+      this.userService.create(payload).subscribe({
+        next: user => {
+          this.toastService.success('toast.staffCreated');
+          this.router.navigate(['/staff', user.id]);
+        },
+        error: err => this.toastService.error(err),
       });
     }
   }

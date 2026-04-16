@@ -39,10 +39,12 @@
   flex: 1;
 }
 
-.logout-btn {
-  margin-left: var(--spacing-xs);
-  font-size: 0.8125rem;
-  border-radius: 30px !important;
+.user-menu-header {
+  opacity: 1 !important;
+}
+
+.user-menu-name {
+  font-weight: 500;
 }
 
 .main-content {

@@ -10,25 +10,29 @@ import { TranslatePipe } from '../../shared/translate.pipe';
 import { LocalizedDatePipe } from '../../shared/localized-date.pipe';
 import { CurrencyFormatPipe } from '../../shared/currency-format.pipe';
 import { ConfirmDialogService } from '../../services/confirm-dialog.service';
+import { ToastService } from '../../services/toast.service';
 import { UserService } from '../../services/user.service';
 import { VisitService } from '../../services/visit.service';
 import { PatientService } from '../../services/patient.service';
 import { DiagnosisService } from '../../services/diagnosis.service';
 import { TreatmentService } from '../../services/treatment.service';
-import { User, UserRole } from '../../models/user.model';
+import { HasPermissionPipe } from '../../shared/has-permission.pipe';
+import { Permission, User, UserRole } from '../../models/user.model';
 import { Visit } from '../../models/visit.model';
 
 @Component({
   selector: 'app-staff-detail',
-  imports: [RouterLink, TranslatePipe, LocalizedDatePipe, CurrencyFormatPipe, MatCardModule, MatTableModule, MatPaginatorModule, MatButtonModule, MatIconModule],
+  imports: [RouterLink, TranslatePipe, LocalizedDatePipe, CurrencyFormatPipe, HasPermissionPipe, MatCardModule, MatTableModule, MatPaginatorModule, MatButtonModule, MatIconModule],
   templateUrl: './staff-detail.html',
   styleUrl: './staff-detail.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export default class StaffDetail implements OnInit {
+  readonly Permission = Permission;
   private route = inject(ActivatedRoute);
   private router = inject(Router);
   private confirmDialogService = inject(ConfirmDialogService);
+  private toastService = inject(ToastService);
   private userService = inject(UserService);
   private visitService = inject(VisitService);
   private patientService = inject(PatientService);
@@ -112,7 +116,10 @@ export default class StaffDetail implements OnInit {
   resendInvite(): void {
     const u = this.member();
     if (!u) return;
-    this.userService.resendInvite(u.id).subscribe();
+    this.userService.resendInvite(u.id).subscribe({
+      next: () => this.toastService.success('toast.inviteResent'),
+      error: err => this.toastService.error(err),
+    });
   }
 
   deleteStaff(): void {
@@ -122,8 +129,12 @@ export default class StaffDetail implements OnInit {
       .confirm('staff.deleteTitle', 'staff.deleteMessage')
       .subscribe(confirmed => {
         if (confirmed) {
-          this.userService.delete(u.id).subscribe(() => {
-            this.router.navigate(['/staff']);
+          this.userService.delete(u.id).subscribe({
+            next: () => {
+              this.toastService.success('toast.staffDeleted');
+              this.router.navigate(['/staff']);
+            },
+            error: err => this.toastService.error(err),
           });
         }
       });

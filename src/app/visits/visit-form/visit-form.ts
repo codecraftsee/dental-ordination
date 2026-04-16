@@ -17,6 +17,7 @@ import { PatientService } from '../../services/patient.service';
 import { UserService } from '../../services/user.service';
 import { DiagnosisService } from '../../services/diagnosis.service';
 import { TreatmentService } from '../../services/treatment.service';
+import { ToastService } from '../../services/toast.service';
 import { UserRole } from '../../models/user.model';
 
 @Component({
@@ -48,6 +49,7 @@ export default class VisitForm implements OnInit, OnDestroy {
   private userService = inject(UserService);
   private diagnosisService = inject(DiagnosisService);
   private treatmentService = inject(TreatmentService);
+  private toastService = inject(ToastService);
 
   get patients() { return this.patientService.getAll(); }
   get doctors() { return this.userService.getByRole(UserRole.Doctor, UserRole.Nurse); }
@@ -155,16 +157,24 @@ export default class VisitForm implements OnInit, OnDestroy {
 
     if (this.isEditMode && this.visitId) {
       const { date: _date, ...updatePayload } = payload;
-      this.visitService.update(this.visitId, updatePayload).subscribe(visit => {
-        this.router.navigate(['/visits', visit.id]);
+      this.visitService.update(this.visitId, updatePayload).subscribe({
+        next: visit => {
+          this.toastService.success('toast.visitUpdated');
+          this.router.navigate(['/visits', visit.id]);
+        },
+        error: err => this.toastService.error(err),
       });
     } else {
-      this.visitService.create(payload).subscribe(visit => {
-        if (this.returnTo) {
-          this.router.navigateByUrl(this.returnTo);
-        } else {
-          this.router.navigate(['/visits', visit.id]);
-        }
+      this.visitService.create(payload).subscribe({
+        next: visit => {
+          this.toastService.success('toast.visitCreated');
+          if (this.returnTo) {
+            this.router.navigateByUrl(this.returnTo);
+          } else {
+            this.router.navigate(['/visits', visit.id]);
+          }
+        },
+        error: err => this.toastService.error(err),
       });
     }
   }

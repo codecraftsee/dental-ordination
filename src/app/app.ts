@@ -1,11 +1,12 @@
-import { Component, inject, signal, ChangeDetectionStrategy } from '@angular/core';
-import { Router, RouterOutlet, NavigationEnd } from '@angular/router';
+import { Component, inject, signal, computed, ChangeDetectionStrategy } from '@angular/core';
+import { Router, RouterOutlet, RouterLink, NavigationEnd } from '@angular/router';
 import { filter } from 'rxjs';
 import { MatSidenavModule } from '@angular/material/sidenav';
 import { MatToolbarModule } from '@angular/material/toolbar';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatIconRegistry } from '@angular/material/icon';
+import { MatMenuModule } from '@angular/material/menu';
 import { TranslatePipe } from './shared/translate.pipe';
 import { LanguageSwitcher } from './shared/language-switcher/language-switcher';
 import { Sidebar } from './shared/sidebar/sidebar';
@@ -16,6 +17,7 @@ import { ThemeService } from './services/theme.service';
   selector: 'app-root',
   imports: [
     RouterOutlet,
+    RouterLink,
     TranslatePipe,
     LanguageSwitcher,
     Sidebar,
@@ -23,6 +25,7 @@ import { ThemeService } from './services/theme.service';
     MatToolbarModule,
     MatButtonModule,
     MatIconModule,
+    MatMenuModule,
   ],
   templateUrl: './app.html',
   styleUrl: './app.scss',
@@ -36,6 +39,12 @@ export class App {
   readonly themeService = inject(ThemeService);
 
   readonly isMobile = signal(window.innerWidth < 768);
+
+  readonly userDisplayName = computed(() => {
+    const user = this.authService.user();
+    if (!user) return '';
+    return [user.firstName, user.lastName].filter(Boolean).join(' ') || user.email;
+  });
 
   /** Desktop: sidebar is always visible, this controls mini vs full width. */
   readonly sidebarCollapsed = signal(this.loadCollapsedState());

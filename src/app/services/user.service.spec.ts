@@ -13,6 +13,7 @@ const mockUser: User = {
   role: UserRole.Doctor,
   isActive: true,
   mustSetPassword: false,
+  permissions: [],
   createdAt: '2024-01-01T00:00:00',
   updatedAt: '2024-01-01T00:00:00',
 };
@@ -53,7 +54,7 @@ describe('UserService', () => {
 
   it('should load with role query param', () => {
     service.loadAll({ role: UserRole.Doctor }).subscribe();
-    const req = http.expectOne(`${baseUrl}?role=doctor`);
+    const req = http.expectOne(`${baseUrl}?role=DOCTOR`);
     req.flush([mockUser]);
   });
 

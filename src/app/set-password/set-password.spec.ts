@@ -25,7 +25,7 @@ describe('SetPassword', () => {
         provideHttpClientTesting(),
         { provide: ActivatedRoute, useValue: { snapshot: { queryParamMap: { get: (k: string) => k === 'token' ? 'test-token' : null } } } },
         { provide: AuthService, useValue: authService },
-        { provide: TranslateService, useValue: { instant: (k: string) => k, get: (k: string) => of(k), currentLang: signal('en') } },
+        { provide: TranslateService, useValue: { instant: (k: string) => k, translate: (k: string) => k, get: (k: string) => of(k), currentLang: signal('en'), version: signal('en') } },
       ],
     }).compileComponents();
 
