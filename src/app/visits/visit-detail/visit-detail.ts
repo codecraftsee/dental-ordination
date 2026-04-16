@@ -9,24 +9,29 @@ import { TranslatePipe } from '../../shared/translate.pipe';
 import { LocalizedDatePipe } from '../../shared/localized-date.pipe';
 import { CurrencyFormatPipe } from '../../shared/currency-format.pipe';
 import { ConfirmDialogService } from '../../services/confirm-dialog.service';
+import { ToastService } from '../../services/toast.service';
 import { VisitService } from '../../services/visit.service';
 import { PatientService } from '../../services/patient.service';
 import { UserService } from '../../services/user.service';
 import { DiagnosisService } from '../../services/diagnosis.service';
 import { TreatmentService } from '../../services/treatment.service';
+import { HasPermissionPipe } from '../../shared/has-permission.pipe';
+import { Permission } from '../../models/user.model';
 import { Visit } from '../../models/visit.model';
 
 @Component({
   selector: 'app-visit-detail',
-  imports: [RouterLink, TranslatePipe, LocalizedDatePipe, CurrencyFormatPipe, MatCardModule, MatButtonModule, MatIconModule, MatTooltipModule],
+  imports: [RouterLink, TranslatePipe, LocalizedDatePipe, CurrencyFormatPipe, HasPermissionPipe, MatCardModule, MatButtonModule, MatIconModule, MatTooltipModule],
   templateUrl: './visit-detail.html',
   styleUrl: './visit-detail.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export default class VisitDetail implements OnInit {
+  readonly Permission = Permission;
   private route = inject(ActivatedRoute);
   private router = inject(Router);
   private confirmDialogService = inject(ConfirmDialogService);
+  private toastService = inject(ToastService);
   private visitService = inject(VisitService);
   private patientService = inject(PatientService);
   private userService = inject(UserService);
@@ -116,8 +121,12 @@ export default class VisitDetail implements OnInit {
       .confirm('visit.deleteTitle', 'visit.deleteMessage')
       .subscribe(confirmed => {
         if (confirmed) {
-          this.visitService.delete(v.id).subscribe(() => {
-            this.router.navigate(['/visits']);
+          this.visitService.delete(v.id).subscribe({
+            next: () => {
+              this.toastService.success('toast.visitDeleted');
+              this.router.navigate(['/visits']);
+            },
+            error: err => this.toastService.error(err),
           });
         }
       });

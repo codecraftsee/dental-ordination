@@ -11,6 +11,7 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { TranslatePipe } from '../../shared/translate.pipe';
 import { PatientService } from '../../services/patient.service';
+import { ToastService } from '../../services/toast.service';
 
 @Component({
   selector: 'app-patient-form',
@@ -36,6 +37,7 @@ export default class PatientForm implements OnInit {
   private route = inject(ActivatedRoute);
   private router = inject(Router);
   private patientService = inject(PatientService);
+  private toastService = inject(ToastService);
 
   isEditMode = false;
   patientId: string | null = null;
@@ -92,12 +94,20 @@ export default class PatientForm implements OnInit {
     const payload = { ...raw, dateOfBirth: this.formatDate(raw.dateOfBirth) };
 
     if (this.isEditMode && this.patientId) {
-      this.patientService.update(this.patientId, payload).subscribe(patient => {
-        this.router.navigate(['/patients', patient.id]);
+      this.patientService.update(this.patientId, payload).subscribe({
+        next: patient => {
+          this.toastService.success('toast.patientUpdated');
+          this.router.navigate(['/patients', patient.id]);
+        },
+        error: err => this.toastService.error(err),
       });
     } else {
-      this.patientService.create(payload).subscribe(patient => {
-        this.router.navigate(['/patients', patient.id]);
+      this.patientService.create(payload).subscribe({
+        next: patient => {
+          this.toastService.success('toast.patientCreated');
+          this.router.navigate(['/patients', patient.id]);
+        },
+        error: err => this.toastService.error(err),
       });
     }
   }

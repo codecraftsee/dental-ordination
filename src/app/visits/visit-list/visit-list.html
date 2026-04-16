@@ -1,7 +1,9 @@
 <div class="container page">
   <div class="page-header">
     <h1 class="section-title">{{ 'visits.title' | translate }}</h1>
-    <a routerLink="/visits/new" matButton="elevated" color="primary"><mat-icon>add</mat-icon>{{ 'visits.addNew' | translate }}</a>
+    @if (Permission.VisitsCreate | hasPermission) {
+      <a routerLink="/visits/new" matButton="elevated" color="primary"><mat-icon>add</mat-icon>{{ 'visits.addNew' | translate }}</a>
+    }
   </div>
 
   <mat-card class="filters-card form-card">
@@ -23,7 +25,7 @@
         </mat-form-field>
         <mat-form-field appearance="fill" class="filter-field">
           <mat-label>{{ 'visits.filterDoctor' | translate }}</mat-label>
-          <mat-select (selectionChange)="doctorFilter.set($event.value)">
+          <mat-select [value]="doctorFilter()" (selectionChange)="doctorFilter.set($event.value)">
             <mat-option value="">{{ 'visits.filterDoctor' | translate }}</mat-option>
             @for (d of doctors(); track d.id) {
               <mat-option [value]="d.id">{{ d.role === UserRole.Doctor ? 'Dr. ' : '' }}{{ d.firstName }} {{ d.lastName }}</mat-option>
@@ -101,9 +103,11 @@
           <a mat-icon-button class="icon-btn--primary" [routerLink]="['/visits', v.id]" [matTooltip]="'common.view' | translate">
             <mat-icon>visibility</mat-icon>
           </a>
-          <button mat-icon-button class="icon-btn--danger" (click)="deleteVisit(v.id)" [matTooltip]="'common.delete' | translate" [attr.aria-label]="'common.delete' | translate">
-            <mat-icon>delete</mat-icon>
-          </button>
+          @if (Permission.VisitsDelete | hasPermission) {
+            <button mat-icon-button class="icon-btn--danger" (click)="deleteVisit(v.id)" [matTooltip]="'common.delete' | translate" [attr.aria-label]="'common.delete' | translate">
+              <mat-icon>delete</mat-icon>
+            </button>
+          }
         </div>
       </td>
     </ng-container>

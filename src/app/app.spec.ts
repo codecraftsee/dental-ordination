@@ -13,6 +13,7 @@ describe('App', () => {
 
   const mockAuthService = {
     isAuthenticated: signal(false),
+    user: signal(null),
     logout: vi.fn(),
   };
 

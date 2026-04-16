@@ -1087,6 +1087,50 @@ mat-card.stat-card {
   }
 }
 
+// Menu dropdown panel (user menu in header, etc.)
+.mat-mdc-menu-panel {
+  background: var(--color-surface) !important;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md) !important;
+  box-shadow: var(--shadow-3) !important;
+}
+
+.mat-mdc-menu-item {
+  color: var(--color-text) !important;
+
+  .mat-icon {
+    color: var(--color-text-secondary);
+  }
+
+  &:hover:not([disabled]) {
+    background: var(--color-sidebar-hover);
+  }
+
+  &[disabled] {
+    color: var(--color-text) !important;
+    opacity: 0.7;
+  }
+}
+
+// Toast notifications
+.toast-success .mdc-snackbar__surface {
+  background: #1b6d2f !important;
+  color: #fff !important;
+
+  .mat-mdc-snack-bar-label {
+    color: #fff !important;
+  }
+}
+
+.toast-error .mdc-snackbar__surface {
+  background: var(--color-danger) !important;
+  color: #fff !important;
+
+  .mat-mdc-snack-bar-label {
+    color: #fff !important;
+  }
+}
+
 // Radio buttons
 .mat-mdc-radio-button {
   --mdc-radio-selected-icon-color: var(--color-primary);

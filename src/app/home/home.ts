@@ -1,31 +1,35 @@
-import { ChangeDetectionStrategy, Component, ElementRef, inject, OnInit, signal, ViewChild, WritableSignal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, ElementRef, inject, OnInit, signal, ViewChild, WritableSignal } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { MatCardModule } from '@angular/material/card';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
-import { forkJoin } from 'rxjs';
+import { forkJoin, of } from 'rxjs';
 import { TranslatePipe } from '../shared/translate.pipe';
 import { TranslateService } from '../services/translate.service';
 import { LocalizedDatePipe } from '../shared/localized-date.pipe';
 import { CurrencyFormatPipe } from '../shared/currency-format.pipe';
+import { AuthService } from '../services/auth.service';
 import { PatientService } from '../services/patient.service';
 import { UserService } from '../services/user.service';
 import { VisitService } from '../services/visit.service';
 import { DiagnosisService } from '../services/diagnosis.service';
 import { TreatmentService } from '../services/treatment.service';
 import { BookTableComponent } from '../shared/book-table/book-table';
+import { HasPermissionPipe } from '../shared/has-permission.pipe';
 import { Visit } from '../models/visit.model';
-import { UserRole } from '../models/user.model';
+import { Permission, UserRole } from '../models/user.model';
 
 @Component({
   selector: 'app-home',
-  imports: [RouterLink, MatCardModule, MatButtonModule, MatIconModule, MatProgressBarModule, TranslatePipe, LocalizedDatePipe, CurrencyFormatPipe, BookTableComponent],
+  imports: [RouterLink, MatCardModule, MatButtonModule, MatIconModule, MatProgressBarModule, TranslatePipe, LocalizedDatePipe, CurrencyFormatPipe, BookTableComponent, HasPermissionPipe],
   templateUrl: './home.html',
   styleUrl: './home.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export default class Home implements OnInit {
+  readonly Permission = Permission;
+  private authService = inject(AuthService);
   private patientService = inject(PatientService);
   private userService = inject(UserService);
   private visitService = inject(VisitService);
@@ -34,6 +38,10 @@ export default class Home implements OnInit {
   private translate = inject(TranslateService);
 
   @ViewChild('xlsxInput') xlsxInput!: ElementRef<HTMLInputElement>;
+
+  hasAnyQuickAction = computed(() =>
+    this.authService.hasAnyPermission(Permission.PatientsCreate, Permission.VisitsCreate, Permission.AdminImport),
+  );
 
   loaded = signal(false);
   importing = signal(false);
@@ -49,12 +57,13 @@ export default class Home implements OnInit {
   recentVisits: WritableSignal<Visit[]> = signal<Visit[]>([]);
 
   ngOnInit(): void {
+    const has = (...p: Permission[]) => this.authService.hasPermission(...p);
     forkJoin([
-      this.patientService.loadAll(),
-      this.userService.loadAll(),
-      this.visitService.loadAll(),
-      this.diagnosisService.loadAll(),
-      this.treatmentService.loadAll(),
+      has(Permission.PatientsRead) ? this.patientService.loadAll() : of([]),
+      has(Permission.UsersRead) ? this.userService.loadAll() : of([]),
+      has(Permission.VisitsRead) ? this.visitService.loadAll() : of([]),
+      has(Permission.DiagnosesRead) ? this.diagnosisService.loadAll() : of([]),
+      has(Permission.TreatmentsRead) ? this.treatmentService.loadAll() : of([]),
     ]).subscribe(() => {
       this.totalPatients = this.patientService.getAll().length;
       this.totalDoctors = this.userService.getByRole(UserRole.Doctor).length;

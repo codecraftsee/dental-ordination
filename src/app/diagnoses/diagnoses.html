@@ -1,7 +1,9 @@
 <div class="container page">
   <div class="page-header">
     <h1 class="section-title">{{ 'diagnoses.title' | translate }}</h1>
-    <a routerLink="/diagnoses/new" matButton="elevated" color="primary"><mat-icon>add</mat-icon>{{ 'diagnoses.addNew' | translate }}</a>
+    @if (Permission.DiagnosesCreate | hasPermission) {
+      <a routerLink="/diagnoses/new" matButton="elevated" color="primary"><mat-icon>add</mat-icon>{{ 'diagnoses.addNew' | translate }}</a>
+    }
   </div>
 
   <mat-card class="filters-card form-card">
@@ -53,12 +55,16 @@
       <th mat-header-cell *matHeaderCellDef>{{ 'diagnoses.actions' | translate }}</th>
       <td mat-cell *matCellDef="let dg">
         <div class="actions-cell">
-          <a mat-icon-button class="icon-btn--warning" [routerLink]="['/diagnoses', dg.id, 'edit']" [matTooltip]="'common.edit' | translate">
-            <mat-icon>edit</mat-icon>
-          </a>
-          <button mat-icon-button class="icon-btn--danger" (click)="deleteDiagnosis(dg.id)" [matTooltip]="'common.delete' | translate">
-            <mat-icon>delete</mat-icon>
-          </button>
+          @if (Permission.DiagnosesUpdate | hasPermission) {
+            <a mat-icon-button class="icon-btn--warning" [routerLink]="['/diagnoses', dg.id, 'edit']" [matTooltip]="'common.edit' | translate" [attr.aria-label]="'common.edit' | translate">
+              <mat-icon>edit</mat-icon>
+            </a>
+          }
+          @if (Permission.DiagnosesDelete | hasPermission) {
+            <button mat-icon-button class="icon-btn--danger" (click)="deleteDiagnosis(dg.id)" [matTooltip]="'common.delete' | translate" [attr.aria-label]="'common.delete' | translate">
+              <mat-icon>delete</mat-icon>
+            </button>
+          }
         </div>
       </td>
     </ng-container>

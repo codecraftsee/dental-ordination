@@ -9,7 +9,7 @@
 
   @if (collapsed()) {
     <nav class="icon-rail" aria-label="Navigation">
-      @for (link of navLinks; track link.route) {
+      @for (link of navLinks(); track link.route) {
         <a
           class="icon-rail-item"
           matRipple
@@ -29,7 +29,7 @@
     </nav>
   } @else {
     <mat-nav-list>
-      @for (link of navLinks; track link.route) {
+      @for (link of navLinks(); track link.route) {
         <a
           mat-list-item
           [routerLink]="link.route"

@@ -48,35 +48,43 @@
     </mat-card>
   </div>
 
-  <div class="quick-actions">
-    <h2>{{ 'home.quickActions' | translate }}</h2>
-    <div class="actions-row">
-      <a routerLink="/patients/new" matButton="elevated" color="primary">
-        <mat-icon>person_add</mat-icon>
-        {{ 'home.newPatient' | translate }}
-      </a>
-      <a routerLink="/visits/new" matButton="elevated" color="accent">
-        <mat-icon>calendar_today</mat-icon>
-        {{ 'home.newVisit' | translate }}
-      </a>
-      <button matButton="elevated" class="btn-amber" (click)="triggerXlsxInput()" [disabled]="importing()">
-        <mat-icon>upload_file</mat-icon>
-        @if (importing()) {
-          {{ 'home.importing' | translate }}
-        } @else {
-          {{ 'home.importXlsx' | translate }}
+  @if (hasAnyQuickAction()) {
+    <div class="quick-actions">
+      <h2>{{ 'home.quickActions' | translate }}</h2>
+      <div class="actions-row">
+        @if (Permission.PatientsCreate | hasPermission) {
+          <a routerLink="/patients/new" matButton="elevated" color="primary">
+            <mat-icon>person_add</mat-icon>
+            {{ 'home.newPatient' | translate }}
+          </a>
         }
-      </button>
-      <input
-        #xlsxInput
-        type="file"
-        multiple
-        accept=".xlsx"
-        (change)="onXlsxSelected($event)"
-        style="display: none"
-      />
+        @if (Permission.VisitsCreate | hasPermission) {
+          <a routerLink="/visits/new" matButton="elevated" color="accent">
+            <mat-icon>calendar_today</mat-icon>
+            {{ 'home.newVisit' | translate }}
+          </a>
+        }
+        @if (Permission.AdminImport | hasPermission) {
+          <button matButton="elevated" class="btn-amber" (click)="triggerXlsxInput()" [disabled]="importing()">
+            <mat-icon>upload_file</mat-icon>
+            @if (importing()) {
+              {{ 'home.importing' | translate }}
+            } @else {
+              {{ 'home.importXlsx' | translate }}
+            }
+          </button>
+          <input
+            #xlsxInput
+            type="file"
+            multiple
+            accept=".xlsx"
+            (change)="onXlsxSelected($event)"
+            style="display: none"
+          />
+        }
+      </div>
     </div>
-  </div>
+  }
 
   @if (importing()) {
     <mat-card class="import-progress-card" role="status" aria-live="polite" aria-atomic="true">

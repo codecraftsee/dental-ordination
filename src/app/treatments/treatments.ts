@@ -14,18 +14,23 @@ import { TranslatePipe } from '../shared/translate.pipe';
 import { CurrencyFormatPipe } from '../shared/currency-format.pipe';
 import { TreatmentService } from '../services/treatment.service';
 import { ConfirmDialogService } from '../services/confirm-dialog.service';
+import { ToastService } from '../services/toast.service';
+import { HasPermissionPipe } from '../shared/has-permission.pipe';
 import { Treatment, TreatmentCategory } from '../models/treatment.model';
+import { Permission } from '../models/user.model';
 
 @Component({
   selector: 'app-treatments',
-  imports: [RouterLink, TranslatePipe, CurrencyFormatPipe, MatFormFieldModule, MatInputModule, MatSelectModule, MatTableModule, MatPaginatorModule, MatSortModule, MatCardModule, MatButtonModule, MatIconModule, MatTooltipModule],
+  imports: [RouterLink, TranslatePipe, CurrencyFormatPipe, HasPermissionPipe, MatFormFieldModule, MatInputModule, MatSelectModule, MatTableModule, MatPaginatorModule, MatSortModule, MatCardModule, MatButtonModule, MatIconModule, MatTooltipModule],
   templateUrl: './treatments.html',
   styleUrl: './treatments.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export default class Treatments implements OnInit {
+  readonly Permission = Permission;
   private treatmentService = inject(TreatmentService);
   private confirmDialogService = inject(ConfirmDialogService);
+  private toastService = inject(ToastService);
   private paginator = viewChild(MatPaginator);
   private sort = viewChild(MatSort);
 
@@ -67,7 +72,10 @@ export default class Treatments implements OnInit {
       .confirm('treatment.deleteTitle', 'treatment.deleteMessage')
       .subscribe(confirmed => {
         if (confirmed) {
-          this.treatmentService.delete(id).subscribe();
+          this.treatmentService.delete(id).subscribe({
+            next: () => this.toastService.success('toast.treatmentDeleted'),
+            error: err => this.toastService.error(err),
+          });
         }
       });
   }

@@ -8,7 +8,6 @@ import { vi } from 'vitest';
 import Admin from './admin';
 import { TranslateService } from '../services/translate.service';
 import { AdminService } from '../services/admin.service';
-import { AuthService } from '../services/auth.service';
 import { PatientService } from '../services/patient.service';
 import { UserService } from '../services/user.service';
 import { VisitService } from '../services/visit.service';
@@ -20,7 +19,6 @@ const makeLoadAllMock = () => ({ loadAll: vi.fn().mockReturnValue(of([])) });
 describe('Admin', () => {
   let component: Admin;
   let fixture: ComponentFixture<Admin>;
-  let authService: { changePassword: ReturnType<typeof vi.fn> };
   let adminService: {
     deleteVisits: ReturnType<typeof vi.fn>;
     deletePatients: ReturnType<typeof vi.fn>;
@@ -35,7 +33,6 @@ describe('Admin', () => {
   let treatmentService: { loadAll: ReturnType<typeof vi.fn> };
 
   beforeEach(async () => {
-    authService = { changePassword: vi.fn().mockReturnValue(of(undefined)) };
     adminService = {
       deleteVisits: vi.fn().mockReturnValue(of(undefined)),
       deletePatients: vi.fn().mockReturnValue(of(undefined)),
@@ -64,7 +61,6 @@ describe('Admin', () => {
             currentLang: signal('en'),
           },
         },
-        { provide: AuthService, useValue: authService },
         { provide: AdminService, useValue: adminService },
         { provide: PatientService, useValue: patientService },
         { provide: UserService, useValue: userService },
@@ -82,71 +78,6 @@ describe('Admin', () => {
   it('creates the component', () => {
     expect(component).toBeTruthy();
   });
-
-  // Password form validation
-
-  it('passwordForm is invalid when empty', () => {
-    expect(component.passwordForm.invalid).toBe(true);
-  });
-
-  it('passwordForm is invalid when passwords do not match', () => {
-    component.passwordForm.setValue({ currentPassword: 'old', newPassword: 'newPass1', confirmPassword: 'different' });
-    expect(component.passwordForm.errors?.['passwordMismatch']).toBeTruthy();
-  });
-
-  it('passwordForm is valid when all fields are correct and passwords match', () => {
-    component.passwordForm.setValue({ currentPassword: 'old', newPassword: 'newPass1', confirmPassword: 'newPass1' });
-    expect(component.passwordForm.valid).toBe(true);
-  });
-
-  // submitPasswordChange — invalid form
-
-  it('submitPasswordChange marks all controls as touched when form is invalid', () => {
-    component.submitPasswordChange();
-    expect(component.passwordForm.get('currentPassword')?.touched).toBe(true);
-    expect(component.passwordForm.get('newPassword')?.touched).toBe(true);
-    expect(component.passwordForm.get('confirmPassword')?.touched).toBe(true);
-  });
-
-  it('submitPasswordChange does not call authService when form is invalid', () => {
-    component.submitPasswordChange();
-    expect(authService.changePassword).not.toHaveBeenCalled();
-  });
-
-  // submitPasswordChange — success
-
-  it('submitPasswordChange calls authService.changePassword with form values', () => {
-    component.passwordForm.setValue({ currentPassword: 'old', newPassword: 'newPass1', confirmPassword: 'newPass1' });
-    component.submitPasswordChange();
-    expect(authService.changePassword).toHaveBeenCalledWith({
-      currentPassword: 'old',
-      newPassword: 'newPass1',
-      confirmPassword: 'newPass1',
-    });
-  });
-
-  it('submitPasswordChange sets success message and resets form on success', () => {
-    component.passwordForm.setValue({ currentPassword: 'old', newPassword: 'newPass1', confirmPassword: 'newPass1' });
-    component.submitPasswordChange();
-    expect(component.pwMessage()).toBe('admin.changePasswordSuccess');
-    expect(component.pwIsError()).toBe(false);
-    expect(component.pwLoading()).toBe(false);
-    expect(component.passwordForm.pristine).toBe(true);
-    expect(component.passwordForm.get('currentPassword')?.value).toBeNull();
-    expect(component.passwordForm.get('newPassword')?.value).toBeNull();
-    expect(component.passwordForm.get('confirmPassword')?.value).toBeNull();
-  });
-
-  it('submitPasswordChange sets error message on failure', () => {
-    authService.changePassword.mockReturnValue(throwError(() => new Error('fail')));
-    component.passwordForm.setValue({ currentPassword: 'wrong', newPassword: 'newPass1', confirmPassword: 'newPass1' });
-    component.submitPasswordChange();
-    expect(component.pwMessage()).toBe('admin.changePasswordError');
-    expect(component.pwIsError()).toBe(true);
-    expect(component.pwLoading()).toBe(false);
-  });
-
-  // execute — success
 
   it('execute calls adminService.deleteVisits for visits action', () => {
     const action = component.actions.find(a => a.key === 'visits')!;
@@ -182,8 +113,6 @@ describe('Admin', () => {
     component.execute(action);
     expect(action.message()).toBe('admin.error');
   });
-
-  // Cache refresh logic — parameterized
 
   it.each([
     { key: 'patients' as const, deleteFn: 'deletePatients' as const, caches: ['patientService', 'visitService'] },

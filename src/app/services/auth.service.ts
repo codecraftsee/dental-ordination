@@ -4,7 +4,7 @@ import { Router } from '@angular/router';
 import { Observable, tap, catchError, of } from 'rxjs';
 import { environment } from '../../environments/environment';
 import { ChangePasswordRequest, LoginRequest, SetPasswordRequest, TokenResponse } from '../models/auth.model';
-import { User, UserRole } from '../models/user.model';
+import { Permission, User, UserRole } from '../models/user.model';
 
 const ACCESS_TOKEN_KEY = 'access_token';
 const REFRESH_TOKEN_KEY = 'refresh_token';
@@ -20,6 +20,7 @@ export class AuthService {
   readonly user = this.currentUser.asReadonly();
   readonly isAuthenticated = computed(() => !!this.currentUser());
   readonly userRole = computed(() => this.currentUser()?.role ?? null);
+  readonly userPermissions = computed(() => this.currentUser()?.permissions ?? []);
 
   getAccessToken(): string | null {
     return localStorage.getItem(ACCESS_TOKEN_KEY);
@@ -90,6 +91,17 @@ export class AuthService {
   hasRole(...roles: UserRole[]): boolean {
     const role = this.userRole();
     return role !== null && roles.includes(role);
+  }
+
+  hasPermission(...permissions: Permission[]): boolean {
+    if (permissions.length === 0) return false;
+    const userPerms = this.userPermissions();
+    return permissions.every(p => userPerms.includes(p));
+  }
+
+  hasAnyPermission(...permissions: Permission[]): boolean {
+    const userPerms = this.userPermissions();
+    return permissions.some(p => userPerms.includes(p));
   }
 
   changePassword(request: ChangePasswordRequest): Observable<void> {

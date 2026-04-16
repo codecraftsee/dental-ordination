@@ -9,6 +9,7 @@ import Diagnoses from './diagnoses';
 import { TranslateService } from '../services/translate.service';
 import { DiagnosisService } from '../services/diagnosis.service';
 import { ConfirmDialogService } from '../services/confirm-dialog.service';
+import { AuthService } from '../services/auth.service';
 import { Diagnosis, DiagnosisCategory } from '../models/diagnosis.model';
 
 describe('Diagnoses', () => {
@@ -34,6 +35,14 @@ describe('Diagnoses', () => {
         {
           provide: ConfirmDialogService,
           useValue: { confirm: vi.fn().mockReturnValue(of(false)) },
+        },
+        {
+          provide: AuthService,
+          useValue: {
+            hasPermission: () => true,
+            hasAnyPermission: () => true,
+            userPermissions: signal([]),
+          },
         },
       ],
     }).compileComponents();
@@ -112,7 +121,6 @@ describe('Diagnoses', () => {
     const diagB: Diagnosis = { id: '2', code: 'K01', name: 'Alpha', category: DiagnosisCategory.Periodontal, createdAt: '' };
     component.dataSource.data = [diagA, diagB];
     const sort = component.dataSource.sort!;
-    sort.sort({ id: 'name', start: 'asc', disableClear: false });
     const sorted = component.dataSource.sortData([diagA, diagB], sort);
     expect(sorted[0].name).toBe('Alpha');
     expect(sorted[1].name).toBe('Zebra');

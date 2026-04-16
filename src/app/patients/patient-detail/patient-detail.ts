@@ -11,25 +11,30 @@ import { TranslatePipe } from '../../shared/translate.pipe';
 import { LocalizedDatePipe } from '../../shared/localized-date.pipe';
 import { CurrencyFormatPipe } from '../../shared/currency-format.pipe';
 import { ConfirmDialogService } from '../../services/confirm-dialog.service';
+import { ToastService } from '../../services/toast.service';
 import { PatientService } from '../../services/patient.service';
 import { VisitService } from '../../services/visit.service';
 import { UserService } from '../../services/user.service';
 import { DiagnosisService } from '../../services/diagnosis.service';
 import { TreatmentService } from '../../services/treatment.service';
+import { HasPermissionPipe } from '../../shared/has-permission.pipe';
 import { Patient } from '../../models/patient.model';
+import { Permission } from '../../models/user.model';
 import { Visit } from '../../models/visit.model';
 
 @Component({
   selector: 'app-patient-detail',
-  imports: [RouterLink, TranslatePipe, LocalizedDatePipe, CurrencyFormatPipe, MatCardModule, MatTableModule, MatPaginatorModule, MatButtonModule, MatIconModule, MatTooltipModule],
+  imports: [RouterLink, TranslatePipe, LocalizedDatePipe, CurrencyFormatPipe, MatCardModule, MatTableModule, MatPaginatorModule, MatButtonModule, MatIconModule, MatTooltipModule, HasPermissionPipe],
   templateUrl: './patient-detail.html',
   styleUrl: './patient-detail.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export default class PatientDetail implements OnInit {
+  readonly Permission = Permission;
   private route = inject(ActivatedRoute);
   private router = inject(Router);
   private confirmDialogService = inject(ConfirmDialogService);
+  private toastService = inject(ToastService);
   private patientService = inject(PatientService);
   private visitService = inject(VisitService);
   private userService = inject(UserService);
@@ -143,8 +148,12 @@ export default class PatientDetail implements OnInit {
       .confirm('patient.deleteTitle', 'patient.deleteMessage')
       .subscribe(confirmed => {
         if (confirmed) {
-          this.patientService.delete(p.id).subscribe(() => {
-            this.router.navigate(['/patients']);
+          this.patientService.delete(p.id).subscribe({
+            next: () => {
+              this.toastService.success('toast.patientDeleted');
+              this.router.navigate(['/patients']);
+            },
+            error: err => this.toastService.error(err),
           });
         }
       });

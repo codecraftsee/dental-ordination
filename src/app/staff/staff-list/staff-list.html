@@ -1,7 +1,9 @@
 <div class="container page">
   <div class="page-header">
     <h1 class="section-title">{{ 'staff.title' | translate }}</h1>
-    <a routerLink="/staff/new" matButton="elevated" color="primary"><mat-icon>person_add</mat-icon>{{ 'staff.addNew' | translate }}</a>
+    @if (Permission.UsersCreate | hasPermission) {
+      <a routerLink="/staff/new" matButton="elevated" color="primary"><mat-icon>person_add</mat-icon>{{ 'staff.addNew' | translate }}</a>
+    }
   </div>
 
   <mat-card class="filters-card form-card">
@@ -73,9 +75,11 @@
       <th mat-header-cell *matHeaderCellDef>{{ 'staff.actions' | translate }}</th>
       <td mat-cell *matCellDef="let u">
         <div class="actions-cell">
-          <a mat-icon-button class="icon-btn--warning" [routerLink]="['/staff', u.id, 'edit']" [matTooltip]="'common.edit' | translate">
-            <mat-icon>edit</mat-icon>
-          </a>
+          @if (Permission.UsersUpdate | hasPermission) {
+            <a mat-icon-button class="icon-btn--warning" [routerLink]="['/staff', u.id, 'edit']" [matTooltip]="'common.edit' | translate" [attr.aria-label]="'common.edit' | translate">
+              <mat-icon>edit</mat-icon>
+            </a>
+          }
         </div>
       </td>
     </ng-container>

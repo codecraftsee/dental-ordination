@@ -33,8 +33,12 @@
           </div>
           <div class="profile-actions">
             <a [routerLink]="['/patients', p.id, 'dental-card']" matButton="elevated" color="primary"><mat-icon>assignment</mat-icon>{{ 'patients.viewDentalCard' | translate }}</a>
-            <a [routerLink]="['/patients', p.id, 'edit']" matButton="outlined"><mat-icon>edit</mat-icon>{{ 'common.edit' | translate }}</a>
-            <button matButton="outlined" class="btn-danger-outlined" (click)="deletePatient()"><mat-icon>delete</mat-icon>{{ 'common.delete' | translate }}</button>
+            @if (Permission.PatientsUpdate | hasPermission) {
+              <a [routerLink]="['/patients', p.id, 'edit']" matButton="outlined"><mat-icon>edit</mat-icon>{{ 'common.edit' | translate }}</a>
+            }
+            @if (Permission.PatientsDelete | hasPermission) {
+              <button matButton="outlined" class="btn-danger-outlined" (click)="deletePatient()"><mat-icon>delete</mat-icon>{{ 'common.delete' | translate }}</button>
+            }
             <a routerLink="/patients" matButton="outlined"><mat-icon>arrow_back</mat-icon>{{ 'common.back' | translate }}</a>
           </div>
         </div>
@@ -53,9 +57,11 @@
             <div class="stat-label">{{ 'patient.totalVisits' | translate }}</div>
           </div>
         </mat-card-content>
-        <a [routerLink]="['/visits/new']" [queryParams]="{ patientId: p.id, returnTo: '/patients/' + p.id }" matIconButton class="stat-card-action-btn" [matTooltip]="'visit.addForPatient' | translate" [attr.aria-label]="'visit.addForPatient' | translate">
-          <mat-icon>add_circle_outline</mat-icon>
-        </a>
+        @if (Permission.VisitsCreate | hasPermission) {
+          <a [routerLink]="['/visits/new']" [queryParams]="{ patientId: p.id, returnTo: '/patients/' + p.id }" matIconButton class="stat-card-action-btn" [matTooltip]="'visit.addForPatient' | translate" [attr.aria-label]="'visit.addForPatient' | translate">
+            <mat-icon>add_circle_outline</mat-icon>
+          </a>
+        }
       </mat-card>
       <mat-card class="stat-card stat-card--info">
         <mat-card-content>

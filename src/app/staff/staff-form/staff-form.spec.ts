@@ -7,6 +7,7 @@ import { of } from 'rxjs';
 import { vi } from 'vitest';
 import StaffForm from './staff-form';
 import { UserService } from '../../services/user.service';
+import { ToastService } from '../../services/toast.service';
 import { UserRole } from '../../models/user.model';
 import { TranslateService } from '../../services/translate.service';
 
@@ -30,7 +31,8 @@ describe('StaffForm', () => {
         provideHttpClientTesting(),
         { provide: ActivatedRoute, useValue: { snapshot: { paramMap: { get: () => null } } } },
         { provide: UserService, useValue: userService },
-        { provide: TranslateService, useValue: { instant: (k: string) => k, get: (k: string) => of(k), currentLang: signal('en') } },
+        { provide: ToastService, useValue: { success: vi.fn(), error: vi.fn() } },
+        { provide: TranslateService, useValue: { instant: (k: string) => k, translate: (k: string) => k, get: (k: string) => of(k), currentLang: signal('en'), version: signal('en') } },
       ],
     }).compileComponents();
 

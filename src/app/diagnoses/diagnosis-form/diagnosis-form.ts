@@ -9,6 +9,7 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { TranslatePipe } from '../../shared/translate.pipe';
 import { DiagnosisService } from '../../services/diagnosis.service';
+import { ToastService } from '../../services/toast.service';
 import { DiagnosisCategory } from '../../models/diagnosis.model';
 
 @Component({
@@ -23,6 +24,7 @@ export default class DiagnosisForm implements OnInit {
   private route = inject(ActivatedRoute);
   private router = inject(Router);
   private diagnosisService = inject(DiagnosisService);
+  private toastService = inject(ToastService);
 
   categories = Object.values(DiagnosisCategory);
   isEditMode = false;
@@ -67,12 +69,20 @@ export default class DiagnosisForm implements OnInit {
     }
 
     if (this.isEditMode && this.diagnosisId) {
-      this.diagnosisService.update(this.diagnosisId, this.form.value).subscribe(() => {
-        this.router.navigate(['/diagnoses']);
+      this.diagnosisService.update(this.diagnosisId, this.form.value).subscribe({
+        next: () => {
+          this.toastService.success('toast.diagnosisUpdated');
+          this.router.navigate(['/diagnoses']);
+        },
+        error: err => this.toastService.error(err),
       });
     } else {
-      this.diagnosisService.create(this.form.value).subscribe(() => {
-        this.router.navigate(['/diagnoses']);
+      this.diagnosisService.create(this.form.value).subscribe({
+        next: () => {
+          this.toastService.success('toast.diagnosisCreated');
+          this.router.navigate(['/diagnoses']);
+        },
+        error: err => this.toastService.error(err),
       });
     }
   }

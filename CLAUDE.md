@@ -79,6 +79,7 @@ Components use flat names without `.component` suffix:
 ### Routing
 - Lazy-loaded routes via `loadComponent: () => import('./path/component')`
 - Protected routes use `canActivate: [authGuard]`
+- Permission-restricted routes add `canActivate: [authGuard, permissionGuard([Permission.X])]`
 - Login route uses `canActivate: [loginGuard]`
 - Routes defined in `src/app/app.routes.ts`
 
@@ -138,19 +139,21 @@ Always use OpenSpec for new features — agree on specs before writing code.
 ## Project Structure
 ```
 src/app/
-├── guards/          # authGuard, loginGuard
+├── guards/          # authGuard, loginGuard, permissionGuard
 ├── interceptors/    # auth, error, case-transform
 ├── models/          # TypeScript interfaces
 ├── services/        # Injectable services with signal caching
-├── shared/          # Pipes (translate, date, currency), language-switcher
+├── shared/          # Pipes (translate, date, currency, hasPermission), language-switcher, sidebar
 ├── login/           # Login component
 ├── home/            # Dashboard
 ├── patients/        # patient-list, patient-detail, patient-form
-├── doctors/         # doctor-list, doctor-detail, doctor-form
+├── staff/           # staff-list, staff-detail, staff-form
 ├── visits/          # visit-list, visit-detail, visit-form
 ├── diagnoses/       # Simple CRUD component
 ├── treatments/      # Simple CRUD component
-└── dental-card/     # Patient dental card
+├── dental-card/     # Patient dental card
+├── profile/         # User profile (change password)
+└── admin/           # Admin panel (bulk delete)
 ```
 
 ---

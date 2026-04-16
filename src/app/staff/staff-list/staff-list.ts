@@ -11,17 +11,21 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { TranslatePipe } from '../../shared/translate.pipe';
+import { AuthService } from '../../services/auth.service';
 import { UserService } from '../../services/user.service';
-import { User, UserRole } from '../../models/user.model';
+import { HasPermissionPipe } from '../../shared/has-permission.pipe';
+import { Permission, User, UserRole } from '../../models/user.model';
 
 @Component({
   selector: 'app-staff-list',
-  imports: [RouterLink, TranslatePipe, MatFormFieldModule, MatInputModule, MatSelectModule, MatTableModule, MatPaginatorModule, MatSortModule, MatCardModule, MatButtonModule, MatIconModule, MatTooltipModule],
+  imports: [RouterLink, TranslatePipe, HasPermissionPipe, MatFormFieldModule, MatInputModule, MatSelectModule, MatTableModule, MatPaginatorModule, MatSortModule, MatCardModule, MatButtonModule, MatIconModule, MatTooltipModule],
   templateUrl: './staff-list.html',
   styleUrl: './staff-list.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export default class StaffList implements OnInit {
+  readonly Permission = Permission;
+  private authService = inject(AuthService);
   private userService = inject(UserService);
   private paginator = viewChild(MatPaginator);
   private sort = viewChild(MatSort);
@@ -36,8 +40,9 @@ export default class StaffList implements OnInit {
   filteredStaff = computed(() => {
     const role = this.roleFilter() as UserRole | undefined;
     const rolesToShow: UserRole[] = role ? [role] : [UserRole.Doctor, UserRole.Nurse];
+    const currentUserId = this.authService.user()?.id;
     return this.userService.search(this.searchQuery(), { role: undefined }).filter(u =>
-      rolesToShow.includes(u.role),
+      rolesToShow.includes(u.role) && u.id !== currentUserId,
     );
   });
 

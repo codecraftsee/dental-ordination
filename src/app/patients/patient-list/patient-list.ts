@@ -14,21 +14,26 @@ import { LocalizedDatePipe } from '../../shared/localized-date.pipe';
 import { PatientService } from '../../services/patient.service';
 import { VisitService } from '../../services/visit.service';
 import { ConfirmDialogService } from '../../services/confirm-dialog.service';
+import { ToastService } from '../../services/toast.service';
 import { Patient } from '../../models/patient.model';
+import { Permission } from '../../models/user.model';
 import { MatCardModule } from '@angular/material/card';
 import { BookTableComponent } from '../../shared/book-table/book-table';
+import { HasPermissionPipe } from '../../shared/has-permission.pipe';
 
 @Component({
   selector: 'app-patient-list',
-  imports: [RouterLink, MatTableModule, MatPaginatorModule, MatSortModule, MatFormFieldModule, MatInputModule, MatCardModule, MatSelectModule, MatButtonModule, MatIconModule, MatTooltipModule, TranslatePipe, LocalizedDatePipe, BookTableComponent],
+  imports: [RouterLink, MatTableModule, MatPaginatorModule, MatSortModule, MatFormFieldModule, MatInputModule, MatCardModule, MatSelectModule, MatButtonModule, MatIconModule, MatTooltipModule, TranslatePipe, LocalizedDatePipe, BookTableComponent, HasPermissionPipe],
   templateUrl: './patient-list.html',
   styleUrl: './patient-list.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export default class PatientList implements OnInit {
+  readonly Permission = Permission;
   private patientService = inject(PatientService);
   private visitService = inject(VisitService);
   private confirmDialogService = inject(ConfirmDialogService);
+  private toastService = inject(ToastService);
   private paginator = viewChild(MatPaginator);
   private sort = viewChild(MatSort);
 
@@ -109,7 +114,10 @@ export default class PatientList implements OnInit {
       .confirm('patient.deleteTitle', 'patient.deleteMessage')
       .subscribe(confirmed => {
         if (confirmed) {
-          this.patientService.delete(id).subscribe();
+          this.patientService.delete(id).subscribe({
+            next: () => this.toastService.success('toast.patientDeleted'),
+            error: err => this.toastService.error(err),
+          });
         }
       });
   }

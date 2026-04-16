@@ -13,18 +13,23 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 import { TranslatePipe } from '../shared/translate.pipe';
 import { DiagnosisService } from '../services/diagnosis.service';
 import { ConfirmDialogService } from '../services/confirm-dialog.service';
+import { ToastService } from '../services/toast.service';
+import { HasPermissionPipe } from '../shared/has-permission.pipe';
 import { Diagnosis, DiagnosisCategory } from '../models/diagnosis.model';
+import { Permission } from '../models/user.model';
 
 @Component({
   selector: 'app-diagnoses',
-  imports: [RouterLink, TranslatePipe, MatFormFieldModule, MatInputModule, MatSelectModule, MatTableModule, MatPaginatorModule, MatSortModule, MatCardModule, MatButtonModule, MatIconModule, MatTooltipModule],
+  imports: [RouterLink, TranslatePipe, HasPermissionPipe, MatFormFieldModule, MatInputModule, MatSelectModule, MatTableModule, MatPaginatorModule, MatSortModule, MatCardModule, MatButtonModule, MatIconModule, MatTooltipModule],
   templateUrl: './diagnoses.html',
   styleUrl: './diagnoses.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export default class Diagnoses implements OnInit {
+  readonly Permission = Permission;
   private diagnosisService = inject(DiagnosisService);
   private confirmDialogService = inject(ConfirmDialogService);
+  private toastService = inject(ToastService);
   private paginator = viewChild(MatPaginator);
   private sort = viewChild(MatSort);
 
@@ -66,7 +71,10 @@ export default class Diagnoses implements OnInit {
       .confirm('diagnosis.deleteTitle', 'diagnosis.deleteMessage')
       .subscribe(confirmed => {
         if (confirmed) {
-          this.diagnosisService.delete(id).subscribe();
+          this.diagnosisService.delete(id).subscribe({
+            next: () => this.toastService.success('toast.diagnosisDeleted'),
+            error: err => this.toastService.error(err),
+          });
         }
       });
   }
