@@ -60,5 +60,8 @@ describe('ToastService', () => {
   it('should fall back to unknown error for non-HTTP errors', () => {
     service.error(new Error('something'));
     expect(translateService.instant).toHaveBeenCalledWith('toast.unknownError');
+    expect(snackBar.open).toHaveBeenCalledWith('toast.unknownError', '', expect.objectContaining({
+      panelClass: 'toast-error',
+    }));
   });
 });

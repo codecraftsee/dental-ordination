@@ -44,8 +44,10 @@ describe('Sidebar', () => {
     expect(component).toBeTruthy();
   });
 
-  it('shows all 7 nav links when user has all permissions', () => {
-    expect(component.navLinks().length).toBe(7);
+  it('renders all 7 nav links when user has all permissions', () => {
+    fixture.detectChanges();
+    const items = fixture.nativeElement.querySelectorAll('[mat-list-item]');
+    expect(items.length).toBe(7);
   });
 
   it('home link uses exact matching', () => {
@@ -68,20 +70,17 @@ describe('Sidebar', () => {
 
   it('hides admin link when user lacks admin permission', () => {
     userPermissions.set([Permission.PatientsRead, Permission.VisitsRead, Permission.DiagnosesRead, Permission.TreatmentsRead, Permission.UsersRead]);
-    const links = component.navLinks();
-    expect(links.find(l => l.route === '/admin')).toBeUndefined();
+    fixture.detectChanges();
+    const items = fixture.nativeElement.querySelectorAll('[mat-list-item]');
+    const hrefs = Array.from(items as NodeListOf<Element>).map(el => el.getAttribute('href'));
+    expect(hrefs).not.toContain('/admin');
   });
 
   it('always shows home link regardless of permissions', () => {
     userPermissions.set([]);
-    const links = component.navLinks();
-    expect(links.find(l => l.route === '/')).toBeTruthy();
-    expect(links.length).toBe(1);
-  });
-
-  it('renders a list item for each visible nav link', () => {
     fixture.detectChanges();
     const items = fixture.nativeElement.querySelectorAll('[mat-list-item]');
-    expect(items.length).toBe(component.navLinks().length);
+    expect(items.length).toBe(1);
+    expect(items[0].getAttribute('href')).toBe('/');
   });
 });

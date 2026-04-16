@@ -94,6 +94,7 @@ export class AuthService {
   }
 
   hasPermission(...permissions: Permission[]): boolean {
+    if (permissions.length === 0) return false;
     const userPerms = this.userPermissions();
     return permissions.every(p => userPerms.includes(p));
   }

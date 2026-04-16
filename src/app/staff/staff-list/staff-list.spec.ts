@@ -80,4 +80,15 @@ describe('StaffList', () => {
     component.roleFilter.set(UserRole.Doctor);
     expect(component.roleFilter()).toBe(UserRole.Doctor);
   });
+
+  it('should hide add and edit controls when user lacks permissions', async () => {
+    const noPermsFixture = TestBed.createComponent(StaffList);
+    const authService = TestBed.inject(AuthService);
+    (authService.hasPermission as ReturnType<typeof vi.fn>) = vi.fn().mockReturnValue(false);
+    (authService.hasAnyPermission as ReturnType<typeof vi.fn>) = vi.fn().mockReturnValue(false);
+    noPermsFixture.detectChanges();
+    const el = noPermsFixture.nativeElement;
+    expect(el.querySelector('a[routerLink="/staff/new"]')).toBeNull();
+    expect(el.querySelector('.icon-btn--warning')).toBeNull();
+  });
 });

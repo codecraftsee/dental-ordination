@@ -21,7 +21,7 @@
             <button type="button" mat-icon-button matSuffix (click)="showCurrentPassword.set(!showCurrentPassword())" [attr.aria-label]="'common.toggleCurrentPasswordVisibility' | translate">
               <mat-icon>{{ showCurrentPassword() ? 'visibility_off' : 'visibility' }}</mat-icon>
             </button>
-            @if (passwordForm.get('currentPassword')?.errors?.['required'] && passwordForm.get('currentPassword')?.touched) {
+            @if (currentPassword.errors?.['required'] && currentPassword.touched) {
               <mat-error>{{ 'common.required' | translate }}</mat-error>
             }
           </mat-form-field>
@@ -32,9 +32,9 @@
             <button type="button" mat-icon-button matSuffix (click)="showNewPassword.set(!showNewPassword())" [attr.aria-label]="'common.toggleNewPasswordVisibility' | translate">
               <mat-icon>{{ showNewPassword() ? 'visibility_off' : 'visibility' }}</mat-icon>
             </button>
-            @if (passwordForm.get('newPassword')?.errors?.['required'] && passwordForm.get('newPassword')?.touched) {
+            @if (newPassword.errors?.['required'] && newPassword.touched) {
               <mat-error>{{ 'common.required' | translate }}</mat-error>
-            } @else if (passwordForm.get('newPassword')?.errors?.['minlength'] && passwordForm.get('newPassword')?.touched) {
+            } @else if (newPassword.errors?.['minlength'] && newPassword.touched) {
               <mat-error>{{ 'common.minLength8' | translate }}</mat-error>
             }
           </mat-form-field>
@@ -45,9 +45,9 @@
             <button type="button" mat-icon-button matSuffix (click)="showConfirmPassword.set(!showConfirmPassword())" [attr.aria-label]="'common.toggleConfirmPasswordVisibility' | translate">
               <mat-icon>{{ showConfirmPassword() ? 'visibility_off' : 'visibility' }}</mat-icon>
             </button>
-            @if (passwordForm.get('confirmPassword')?.errors?.['required'] && passwordForm.get('confirmPassword')?.touched) {
+            @if (confirmPassword.errors?.['required'] && confirmPassword.touched) {
               <mat-error>{{ 'common.required' | translate }}</mat-error>
-            } @else if (passwordForm.errors?.['passwordMismatch'] && passwordForm.get('confirmPassword')?.touched) {
+            } @else if (passwordForm.errors?.['passwordMismatch'] && confirmPassword.touched) {
               <mat-error>{{ 'common.passwordMismatch' | translate }}</mat-error>
             }
           </mat-form-field>

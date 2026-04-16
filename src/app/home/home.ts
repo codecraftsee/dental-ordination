@@ -4,7 +4,7 @@ import { MatCardModule } from '@angular/material/card';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
-import { forkJoin } from 'rxjs';
+import { forkJoin, of } from 'rxjs';
 import { TranslatePipe } from '../shared/translate.pipe';
 import { TranslateService } from '../services/translate.service';
 import { LocalizedDatePipe } from '../shared/localized-date.pipe';
@@ -57,12 +57,13 @@ export default class Home implements OnInit {
   recentVisits: WritableSignal<Visit[]> = signal<Visit[]>([]);
 
   ngOnInit(): void {
+    const has = (...p: Permission[]) => this.authService.hasPermission(...p);
     forkJoin([
-      this.patientService.loadAll(),
-      this.userService.loadAll(),
-      this.visitService.loadAll(),
-      this.diagnosisService.loadAll(),
-      this.treatmentService.loadAll(),
+      has(Permission.PatientsRead) ? this.patientService.loadAll() : of([]),
+      has(Permission.UsersRead) ? this.userService.loadAll() : of([]),
+      has(Permission.VisitsRead) ? this.visitService.loadAll() : of([]),
+      has(Permission.DiagnosesRead) ? this.diagnosisService.loadAll() : of([]),
+      has(Permission.TreatmentsRead) ? this.treatmentService.loadAll() : of([]),
     ]).subscribe(() => {
       this.totalPatients = this.patientService.getAll().length;
       this.totalDoctors = this.userService.getByRole(UserRole.Doctor).length;

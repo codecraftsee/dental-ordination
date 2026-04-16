@@ -34,7 +34,7 @@ export default class Profile {
   private destroyRef = inject(DestroyRef);
   private fb = inject(FormBuilder);
 
-  readonly passwordForm = this.fb.group(
+  readonly passwordForm = this.fb.nonNullable.group(
     {
       currentPassword: ['', Validators.required],
       newPassword: ['', [Validators.required, Validators.minLength(8)]],
@@ -51,6 +51,10 @@ export default class Profile {
   readonly showNewPassword = signal(false);
   readonly showConfirmPassword = signal(false);
 
+  get currentPassword() { return this.passwordForm.get('currentPassword')!; }
+  get newPassword() { return this.passwordForm.get('newPassword')!; }
+  get confirmPassword() { return this.passwordForm.get('confirmPassword')!; }
+
   submitPasswordChange(): void {
     if (this.passwordForm.invalid) {
       this.passwordForm.markAllAsTouched();
@@ -61,13 +65,13 @@ export default class Profile {
     this.pwMessage.set('');
     this.pwIsError.set(false);
 
-    const { currentPassword, newPassword, confirmPassword } = this.passwordForm.value;
+    const { currentPassword, newPassword, confirmPassword } = this.passwordForm.getRawValue();
 
     this.authService
       .changePassword({
-        currentPassword: currentPassword!,
-        newPassword: newPassword!,
-        confirmPassword: confirmPassword!,
+        currentPassword,
+        newPassword,
+        confirmPassword,
       })
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({

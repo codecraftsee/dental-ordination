@@ -133,6 +133,13 @@ describe('AuthService', () => {
     expect(service.hasPermission(Permission.PatientsRead)).toBe(false);
   });
 
+  it('hasPermission returns false when called with no arguments', () => {
+    localStorage.setItem('access_token', 'valid-token');
+    service.loadCurrentUser().subscribe();
+    httpMock.expectOne(`${environment.apiUrl}/api/auth/me`).flush(mockUser);
+    expect(service.hasPermission()).toBe(false);
+  });
+
   it('hasPermission returns true when user has the requested permission', () => {
     localStorage.setItem('access_token', 'valid-token');
     service.loadCurrentUser().subscribe();

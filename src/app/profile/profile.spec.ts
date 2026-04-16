@@ -85,6 +85,8 @@ describe('Profile', () => {
     expect(component.pwMessage()).toBe('profile.changePasswordSuccess');
     expect(component.pwIsError()).toBe(false);
     expect(component.pwLoading()).toBe(false);
+    expect(component.passwordForm.pristine).toBe(true);
+    expect(component.passwordForm.value).toEqual({ currentPassword: '', newPassword: '', confirmPassword: '' });
   });
 
   it('submitPasswordChange sets error message on failure', () => {

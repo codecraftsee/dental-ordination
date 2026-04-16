@@ -76,7 +76,7 @@
       <td mat-cell *matCellDef="let u">
         <div class="actions-cell">
           @if (Permission.UsersUpdate | hasPermission) {
-            <a mat-icon-button class="icon-btn--warning" [routerLink]="['/staff', u.id, 'edit']" [matTooltip]="'common.edit' | translate">
+            <a mat-icon-button class="icon-btn--warning" [routerLink]="['/staff', u.id, 'edit']" [matTooltip]="'common.edit' | translate" [attr.aria-label]="'common.edit' | translate">
               <mat-icon>edit</mat-icon>
             </a>
           }
