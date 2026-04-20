@@ -111,13 +111,14 @@ export class PatientService {
     return this.loaded;
   }
 
-  importXlsx(files: File[]): Observable<ImportProgressEvent> {
+  importXlsx(files: File[], doctorId?: string): Observable<ImportProgressEvent> {
     return new Observable(observer => {
       const controller = new AbortController();
       let reader: ReadableStreamDefaultReader<Uint8Array> | undefined;
 
       const formData = new FormData();
       for (const file of files) formData.append('files', file);
+      if (doctorId) formData.append('doctor_id', doctorId);
       const token = this.authService.getAccessToken();
 
       fetch(environment.apiUrl + '/api/import/xlsx', {

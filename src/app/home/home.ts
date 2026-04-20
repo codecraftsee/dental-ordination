@@ -1,7 +1,8 @@
-import { ChangeDetectionStrategy, Component, computed, ElementRef, inject, OnInit, signal, ViewChild, WritableSignal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, inject, OnInit, signal, WritableSignal } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { MatCardModule } from '@angular/material/card';
 import { MatButtonModule } from '@angular/material/button';
+import { MatDialog } from '@angular/material/dialog';
 import { MatIconModule } from '@angular/material/icon';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { forkJoin, of } from 'rxjs';
@@ -17,6 +18,7 @@ import { DiagnosisService } from '../services/diagnosis.service';
 import { TreatmentService } from '../services/treatment.service';
 import { BookTableComponent } from '../shared/book-table/book-table';
 import { HasPermissionPipe } from '../shared/has-permission.pipe';
+import { ImportDialog, ImportDialogResult } from '../shared/import-dialog/import-dialog';
 import { Visit } from '../models/visit.model';
 import { Permission, UserRole } from '../models/user.model';
 
@@ -36,8 +38,7 @@ export default class Home implements OnInit {
   private diagnosisService = inject(DiagnosisService);
   private treatmentService = inject(TreatmentService);
   private translate = inject(TranslateService);
-
-  @ViewChild('xlsxInput') xlsxInput!: ElementRef<HTMLInputElement>;
+  private dialog = inject(MatDialog);
 
   hasAnyQuickAction = computed(() =>
     this.authService.hasAnyPermission(Permission.PatientsCreate, Permission.VisitsCreate, Permission.AdminImport),
@@ -93,15 +94,21 @@ export default class Home implements OnInit {
     return this.treatmentService.getById(id)?.name || '';
   }
 
-  triggerXlsxInput(): void {
-    this.xlsxInput.nativeElement.click();
+  openImportDialog(): void {
+    this.dialog
+      .open<ImportDialog, void, ImportDialogResult>(ImportDialog, {
+        width: '480px',
+        disableClose: true,
+        autoFocus: false,
+      })
+      .afterClosed()
+      .subscribe(result => {
+        if (!result) return;
+        this.startImport(result.files, result.doctorId);
+      });
   }
 
-  onXlsxSelected(event: Event): void {
-    const input = event.target as HTMLInputElement;
-    const files = input.files;
-    if (!files || files.length === 0) return;
-
+  private startImport(files: File[], doctorId: string | undefined): void {
     this.importing.set(true);
     this.importMessage.set('');
     this.importError.set(false);
@@ -109,30 +116,25 @@ export default class Home implements OnInit {
     this.importCurrentFile.set('');
     this.importTotal.set(0);
 
-    this.patientService.importXlsx(Array.from(files)).subscribe({
+    this.patientService.importXlsx(files, doctorId).subscribe({
       next: (event) => {
         if (event.type === 'progress') {
           this.importTotal.set(event.total);
           this.importCurrentFile.set(event.file);
-          // Show 0% at START of each file so the bar is visible before processing
           this.importProgress.set(Math.round(((event.current - 1) / event.total) * 100));
         } else if (event.type === 'file_done') {
-          // Advance bar to X% when file finishes
           this.importProgress.set(Math.round((event.current / event.total) * 100));
         } else if (event.type === 'complete') {
           this.importing.set(false);
           const s = event.summary;
-          const msg = this.translate.format('home.importSummary', {
-            filesProcessed: s.filesProcessed,
-            patientsCreated: s.patientsCreated,
-            visitsCreated: s.visitsCreated,
-          });
-          this.importError.set(s.errors.length > 0);
-          const warnings =
-            s.errors.length > 0
-              ? ' ' + this.translate.format('home.importWarnings', { warnings: s.errors.join(' | ') })
-              : '';
-          this.importMessage.set(msg + warnings);
+          this.importError.set(false);
+          this.importMessage.set(
+            this.translate.format('home.importSummary', {
+              filesProcessed: s.filesProcessed,
+              patientsCreated: s.patientsCreated,
+              visitsCreated: s.visitsCreated,
+            }),
+          );
           this.importProgress.set(100);
           this.ngOnInit();
         }
@@ -145,7 +147,5 @@ export default class Home implements OnInit {
         this.importProgress.set(0);
       },
     });
-
-    input.value = '';
   }
 }

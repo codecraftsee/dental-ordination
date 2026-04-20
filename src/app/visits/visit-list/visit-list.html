@@ -97,7 +97,7 @@
     </ng-container>
 
     <ng-container matColumnDef="actions">
-      <th mat-header-cell *matHeaderCellDef>{{ 'visits.actions' | translate }}</th>
+      <th mat-header-cell *matHeaderCellDef aria-hidden="true"></th>
       <td mat-cell *matCellDef="let v">
         <div class="actions-cell">
           <a mat-icon-button class="icon-btn--primary" [routerLink]="['/visits', v.id]" [matTooltip]="'common.view' | translate">
