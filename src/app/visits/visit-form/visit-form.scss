@@ -3,8 +3,60 @@
   padding-bottom: var(--spacing-2xl);
 }
 
-.toggle-field {
-  display: flex;
+.paid-toggle {
+  display: inline-flex;
+  align-self: flex-start;
+  margin-top: 6px;
+  padding: 4px;
+  gap: 4px;
+  background: var(--color-surface-variant);
+  border: 1px solid var(--color-border);
+  border-radius: 999px;
+  height: 44px;
+  box-sizing: border-box;
+}
+
+.paid-toggle__option {
+  display: inline-flex;
   align-items: center;
-  padding-top: var(--spacing-sm);
+  justify-content: center;
+  gap: 6px;
+  height: 34px;
+  padding: 0 16px;
+  border: none;
+  background: transparent;
+  color: var(--color-text-secondary);
+  font-family: inherit;
+  font-size: 0.875rem;
+  font-weight: 600;
+  border-radius: 999px;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s, box-shadow 0.15s;
+
+  mat-icon {
+    font-size: 18px;
+    width: 18px;
+    height: 18px;
+  }
+
+  &:hover:not(.paid-toggle__option--active) {
+    color: var(--color-text);
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--color-primary);
+    outline-offset: 2px;
+  }
+
+  &--active.paid-toggle__option--paid {
+    background: var(--color-success, #2e7d32);
+    color: #fff;
+    box-shadow: var(--shadow-1);
+  }
+
+  &--active.paid-toggle__option--unpaid {
+    background: var(--color-danger, #c62828);
+    color: #fff;
+    box-shadow: var(--shadow-1);
+  }
 }

@@ -13,6 +13,8 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 import { TranslatePipe } from '../../shared/translate.pipe';
 import { AuthService } from '../../services/auth.service';
 import { UserService } from '../../services/user.service';
+import { ConfirmDialogService } from '../../services/confirm-dialog.service';
+import { ToastService } from '../../services/toast.service';
 import { HasPermissionPipe } from '../../shared/has-permission.pipe';
 import { Permission, User, UserRole } from '../../models/user.model';
 
@@ -27,6 +29,8 @@ export default class StaffList implements OnInit {
   readonly Permission = Permission;
   private authService = inject(AuthService);
   private userService = inject(UserService);
+  private confirmDialogService = inject(ConfirmDialogService);
+  private toastService = inject(ToastService);
   private paginator = viewChild(MatPaginator);
   private sort = viewChild(MatSort);
 
@@ -74,5 +78,18 @@ export default class StaffList implements OnInit {
 
   onSearch(event: Event): void {
     this.searchQuery.set((event.target as HTMLInputElement).value);
+  }
+
+  deleteStaff(id: string): void {
+    this.confirmDialogService
+      .confirm('staff.deleteTitle', 'staff.deleteMessage')
+      .subscribe(confirmed => {
+        if (confirmed) {
+          this.userService.delete(id).subscribe({
+            next: () => this.toastService.success('toast.staffDeleted'),
+            error: err => this.toastService.error(err),
+          });
+        }
+      });
   }
 }

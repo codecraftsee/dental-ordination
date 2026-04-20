@@ -65,7 +65,7 @@
           </a>
         }
         @if (Permission.AdminImport | hasPermission) {
-          <button matButton="elevated" class="btn-amber" (click)="triggerXlsxInput()" [disabled]="importing()">
+          <button matButton="elevated" class="btn-amber" (click)="openImportDialog()" [disabled]="importing()">
             <mat-icon>upload_file</mat-icon>
             @if (importing()) {
               {{ 'home.importing' | translate }}
@@ -73,14 +73,6 @@
               {{ 'home.importXlsx' | translate }}
             }
           </button>
-          <input
-            #xlsxInput
-            type="file"
-            multiple
-            accept=".xlsx"
-            (change)="onXlsxSelected($event)"
-            style="display: none"
-          />
         }
       </div>
     </div>
