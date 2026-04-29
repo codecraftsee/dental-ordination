@@ -28,11 +28,6 @@ export const routes: Routes = [
     canActivate: [authGuard, permissionGuard([Permission.PatientsUpdate])],
   },
   {
-    path: 'patients/:id/dental-card',
-    loadComponent: () => import('./dental-card/dental-card'),
-    canActivate: [authGuard, permissionGuard([Permission.PatientsRead])],
-  },
-  {
     path: 'staff',
     loadComponent: () => import('./staff/staff-list/staff-list'),
     canActivate: [authGuard, permissionGuard([Permission.UsersRead])],

@@ -40,6 +40,10 @@ export enum Permission {
   UsersUpdate = 'users:update',
   UsersDelete = 'users:delete',
 
+  PatientDocumentsRead = 'patient_documents:read',
+  PatientDocumentsCreate = 'patient_documents:create',
+  PatientDocumentsDelete = 'patient_documents:delete',
+
   AdminImport = 'admin:import',
   AdminBulkDelete = 'admin:bulk_delete',
 }
