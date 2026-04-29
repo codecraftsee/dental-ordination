@@ -102,7 +102,7 @@
             {{ 'common.edit' | translate }}
           </a>
         }
-        <a mat-button [routerLink]="['/patients', patient.id, 'dental-card']">
+        <a mat-button [routerLink]="['/patients', patient.id]" [queryParams]="{ tab: 'dental-card' }">
           <mat-icon>assignment</mat-icon>
           {{ 'patients.viewDentalCard' | translate }}
         </a>
@@ -167,7 +167,7 @@
               <mat-icon>edit</mat-icon>
             </a>
           }
-          <a mat-icon-button class="icon-btn--success" [routerLink]="['/patients', p.id, 'dental-card']" [matTooltip]="'patients.viewDentalCard' | translate">
+          <a mat-icon-button class="icon-btn--success" [routerLink]="['/patients', p.id]" [queryParams]="{ tab: 'dental-card' }" [matTooltip]="'patients.viewDentalCard' | translate" [attr.aria-label]="'patients.viewDentalCard' | translate">
             <mat-icon>assignment</mat-icon>
           </a>
           @if (Permission.PatientsDelete | hasPermission) {

@@ -1303,3 +1303,13 @@ mat-error,
 .mat-mdc-form-field-error {
   color: var(--color-error) !important;
 }
+
+// Fullscreen document preview dialog — remove container padding and let the
+// component fill the whole viewport.
+.fullscreen-preview-dialog {
+  .mat-mdc-dialog-surface {
+    border-radius: 0;
+    padding: 0;
+    overflow: hidden;
+  }
+}

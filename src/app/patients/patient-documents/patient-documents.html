@@ -1,0 +1,162 @@
+<div class="documents">
+
+  @if (Permission.PatientDocumentsCreate | hasPermission) {
+    <div
+      class="upload-zone"
+      [class.upload-zone--active]="dragging()"
+      (dragover)="onDragOver($event)"
+      (dragleave)="onDragLeave($event)"
+      (drop)="onDrop($event)"
+    >
+      @if (!pendingFile()) {
+        <mat-icon class="upload-zone__icon">cloud_upload</mat-icon>
+        <p class="upload-zone__text">{{ 'patient.documents.dropHere' | translate }}</p>
+      } @else {
+        <div class="upload-zone__file">
+          <mat-icon>description</mat-icon>
+          <div class="upload-zone__file-meta">
+            <span class="upload-zone__file-name">{{ pendingFile()!.name }}</span>
+            <span class="upload-zone__file-size">{{ formatBytes(pendingFile()!.size) }} · {{ typeLabel(pendingFile()!.type) }}</span>
+          </div>
+          <button matIconButton type="button" (click)="clearPendingFile()" [attr.aria-label]="'common.cancel' | translate" [matTooltip]="'common.cancel' | translate">
+            <mat-icon>close</mat-icon>
+          </button>
+        </div>
+        <div class="upload-zone__form">
+          <label class="upload-zone__field">
+            <span class="upload-zone__label">{{ 'patient.documents.description' | translate }}</span>
+            <input
+              type="text"
+              class="upload-zone__description"
+              [value]="description()"
+              (input)="description.set($any($event.target).value)"
+              [placeholder]="'patient.documents.descriptionPlaceholder' | translate"
+              [disabled]="uploading()"
+              maxlength="500"
+            />
+          </label>
+          <button
+            matButton="elevated"
+            color="primary"
+            type="button"
+            (click)="upload()"
+            [disabled]="uploading()"
+          >
+            <mat-icon>upload</mat-icon>
+            {{ 'patient.documents.uploadButton' | translate }}
+          </button>
+        </div>
+      }
+    </div>
+  }
+
+  <div class="docs-layout">
+
+    <div class="docs-table-col">
+      <table mat-table [dataSource]="dataSource" class="docs-table">
+
+        <ng-container matColumnDef="name">
+          <th mat-header-cell *matHeaderCellDef>{{ 'patient.documents.name' | translate }}</th>
+          <td mat-cell *matCellDef="let d">
+            <div class="doc-name-cell">
+              <mat-icon class="doc-name-cell__icon">{{ isImage(d.contentType) ? 'image' : 'picture_as_pdf' }}</mat-icon>
+              <span class="doc-name-cell__text">{{ d.filename }}</span>
+            </div>
+          </td>
+        </ng-container>
+
+        <ng-container matColumnDef="type">
+          <th mat-header-cell *matHeaderCellDef>{{ 'patient.documents.type' | translate }}</th>
+          <td mat-cell *matCellDef="let d">{{ typeLabel(d.contentType) }}</td>
+        </ng-container>
+
+        <ng-container matColumnDef="size">
+          <th mat-header-cell *matHeaderCellDef>{{ 'patient.documents.size' | translate }}</th>
+          <td mat-cell *matCellDef="let d">{{ formatBytes(d.sizeBytes) }}</td>
+        </ng-container>
+
+        <ng-container matColumnDef="uploadedAt">
+          <th mat-header-cell *matHeaderCellDef>{{ 'patient.documents.uploadedAt' | translate }}</th>
+          <td mat-cell *matCellDef="let d">{{ d.uploadedAt | localizedDate:'mediumDate' }}</td>
+        </ng-container>
+
+        <ng-container matColumnDef="actions">
+          <th mat-header-cell *matHeaderCellDef>{{ 'patient.documents.actions' | translate }}</th>
+          <td mat-cell *matCellDef="let d" class="actions-cell">
+            <button matIconButton type="button" class="action-btn" (click)="openPreview(d); $event.stopPropagation()" [matTooltip]="'patient.documents.preview' | translate" [attr.aria-label]="'patient.documents.preview' | translate">
+              <mat-icon>visibility</mat-icon>
+            </button>
+            @if (Permission.PatientDocumentsDelete | hasPermission) {
+              <button matIconButton type="button" class="action-btn action-btn--danger" (click)="deleteDocument(d); $event.stopPropagation()" [matTooltip]="'patient.documents.delete' | translate" [attr.aria-label]="'patient.documents.delete' | translate">
+                <mat-icon>delete</mat-icon>
+              </button>
+            }
+          </td>
+        </ng-container>
+
+        <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+        <tr
+          mat-row
+          *matRowDef="let row; columns: displayedColumns"
+          class="doc-row"
+          [class.doc-row--selected]="selectedDocument()?.id === row.id"
+          (click)="selectDocument(row)"
+        ></tr>
+
+        <tr class="mat-mdc-no-data-row" *matNoDataRow>
+          <td [colSpan]="displayedColumns.length">
+            <div class="empty-state">
+              <p class="empty-state-text">{{ 'patient.documents.noDocuments' | translate }}</p>
+            </div>
+          </td>
+        </tr>
+
+      </table>
+    </div>
+
+    <div class="docs-info-col">
+      @if (selectedDocument(); as d) {
+        <div class="doc-info">
+          <button type="button" class="doc-info__thumb doc-info__thumb--clickable" (click)="openPreview(d)" [attr.aria-label]="'patient.documents.preview' | translate" [matTooltip]="'patient.documents.preview' | translate">
+            @if (isImage(d.contentType)) {
+              <img [src]="d.signedUrl" [alt]="d.filename" class="doc-info__thumb-img" />
+            } @else {
+              <div class="doc-info__thumb-placeholder">
+                <mat-icon>picture_as_pdf</mat-icon>
+                <span>{{ typeLabel(d.contentType) }}</span>
+              </div>
+            }
+            <div class="doc-info__thumb-overlay">
+              <mat-icon>fullscreen</mat-icon>
+            </div>
+          </button>
+
+          <dl class="doc-info__meta">
+            @if (d.description) {
+              <dt>{{ 'patient.documents.description' | translate }}</dt>
+              <dd>{{ d.description }}</dd>
+            }
+            <dt>{{ 'patient.documents.uploadedAt' | translate }}</dt>
+            <dd>{{ d.uploadedAt | localizedDate:'medium' }}</dd>
+            <dt>{{ 'patient.documents.uploadedBy' | translate }}</dt>
+            <dd>{{ getUploadedByName(d) }}</dd>
+          </dl>
+
+          <div class="doc-info__actions">
+            <a matButton="outlined" [href]="d.signedUrl" target="_blank" rel="noopener" download>
+              <mat-icon>download</mat-icon>
+              {{ 'patient.documents.download' | translate }}
+            </a>
+          </div>
+        </div>
+      } @else {
+        <div class="doc-info doc-info--empty">
+          <mat-icon class="doc-info__empty-icon">description</mat-icon>
+          <p class="doc-info__empty-text">{{ 'patient.documents.selectHint' | translate }}</p>
+        </div>
+      }
+    </div>
+
+  </div>
+
+</div>
