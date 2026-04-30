@@ -330,5 +330,6 @@
   "toast.treatmentUpdated": "Treatment updated successfully",
   "toast.treatmentDeleted": "Treatment deleted successfully",
   "toast.inviteResent": "Invite resent successfully",
+  "toast.importSuccess": "Import completed successfully",
   "toast.unknownError": "An unexpected error occurred"
 }

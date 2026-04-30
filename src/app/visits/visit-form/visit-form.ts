@@ -50,7 +50,7 @@ export default class VisitForm implements OnInit, OnDestroy {
   private toastService = inject(ToastService);
 
   get patients() { return this.patientService.getAll(); }
-  get doctors() { return this.userService.getByRole(UserRole.Doctor, UserRole.Nurse); }
+  get doctors() { return this.userService.getByRole(UserRole.Doctor); }
   get diagnoses() { return this.diagnosisService.getAll(); }
   get treatments() { return this.treatmentService.getAll(); }
 
