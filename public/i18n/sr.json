@@ -80,7 +80,7 @@
   "patient.tabs.visits": "Posete",
   "patient.tabs.documents": "Dokumenti",
   "patient.tabs.dentalCard": "Karton",
-  "patient.documents.dropHere": "Prevuci i otpusti fajl ovde",
+  "patient.documents.dropHere": "Prevuci i otpusti fajl ovde, ili klikni za izbor",
   "patient.documents.description": "Opis",
   "patient.documents.descriptionPlaceholder": "Opcionalna napomena o dokumentu",
   "patient.documents.uploadButton": "Otpremi",

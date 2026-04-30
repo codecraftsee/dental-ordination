@@ -79,7 +79,7 @@
   "patient.tabs.visits": "Visits",
   "patient.tabs.documents": "Documents",
   "patient.tabs.dentalCard": "Dental Card",
-  "patient.documents.dropHere": "Drag and drop a file here",
+  "patient.documents.dropHere": "Drag and drop a file here, or click to browse",
   "patient.documents.description": "Description",
   "patient.documents.descriptionPlaceholder": "Optional note about this document",
   "patient.documents.uploadButton": "Upload",

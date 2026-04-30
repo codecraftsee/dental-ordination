@@ -20,6 +20,31 @@
   background: var(--color-primary-50, rgba(81, 86, 190, 0.06));
 }
 
+.upload-zone__empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  cursor: pointer;
+  border-radius: var(--radius-sm);
+
+  &:focus-within {
+    outline: 2px solid var(--color-primary);
+    outline-offset: 4px;
+  }
+}
+
+.upload-zone__input {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
 .upload-zone__icon {
   font-size: 40px;
   width: 40px;

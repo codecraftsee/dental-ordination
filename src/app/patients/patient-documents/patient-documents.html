@@ -9,8 +9,16 @@
       (drop)="onDrop($event)"
     >
       @if (!pendingFile()) {
-        <mat-icon class="upload-zone__icon">cloud_upload</mat-icon>
-        <p class="upload-zone__text">{{ 'patient.documents.dropHere' | translate }}</p>
+        <label class="upload-zone__empty">
+          <input
+            type="file"
+            class="upload-zone__input"
+            accept="image/jpeg,image/png,image/webp,application/pdf"
+            (change)="onFilesSelected($event)"
+          />
+          <mat-icon class="upload-zone__icon">cloud_upload</mat-icon>
+          <p class="upload-zone__text">{{ 'patient.documents.dropHere' | translate }}</p>
+        </label>
       } @else {
         <div class="upload-zone__file">
           <mat-icon>description</mat-icon>
