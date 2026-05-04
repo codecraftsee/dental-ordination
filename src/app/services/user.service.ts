@@ -88,6 +88,10 @@ export class UserService {
     return results;
   }
 
+  isActive(id: string): boolean {
+    return this.getById(id) !== undefined;
+  }
+
   isLoaded(): boolean {
     return this.loaded;
   }

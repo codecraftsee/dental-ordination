@@ -64,8 +64,18 @@ export default class VisitDetail implements OnInit {
     return p ? `${p.firstName} ${p.lastName}` : '';
   }
 
-  getDoctorName(id: string): string {
-    return this.userService.getDisplayName(id);
+  getDoctorName(v: Visit): string {
+    return this.userService.getDisplayName(v.doctorId) || this.fallbackDoctorName(v);
+  }
+
+  isDoctorActive(id: string): boolean {
+    return this.userService.isActive(id);
+  }
+
+  private fallbackDoctorName(v: Visit): string {
+    if (!v.doctor) return '';
+    const name = [v.doctor.firstName, v.doctor.lastName].filter(Boolean).join(' ');
+    return `Dr. ${name}`;
   }
 
   getDiagnosisName(id: string | undefined): string {

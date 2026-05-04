@@ -1,7 +1,14 @@
+export interface VisitDoctor {
+  id: string;
+  firstName?: string;
+  lastName?: string;
+}
+
 export interface Visit {
   id: string;
   patientId: string;
   doctorId: string;
+  doctor?: VisitDoctor;
   date: string;
   toothNumber: number | null;
   diagnosisId?: string;
