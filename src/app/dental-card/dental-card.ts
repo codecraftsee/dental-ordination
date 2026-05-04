@@ -1,5 +1,4 @@
-import { ChangeDetectionStrategy, Component, inject, signal, computed, OnInit } from '@angular/core';
-import { ActivatedRoute, Router, RouterLink } from '@angular/router';
+import { ChangeDetectionStrategy, Component, computed, effect, inject, input, signal, untracked } from '@angular/core';
 import { forkJoin } from 'rxjs';
 import { TranslatePipe } from '../shared/translate.pipe';
 import { LocalizedDatePipe } from '../shared/localized-date.pipe';
@@ -21,20 +20,20 @@ import * as XLSX from 'xlsx';
 
 @Component({
   selector: 'app-dental-card',
-  imports: [RouterLink, TranslatePipe, LocalizedDatePipe, CurrencyFormatPipe, MatButtonModule, MatIconModule, MatTableModule, MatCardModule, BookTableComponent],
+  imports: [TranslatePipe, LocalizedDatePipe, CurrencyFormatPipe, MatButtonModule, MatIconModule, MatTableModule, MatCardModule, BookTableComponent],
   templateUrl: './dental-card.html',
   styleUrl: './dental-card.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export default class DentalCard implements OnInit {
-  private route = inject(ActivatedRoute);
-  private router = inject(Router);
+export default class DentalCard {
   private translateService = inject(TranslateService);
   private patientService = inject(PatientService);
   private visitService = inject(VisitService);
   private userService = inject(UserService);
   private diagnosisService = inject(DiagnosisService);
   private treatmentService = inject(TreatmentService);
+
+  patientId = input.required<string>();
 
   patient = signal<Patient | undefined>(undefined);
   visits = signal<Visit[]>([]);
@@ -46,27 +45,25 @@ export default class DentalCard implements OnInit {
     return this.visits().reduce((sum, v) => sum + (Number(v.price) || 0), 0);
   });
 
-  ngOnInit(): void {
-    const id = this.route.snapshot.paramMap.get('id');
-    if (!id) {
-      this.router.navigate(['/patients']);
-      return;
-    }
+  constructor() {
+    effect(() => {
+      const id = this.patientId();
+      untracked(() => this.loadData(id));
+    });
+  }
 
+  private loadData(id: string): void {
     forkJoin([
       this.patientService.loadById(id),
       this.visitService.loadAll({ patientId: id }),
       this.userService.loadAll(),
       this.diagnosisService.loadAll(),
       this.treatmentService.loadAll(),
-    ]).subscribe({
-      next: ([patient]) => {
-        this.patient.set(patient);
-        const sorted = this.visitService.getByPatientId(id).sort((a, b) => a.date.localeCompare(b.date));
-        this.visits.set(sorted);
-        this.dataSource.data = sorted;
-      },
-      error: () => this.router.navigate(['/patients']),
+    ]).subscribe(([patient]) => {
+      this.patient.set(patient);
+      const sorted = this.visitService.getByPatientId(id).sort((a, b) => a.date.localeCompare(b.date));
+      this.visits.set(sorted);
+      this.dataSource.data = sorted;
     });
   }
 

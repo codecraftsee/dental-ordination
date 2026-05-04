@@ -17,8 +17,11 @@ export class ToastService {
     });
   }
 
-  error(error: unknown): void {
-    const message = this.extractErrorMessage(error);
+  error(keyOrError: unknown): void {
+    const message =
+      typeof keyOrError === 'string'
+        ? this.translateService.instant(keyOrError)
+        : this.extractErrorMessage(keyOrError);
     this.snackBar.open(message, '', {
       duration: 5000,
       panelClass: 'toast-error',

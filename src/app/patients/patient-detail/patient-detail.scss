@@ -327,3 +327,17 @@ mat-card.stat-card--with-action {
     }
   }
 }
+
+// ── Tabs ──────────────────────────────────────────────────────────────────────
+
+.patient-tabs {
+  background: var(--color-surface);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-1);
+  overflow: hidden;
+}
+
+.tab-content {
+  padding: var(--spacing-lg);
+}
+

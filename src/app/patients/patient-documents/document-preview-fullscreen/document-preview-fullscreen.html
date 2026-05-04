@@ -1,0 +1,30 @@
+<div class="preview">
+  <header class="preview__header">
+    <h3 class="preview__title">{{ doc.filename }}</h3>
+    <div class="preview__actions">
+      <a matIconButton [href]="doc.signedUrl" target="_blank" rel="noopener" download [matTooltip]="'patient.documents.download' | translate" [attr.aria-label]="'patient.documents.download' | translate">
+        <mat-icon>download</mat-icon>
+      </a>
+      <button matIconButton type="button" (click)="close()" [matTooltip]="'common.close' | translate" [attr.aria-label]="'common.close' | translate" autofocus>
+        <mat-icon>close</mat-icon>
+      </button>
+    </div>
+  </header>
+
+  <div class="preview__body">
+    @if (isImage) {
+      <img [src]="doc.signedUrl" [alt]="doc.filename" class="preview__image" />
+    } @else if (isPdf) {
+      <iframe [src]="safeUrl" [title]="doc.filename" class="preview__iframe"></iframe>
+    } @else {
+      <div class="preview__fallback">
+        <mat-icon>description</mat-icon>
+        <p>{{ 'patient.documents.previewUnavailable' | translate }}</p>
+        <a matButton="elevated" color="primary" [href]="doc.signedUrl" target="_blank" rel="noopener" download>
+          <mat-icon>download</mat-icon>
+          {{ 'patient.documents.download' | translate }}
+        </a>
+      </div>
+    }
+  </div>
+</div>

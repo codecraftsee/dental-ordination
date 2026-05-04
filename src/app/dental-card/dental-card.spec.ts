@@ -2,7 +2,6 @@ import { TestBed } from '@angular/core/testing';
 import { provideHttpClient } from '@angular/common/http';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { provideRouter } from '@angular/router';
-import { ActivatedRoute } from '@angular/router';
 import DentalCard from './dental-card';
 
 describe('DentalCard', () => {
@@ -10,14 +9,11 @@ describe('DentalCard', () => {
 
   beforeEach(() => {
     TestBed.configureTestingModule({
-      providers: [
-        provideHttpClient(),
-        provideHttpClientTesting(),
-        provideRouter([]),
-        { provide: ActivatedRoute, useValue: { snapshot: { paramMap: { get: () => 'p1' } } } },
-      ],
+      providers: [provideHttpClient(), provideHttpClientTesting(), provideRouter([])],
     });
-    component = TestBed.createComponent(DentalCard).componentInstance;
+    const fixture = TestBed.createComponent(DentalCard);
+    fixture.componentRef.setInput('patientId', 'p1');
+    component = fixture.componentInstance;
   });
 
   it('displayedColumns includes paid column', () => {
