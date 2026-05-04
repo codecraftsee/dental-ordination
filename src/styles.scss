@@ -1313,3 +1313,49 @@ mat-error,
     overflow: hidden;
   }
 }
+
+// ── Scrollbars ───────────────────────────────────────────────────────────────
+
+:root {
+  --scrollbar-track: transparent;
+  --scrollbar-thumb: rgba(81, 86, 190, 0.35);
+  --scrollbar-thumb-hover: rgba(81, 86, 190, 0.6);
+}
+
+[data-theme='dark'] {
+  --scrollbar-thumb: rgba(255, 255, 255, 0.18);
+  --scrollbar-thumb-hover: rgba(255, 255, 255, 0.32);
+}
+
+// Firefox
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--scrollbar-thumb) var(--scrollbar-track);
+}
+
+// WebKit / Chromium
+*::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+*::-webkit-scrollbar-track {
+  background: var(--scrollbar-track);
+}
+
+*::-webkit-scrollbar-thumb {
+  background: var(--scrollbar-thumb);
+  border-radius: 8px;
+  border: 2px solid var(--color-background);
+  background-clip: padding-box;
+  transition: background 0.2s;
+}
+
+*::-webkit-scrollbar-thumb:hover {
+  background: var(--scrollbar-thumb-hover);
+  background-clip: padding-box;
+}
+
+*::-webkit-scrollbar-corner {
+  background: transparent;
+}

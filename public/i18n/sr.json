@@ -358,5 +358,6 @@
   "toast.treatmentUpdated": "Terapija je uspešno ažurirana",
   "toast.treatmentDeleted": "Terapija je uspešno obrisana",
   "toast.inviteResent": "Pozivnica je uspešno ponovo poslata",
+  "toast.importSuccess": "Uvoz uspešno završen",
   "toast.unknownError": "Došlo je do neočekivane greške"
 }
