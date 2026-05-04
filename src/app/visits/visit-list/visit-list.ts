@@ -105,7 +105,7 @@ export default class VisitList implements OnInit {
 
     this.dataSource.sortingDataAccessor = (item: Visit, header: string) => {
       if (header === 'patient') return this.patientNames().get(item.patientId) ?? '';
-      if (header === 'doctor') return this.doctorNames().get(item.doctorId) ?? '';
+      if (header === 'doctor') return this.getDoctorName(item);
       return (item as unknown as Record<string, unknown>)[header] as string | number ?? '';
     };
   }
@@ -131,8 +131,18 @@ export default class VisitList implements OnInit {
     return this.patientNames().get(id) || '';
   }
 
-  getDoctorName(id: string): string {
-    return this.doctorNames().get(id) || '';
+  getDoctorName(v: Visit): string {
+    return this.doctorNames().get(v.doctorId) || this.fallbackDoctorName(v);
+  }
+
+  isDoctorActive(id: string): boolean {
+    return this.userService.isActive(id);
+  }
+
+  private fallbackDoctorName(v: Visit): string {
+    if (!v.doctor) return '';
+    const name = [v.doctor.firstName, v.doctor.lastName].filter(Boolean).join(' ');
+    return `Dr. ${name}`;
   }
 
   getDiagnosisName(id: string | undefined): string {

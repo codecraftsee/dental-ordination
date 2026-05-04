@@ -72,7 +72,11 @@
     <ng-container matColumnDef="doctor">
       <th mat-header-cell *matHeaderCellDef mat-sort-header>{{ 'visits.doctor' | translate }}</th>
       <td mat-cell *matCellDef="let v">
-        <a [routerLink]="['/staff', v.doctorId]">{{ getDoctorName(v.doctorId) }}</a>
+        @if (isDoctorActive(v.doctorId)) {
+          <a [routerLink]="['/staff', v.doctorId]">{{ getDoctorName(v) }}</a>
+        } @else {
+          <span>{{ getDoctorName(v) }}</span>
+        }
       </td>
     </ng-container>
 
