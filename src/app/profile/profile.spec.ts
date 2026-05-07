@@ -8,14 +8,45 @@ import { vi } from 'vitest';
 import Profile from './profile';
 import { TranslateService } from '../services/translate.service';
 import { AuthService } from '../services/auth.service';
+import { UserService } from '../services/user.service';
+import { ToastService } from '../services/toast.service';
+import { Specialization, UserRole } from '../models/user.model';
+
+const mockUser = {
+  id: 'user-1',
+  email: 'test@example.com',
+  firstName: 'John',
+  lastName: 'Doe',
+  role: UserRole.Doctor,
+  phone: '+1234567890',
+  specialization: Specialization.GeneralDentistry,
+  licenseNumber: 'LIC-123',
+  isActive: true,
+  mustSetPassword: false,
+  permissions: [],
+  createdAt: '2024-01-01',
+  updatedAt: '2024-01-01',
+};
 
 describe('Profile', () => {
   let component: Profile;
   let fixture: ComponentFixture<Profile>;
-  let authService: { changePassword: ReturnType<typeof vi.fn> };
+  let authService: {
+    changePassword: ReturnType<typeof vi.fn>;
+    loadCurrentUser: ReturnType<typeof vi.fn>;
+    user: ReturnType<typeof signal>;
+  };
+  let userService: { update: ReturnType<typeof vi.fn> };
+  let toastService: { success: ReturnType<typeof vi.fn>; error: ReturnType<typeof vi.fn> };
 
   beforeEach(async () => {
-    authService = { changePassword: vi.fn().mockReturnValue(of(undefined)) };
+    authService = {
+      changePassword: vi.fn().mockReturnValue(of(undefined)),
+      loadCurrentUser: vi.fn().mockReturnValue(of(mockUser)),
+      user: signal(mockUser),
+    };
+    userService = { update: vi.fn().mockReturnValue(of(mockUser)) };
+    toastService = { success: vi.fn(), error: vi.fn() };
 
     await TestBed.configureTestingModule({
       imports: [Profile],
@@ -33,6 +64,8 @@ describe('Profile', () => {
           },
         },
         { provide: AuthService, useValue: authService },
+        { provide: UserService, useValue: userService },
+        { provide: ToastService, useValue: toastService },
       ],
     }).compileComponents();
 
@@ -44,6 +77,62 @@ describe('Profile', () => {
   it('creates the component', () => {
     expect(component).toBeTruthy();
   });
+
+  // ── Personal info form ──────────────────────────────────────────────────────
+
+  it('infoForm is pre-populated from the current user', () => {
+    expect(component.infoForm.value.firstName).toBe('John');
+    expect(component.infoForm.value.lastName).toBe('Doe');
+    expect(component.infoForm.value.phone).toBe('+1234567890');
+  });
+
+  it('infoForm is invalid when firstName is empty', () => {
+    component.infoForm.patchValue({ firstName: '' });
+    expect(component.infoForm.invalid).toBe(true);
+  });
+
+  it('infoForm is valid when required fields are filled', () => {
+    component.infoForm.patchValue({ firstName: 'Jane', lastName: 'Smith' });
+    expect(component.infoForm.valid).toBe(true);
+  });
+
+  it('submitPersonalInfo marks all controls as touched when form is invalid', () => {
+    component.infoForm.patchValue({ firstName: '' });
+    component.submitPersonalInfo();
+    expect(component.firstName.touched).toBe(true);
+  });
+
+  it('submitPersonalInfo does not call userService when form is invalid', () => {
+    component.infoForm.patchValue({ firstName: '' });
+    component.submitPersonalInfo();
+    expect(userService.update).not.toHaveBeenCalled();
+  });
+
+  it('submitPersonalInfo calls userService.update with form values', () => {
+    component.infoForm.patchValue({ firstName: 'Jane', lastName: 'Smith', phone: '+987' });
+    component.submitPersonalInfo();
+    expect(userService.update).toHaveBeenCalledWith(
+      'user-1',
+      expect.objectContaining({ firstName: 'Jane', lastName: 'Smith', phone: '+987' }),
+    );
+  });
+
+  it('submitPersonalInfo shows success toast and reloads user on success', () => {
+    component.submitPersonalInfo();
+    expect(toastService.success).toHaveBeenCalledWith('profile.updateInfoSuccess');
+    expect(component.infoLoading()).toBe(false);
+    expect(authService.loadCurrentUser).toHaveBeenCalled();
+  });
+
+  it('submitPersonalInfo shows error toast on failure', () => {
+    const err = new Error('fail');
+    userService.update.mockReturnValue(throwError(() => err));
+    component.submitPersonalInfo();
+    expect(toastService.error).toHaveBeenCalledWith(err);
+    expect(component.infoLoading()).toBe(false);
+  });
+
+  // ── Password form ───────────────────────────────────────────────────────────
 
   it('passwordForm is invalid when empty', () => {
     expect(component.passwordForm.invalid).toBe(true);
@@ -79,22 +168,21 @@ describe('Profile', () => {
     });
   });
 
-  it('submitPasswordChange sets success message and resets form on success', () => {
+  it('submitPasswordChange shows success toast and resets form on success', () => {
     component.passwordForm.setValue({ currentPassword: 'old', newPassword: 'newPass1', confirmPassword: 'newPass1' });
     component.submitPasswordChange();
-    expect(component.pwMessage()).toBe('profile.changePasswordSuccess');
-    expect(component.pwIsError()).toBe(false);
+    expect(toastService.success).toHaveBeenCalledWith('profile.changePasswordSuccess');
     expect(component.pwLoading()).toBe(false);
     expect(component.passwordForm.pristine).toBe(true);
     expect(component.passwordForm.value).toEqual({ currentPassword: '', newPassword: '', confirmPassword: '' });
   });
 
-  it('submitPasswordChange sets error message on failure', () => {
-    authService.changePassword.mockReturnValue(throwError(() => new Error('fail')));
+  it('submitPasswordChange shows error toast on failure', () => {
+    const err = new Error('fail');
+    authService.changePassword.mockReturnValue(throwError(() => err));
     component.passwordForm.setValue({ currentPassword: 'wrong', newPassword: 'newPass1', confirmPassword: 'newPass1' });
     component.submitPasswordChange();
-    expect(component.pwMessage()).toBe('profile.changePasswordError');
-    expect(component.pwIsError()).toBe(true);
+    expect(toastService.error).toHaveBeenCalledWith(err);
     expect(component.pwLoading()).toBe(false);
   });
 });
