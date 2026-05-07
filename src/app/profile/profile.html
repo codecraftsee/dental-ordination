@@ -3,6 +3,86 @@
     <h1 class="section-title">{{ 'profile.title' | translate }}</h1>
   </div>
 
+  <!-- Personal Information -->
+  <div class="account-section">
+    <div class="account-section-header">
+      <mat-icon class="account-icon">person</mat-icon>
+      <div>
+        <h2 class="account-title">{{ 'profile.personalInfo' | translate }}</h2>
+        <p class="account-desc">{{ 'profile.personalInfoDesc' | translate }}</p>
+      </div>
+    </div>
+
+    <mat-card>
+      <mat-card-content>
+        <div class="user-identity">
+          <div class="user-avatar" aria-hidden="true">{{ initials() }}</div>
+          <div class="user-identity-details">
+            <span class="user-email">{{ user()?.email }}</span>
+            @if (roleKey()) {
+              <span class="user-role-badge">{{ roleKey() | translate }}</span>
+            }
+          </div>
+        </div>
+
+        <form [formGroup]="infoForm" (ngSubmit)="submitPersonalInfo()" class="info-form">
+          <div class="form-row">
+            <mat-form-field appearance="fill">
+              <mat-label>{{ 'profile.firstName' | translate }}</mat-label>
+              <input matInput type="text" formControlName="firstName" autocomplete="given-name" />
+              @if (firstName.errors?.['required'] && firstName.touched) {
+                <mat-error>{{ 'common.required' | translate }}</mat-error>
+              }
+            </mat-form-field>
+            <mat-form-field appearance="fill">
+              <mat-label>{{ 'profile.lastName' | translate }}</mat-label>
+              <input matInput type="text" formControlName="lastName" autocomplete="family-name" />
+              @if (lastName.errors?.['required'] && lastName.touched) {
+                <mat-error>{{ 'common.required' | translate }}</mat-error>
+              }
+            </mat-form-field>
+          </div>
+
+          <mat-form-field appearance="fill" class="phone-field">
+            <mat-label>{{ 'profile.phone' | translate }}</mat-label>
+            <mat-icon matPrefix>phone</mat-icon>
+            <input matInput type="tel" formControlName="phone" autocomplete="tel" />
+          </mat-form-field>
+
+          @if (isDoctor()) {
+            <div class="form-row">
+              <mat-form-field appearance="fill">
+                <mat-label>{{ 'profile.specialization' | translate }}</mat-label>
+                <mat-select formControlName="specialization">
+                  @for (spec of specializations; track spec) {
+                    <mat-option [value]="spec">{{ 'specialization.' + spec | translate }}</mat-option>
+                  }
+                </mat-select>
+              </mat-form-field>
+              <mat-form-field appearance="fill">
+                <mat-label>{{ 'profile.licenseNumber' | translate }}</mat-label>
+                <mat-icon matPrefix>badge</mat-icon>
+                <input matInput type="text" formControlName="licenseNumber" />
+              </mat-form-field>
+            </div>
+          }
+
+          <div class="form-submit-row">
+            <button type="submit" matButton="elevated" color="primary" [disabled]="infoLoading()">
+              <mat-icon>save</mat-icon>
+              @if (infoLoading()) {
+                {{ 'common.saving' | translate }}
+              } @else {
+                {{ 'profile.updateInfoSubmit' | translate }}
+              }
+            </button>
+          </div>
+        </form>
+      </mat-card-content>
+    </mat-card>
+  </div>
+
+  <!-- Change Password -->
   <div class="account-section">
     <div class="account-section-header">
       <mat-icon class="account-icon">lock</mat-icon>
@@ -52,7 +132,7 @@
             }
           </mat-form-field>
 
-          <div class="password-form-actions">
+          <div class="form-submit-row">
             <button type="submit" matButton="elevated" color="primary" [disabled]="pwLoading()">
               <mat-icon>lock_reset</mat-icon>
               @if (pwLoading()) {
@@ -61,18 +141,6 @@
                 {{ 'profile.changePasswordSubmit' | translate }}
               }
             </button>
-
-            @if (pwMessage()) {
-              <div
-                class="action-message"
-                [class.action-message--error]="pwIsError()"
-                role="status"
-                aria-atomic="true"
-                [attr.aria-live]="pwIsError() ? 'assertive' : 'polite'"
-              >
-                {{ pwMessage() | translate }}
-              </div>
-            }
           </div>
         </form>
       </mat-card-content>
