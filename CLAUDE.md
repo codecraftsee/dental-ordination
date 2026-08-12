@@ -17,6 +17,7 @@
 ## Scripts
 - `npm start` — dev server (`ng serve`)
 - `npm test` — run tests (`ng test` via Vitest)
+- `npm run lint` — ESLint (`ng lint`) over `src/**/*.ts` and `src/**/*.html`
 - `npm run build` — production build
 
 ---
@@ -116,6 +117,27 @@ Components use flat names without `.component` suffix:
 - Test file lives next to source: `name.spec.ts`
 - Use Vitest + jsdom
 - Test behavior, not implementation details
+
+---
+
+## Linting
+
+`eslint.config.js` (flat config) wires `angular-eslint` + `typescript-eslint`.
+CI runs `npm run lint` as part of `Lint, test and build`, so a lint error fails
+the build and blocks the PR.
+
+Enabled beyond the recommended presets:
+- `templateAccessibility` — the template a11y rules, matching the mandatory
+  AXE/WCAG AA requirement above
+- `@typescript-eslint/no-explicit-any` raised to **error**, enforcing the `any`
+  ban below (the preset only warns, and a warning would not fail CI)
+- `no-unused-vars` with `ignoreRestSiblings` — `const { email: _email, ...rest }`
+  is how the forms drop a field the update endpoint rejects
+
+Suppress a rule only where the code is deliberately right and the rule's
+heuristic is wrong, with `// eslint-disable-next-line <rule>` on the line
+immediately above and a comment saying why. Unused disables are reported, so
+stale ones surface on their own.
 
 ---
 

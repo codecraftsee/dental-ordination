@@ -26,8 +26,16 @@
           <mat-error>{{ 'common.required' | translate }}</mat-error>
         </mat-form-field>
         <div class="form-group">
-          <label class="form-label">{{ 'patient.gender' | translate }}</label>
-          <mat-radio-group formControlName="gender" class="radio-group">
+          <!-- A <label> cannot be associated with a radio *group*; mat-radio-group
+               renders role="radiogroup", so it is labelled by id reference instead. -->
+          <span class="form-label" id="patient-gender-label">{{
+            'patient.gender' | translate
+          }}</span>
+          <mat-radio-group
+            formControlName="gender"
+            class="radio-group"
+            aria-labelledby="patient-gender-label"
+          >
             <mat-radio-button value="male">{{ 'patient.gender.male' | translate }}</mat-radio-button>
             <mat-radio-button value="female">{{ 'patient.gender.female' | translate }}</mat-radio-button>
           </mat-radio-group>

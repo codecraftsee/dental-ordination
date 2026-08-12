@@ -134,7 +134,11 @@ export class PatientDocuments {
       maxWidth: '100vw',
       maxHeight: '100vh',
       panelClass: 'fullscreen-preview-dialog',
-      autoFocus: false,
+      // Land focus on the close button, as the template's `autofocus` attribute used
+      // to. Doing it through the dialog config instead runs after the open animation
+      // and keeps focus inside the trap — a native autofocus on an element the CDK
+      // injects is unreliable, and the attribute trips template/no-autofocus.
+      autoFocus: '.preview__actions button',
     });
   }
 

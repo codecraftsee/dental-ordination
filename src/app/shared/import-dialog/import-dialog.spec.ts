@@ -6,7 +6,7 @@ import { vi } from 'vitest';
 import { ImportDialog } from './import-dialog';
 import { TranslateService } from '../../services/translate.service';
 import { UserService } from '../../services/user.service';
-import { Permission, User, UserRole } from '../../models/user.model';
+import { User, UserRole } from '../../models/user.model';
 
 describe('ImportDialog', () => {
   let component: ImportDialog;
