@@ -45,15 +45,30 @@ describe('App', () => {
     expect(component).toBeTruthy();
   });
 
-  it('sidenavOpen defaults to true on desktop (wide window)', () => {
-    Object.defineProperty(window, 'innerWidth', { writable: true, value: 1200 });
-    expect(component.sidenavOpen()).toBe(true);
+  it('sidenavOpen starts closed — it is the mobile overlay, not the desktop sidebar', () => {
+    expect(component.sidenavOpen()).toBe(false);
   });
 
-  it('toggleSidenav flips sidenavOpen', () => {
-    const before = component.sidenavOpen();
+  it('toggleSidenav opens then closes the overlay on mobile', () => {
+    component.onResize({ target: { innerWidth: 500 } } as unknown as UIEvent);
+
     component.toggleSidenav();
-    expect(component.sidenavOpen()).toBe(!before);
+    expect(component.sidenavOpen()).toBe(true);
+
+    component.toggleSidenav();
+    expect(component.sidenavOpen()).toBe(false);
+  });
+
+  it('toggleSidenav collapses the sidebar on desktop and leaves the overlay alone', () => {
+    component.onResize({ target: { innerWidth: 1024 } } as unknown as UIEvent);
+
+    // Relative to the current value: loadCollapsedState reads localStorage,
+    // which earlier toggles in this file have already written to.
+    const before = component.sidebarCollapsed();
+    component.toggleSidenav();
+
+    expect(component.sidebarCollapsed()).toBe(!before);
+    expect(component.sidenavOpen()).toBe(false);
   });
 
   it('toggleSidenav twice returns to original state', () => {
