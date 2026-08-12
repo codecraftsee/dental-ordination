@@ -1,0 +1,70 @@
+name: CI
+
+# The branch flow is develop -> preprod -> master. All three are gated by this
+# same workflow; only what happens *after* it differs (preprod deploys, master
+# will eventually cut a prod release).
+on:
+  pull_request:
+    branches: [develop, preprod, master]
+  push:
+    # preprod is deliberately absent. deploy-preprod.yml calls this workflow as
+    # its first job, so a push here would run the whole suite twice for one
+    # commit. Pull requests *into* preprod still run it directly.
+    branches: [develop, master]
+  # Lets deploy-preprod.yml reuse these exact jobs instead of copying them, so
+  # the checks gating a deploy can never drift from the checks gating a PR.
+  workflow_call:
+
+# A newer push to the same branch cancels the older run — no value in finishing
+# a build whose commit has already been superseded.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  # One job, unlike the API repo's split into `test` and `docker`. That split
+  # earns its keep there because pytest and a Dockerfile are independent
+  # toolchains that fail for unrelated reasons. Here the unit-test builder
+  # compiles the application exactly as the production build does, so a broken
+  # compile fails both steps identically — a second job would spend another
+  # `npm ci` to re-report the same error.
+  build:
+    name: Lint, test and build
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Lint
+        # No linter is configured in this repo — there is no eslint dependency
+        # and no eslint config, and bare `ng lint` would try to install one
+        # interactively. This step reports that plainly instead of silently
+        # passing, and starts working the moment a `lint` script is added.
+        run: |
+          if node -e "process.exit(require('./package.json').scripts?.lint ? 0 : 1)"; then
+            npm run lint
+          else
+            echo "::notice::No lint script configured; skipping. Add a \"lint\" script to package.json to enable this step."
+          fi
+
+      - name: Test
+        # jsdom is the unit-test builder's default environment, so there is no
+        # browser to install. --no-watch is belt and braces: watch already
+        # defaults to false off a TTY, but an explicit flag means this can never
+        # hang a runner for 15 minutes.
+        run: npx ng test --no-watch
+
+      - name: Build
+        # The production configuration, not preprod — this proves the app
+        # compiles under prod optimisation and stays inside its bundle budgets.
+        # deploy-preprod.yml builds its own preprod bundle at deploy time.
+        run: npx ng build --configuration production
