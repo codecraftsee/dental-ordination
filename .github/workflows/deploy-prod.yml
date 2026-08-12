@@ -1,0 +1,119 @@
+# Production does not exist yet. This workflow is a deliberate stub: it defines
+# the shape of a prod release so the decisions are recorded, and it fails at the
+# secrets check because the `production` environment intentionally holds none.
+# It mirrors deploy-prod.yml in dental-ordination-api.
+#
+# Before it can do anything real, all of these have to exist:
+#   - the second Hetzner box, bootstrapped, serving this bundle from Caddy
+#   - the real domain, for the admin host
+#   - a `production` build configuration whose apiUrl points at the prod API
+#
+# That last one is a live problem, not a future one:
+# src/environments/environment.prod.ts still points at
+# https://dental-ordination-api-production.up.railway.app — the Railway backend
+# that was retired. The production build compiles and CI passes, but the bundle
+# it produces talks to nothing. Repointing it is part of wiring prod up, and
+# until then `--configuration production` is a compile check only.
+#
+# There is no `push` trigger and that is the point. Adding one is the explicit
+# act of going live, not something that happens by merging to master.
+name: Deploy production (stub — not wired up)
+
+on:
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: "Release tag to deploy, e.g. v1.0.0"
+        required: true
+        type: string
+
+concurrency:
+  group: deploy-production
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    name: Deploy ${{ inputs.tag }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    environment:
+      name: production
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.tag }}
+          # Full history so the ancestry check below has something to check.
+          fetch-depth: 0
+
+      - name: Verify the tag is on master
+        env:
+          TAG: ${{ inputs.tag }}
+        # Deploying from a tag pushed off some feature branch would ship code
+        # that never went through preprod. Ancestry is what makes the tag mean
+        # "this passed through the whole flow".
+        run: |
+          git fetch --no-tags origin master:refs/remotes/origin/master
+          if ! git merge-base --is-ancestor "$TAG" origin/master; then
+            echo "::error::Tag $TAG is not an ancestor of master. Production only ships code that reached master via preprod."
+            exit 1
+          fi
+
+      - name: Verify the tag matches the package version
+        env:
+          TAG: ${{ inputs.tag }}
+        # The mirror of the API's check against app/main.py. package.json is
+        # still on the CLI's default 0.0.0 and nothing bumps it today, so the
+        # first release has to start treating it as the frontend's version
+        # number — which is exactly the convention this stub exists to record.
+        run: |
+          pkg_version="$(node -p "require('./package.json').version")"
+          if [ "v$pkg_version" != "$TAG" ]; then
+            echo "::error::Tag $TAG does not match package.json version v$pkg_version. Bump the version in the release commit."
+            exit 1
+          fi
+
+      - name: Check the environment is configured
+        env:
+          SSH_KEY: ${{ secrets.PROD_SSH_KEY }}
+          KNOWN_HOSTS: ${{ secrets.PROD_KNOWN_HOSTS }}
+          SERVER: ${{ secrets.PROD_SERVER }}
+        # Expected to fail today. That is the stub doing its job — it cannot
+        # deploy anywhere by accident, and it names exactly what is missing.
+        run: |
+          missing=""
+          [ -n "$SSH_KEY" ] || missing="$missing PROD_SSH_KEY"
+          [ -n "$KNOWN_HOSTS" ] || missing="$missing PROD_KNOWN_HOSTS"
+          [ -n "$SERVER" ] || missing="$missing PROD_SERVER"
+          if [ -n "$missing" ]; then
+            echo "::error::Production is not set up yet. Missing secrets:$missing"
+            echo "See the header comment in this file for everything that has to exist first."
+            exit 1
+          fi
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Configure SSH
+        env:
+          SSH_KEY: ${{ secrets.PROD_SSH_KEY }}
+          KNOWN_HOSTS: ${{ secrets.PROD_KNOWN_HOSTS }}
+        run: |
+          install -d -m 700 ~/.ssh
+          printf '%s\n' "$SSH_KEY" > ~/.ssh/id_ed25519
+          chmod 600 ~/.ssh/id_ed25519
+          printf '%s\n' "$KNOWN_HOSTS" > ~/.ssh/known_hosts
+          chmod 644 ~/.ssh/known_hosts
+
+      - name: Deploy
+        env:
+          DENTAL_SERVER: ${{ secrets.PROD_SERVER }}
+        # KNOWN GAP, and unreachable today because the secrets check above fails
+        # first. deploy-web.sh builds `--configuration preprod`, which is
+        # hardcoded — a production deploy needs a production configuration that
+        # points at the prod API (see the header). Left unfixed deliberately:
+        # the script currently deploys preprod correctly and is not worth
+        # parameterising for a code path nothing runs.
+        run: ./deploy/deploy-web.sh
