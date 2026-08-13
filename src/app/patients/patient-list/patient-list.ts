@@ -90,14 +90,6 @@ export default class PatientList implements OnInit {
     this.searchQuery.set((event.target as HTMLInputElement).value);
   }
 
-  onCityChange(event: Event): void {
-    this.cityFilter.set((event.target as HTMLSelectElement).value);
-  }
-
-  onGenderChange(event: Event): void {
-    this.genderFilter.set((event.target as HTMLSelectElement).value);
-  }
-
   dismissImportWarning(id: string, event: Event): void {
     event.stopPropagation();
     this.confirmDialogService

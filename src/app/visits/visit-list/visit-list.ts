@@ -161,14 +161,6 @@ export default class VisitList implements OnInit {
     this.searchQuery.set((event.target as HTMLInputElement).value);
   }
 
-  onPatientChange(event: Event): void {
-    this.patientFilter.set((event.target as HTMLSelectElement).value);
-  }
-
-  onDoctorChange(event: Event): void {
-    this.doctorFilter.set((event.target as HTMLSelectElement).value);
-  }
-
   onDateFromChange(event: MatDatepickerInputEvent<Date>): void {
     this.dateFromFilter.set(event.value ? this.formatDate(event.value) : '');
   }

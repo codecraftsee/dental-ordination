@@ -249,16 +249,6 @@ mat-card.stat-card--with-action {
 
 // ── Visit history section ─────────────────────────────────────────────────────
 
-.visit-history-section {
-  .section-subtitle {
-    font-size: 1.1rem;
-    font-weight: 700;
-    color: var(--color-text);
-    margin-bottom: var(--spacing-md);
-    font-family: var(--font-heading);
-  }
-}
-
 .visits-table {
   width: 100%;
   table-layout: fixed;
