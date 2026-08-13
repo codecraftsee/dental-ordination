@@ -8,7 +8,7 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatTabsModule } from '@angular/material/tabs';
-import { forkJoin } from 'rxjs';
+import { filter, forkJoin, switchMap } from 'rxjs';
 import { TranslatePipe } from '../../shared/translate.pipe';
 import { LocalizedDatePipe } from '../../shared/localized-date.pipe';
 import { CurrencyFormatPipe } from '../../shared/currency-format.pipe';
@@ -119,7 +119,7 @@ export default class PatientDetail implements OnInit {
       this.userService.loadAll(),
       this.diagnosisService.loadAll(),
       this.treatmentService.loadAll(),
-    ]).subscribe({
+    ]).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: ([patient]) => {
         this.patient.set(patient);
         const patientVisits = this.visitService.getByPatientId(id);
@@ -174,12 +174,14 @@ export default class PatientDetail implements OnInit {
         icon: 'error_outline',
         iconColor: 'warning',
       })
-      .subscribe(confirmed => {
-        if (confirmed) {
-          this.patientService.dismissImportWarning(p.id).subscribe(updated => {
-            this.patient.set(updated);
-          });
-        }
+      .pipe(
+        // Before switchMap: cancels the dialog, never an in-flight write.
+        takeUntilDestroyed(this.destroyRef),
+        filter(Boolean),
+        switchMap(() => this.patientService.dismissImportWarning(p.id)),
+      )
+      .subscribe(updated => {
+        this.patient.set(updated);
       });
   }
 
@@ -188,16 +190,18 @@ export default class PatientDetail implements OnInit {
     if (!p) return;
     this.confirmDialogService
       .confirm('patient.deleteTitle', 'patient.deleteMessage')
-      .subscribe(confirmed => {
-        if (confirmed) {
-          this.patientService.delete(p.id).subscribe({
-            next: () => {
-              this.toastService.success('toast.patientDeleted');
-              this.router.navigate(['/patients']);
-            },
-            error: err => this.toastService.error(err),
-          });
-        }
+      .pipe(
+        // Before switchMap: cancels the dialog, never an in-flight delete.
+        takeUntilDestroyed(this.destroyRef),
+        filter(Boolean),
+        switchMap(() => this.patientService.delete(p.id)),
+      )
+      .subscribe({
+        next: () => {
+          this.toastService.success('toast.patientDeleted');
+          this.router.navigate(['/patients']);
+        },
+        error: err => this.toastService.error(err),
       });
   }
 }

@@ -1,4 +1,5 @@
-import { ChangeDetectionStrategy, Component, inject, OnInit, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, DestroyRef, inject, OnInit, signal } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { MatFormFieldModule } from '@angular/material/form-field';
@@ -25,6 +26,7 @@ export default class StaffForm implements OnInit {
   private router = inject(Router);
   private userService = inject(UserService);
   private toastService = inject(ToastService);
+  private destroyRef = inject(DestroyRef);
 
   protected readonly UserRole = UserRole;
   readonly roles: UserRole[] = [UserRole.Doctor, UserRole.Nurse];
@@ -49,20 +51,22 @@ export default class StaffForm implements OnInit {
       licenseNumber: [''],
     });
 
-    this.form.get('role')!.valueChanges.subscribe((role: UserRole) => {
-      this.selectedRole.set(role);
-      const spec = this.form.get('specialization')!;
-      if (role === UserRole.Doctor) {
-        spec.setValidators(Validators.required);
-      } else {
-        spec.clearValidators();
-        spec.setValue(null);
-      }
-      spec.updateValueAndValidity();
-    });
+    this.form.get('role')!.valueChanges
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe((role: UserRole) => {
+        this.selectedRole.set(role);
+        const spec = this.form.get('specialization')!;
+        if (role === UserRole.Doctor) {
+          spec.setValidators(Validators.required);
+        } else {
+          spec.clearValidators();
+          spec.setValue(null);
+        }
+        spec.updateValueAndValidity();
+      });
 
     if (this.isEditMode && this.userId) {
-      this.userService.loadById(this.userId).subscribe({
+      this.userService.loadById(this.userId).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
         next: user => {
           this.selectedRole.set(user.role);
           this.form.patchValue({
@@ -96,6 +100,7 @@ export default class StaffForm implements OnInit {
       return;
     }
 
+    // No takeUntilDestroyed below: navigating away must not abort the write.
     const value = this.form.getRawValue();
     const payload = {
       email: value.email,

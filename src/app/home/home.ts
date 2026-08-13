@@ -6,6 +6,7 @@ import { MatDialog } from '@angular/material/dialog';
 import { MatIconModule } from '@angular/material/icon';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { forkJoin, of } from 'rxjs';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { TranslatePipe } from '../shared/translate.pipe';
 import { TranslateService } from '../services/translate.service';
 import { LocalizedDatePipe } from '../shared/localized-date.pipe';
@@ -77,7 +78,7 @@ export default class Home implements OnInit {
       has(Permission.VisitsRead) ? this.visitService.loadAll() : of([]),
       has(Permission.DiagnosesRead) ? this.diagnosisService.loadAll() : of([]),
       has(Permission.TreatmentsRead) ? this.treatmentService.loadAll() : of([]),
-    ]).subscribe(() => {
+    ]).pipe(takeUntilDestroyed(this.destroyRef)).subscribe(() => {
       this.totalPatients = this.patientService.getAll().length;
       this.totalDoctors = this.userService.getByRole(UserRole.Doctor).length;
       this.totalVisits = this.visitService.getAll().length;
@@ -114,6 +115,7 @@ export default class Home implements OnInit {
         autoFocus: false,
       })
       .afterClosed()
+      .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe(result => {
         if (!result) return;
         this.startImport(result.files, result.doctorId);
@@ -129,40 +131,44 @@ export default class Home implements OnInit {
     this.importTotal.set(0);
     this.clearImportMessageTimeout();
 
-    this.patientService.importXlsx(files, doctorId).subscribe({
-      next: (event) => {
-        if (event.type === 'progress') {
-          this.importTotal.set(event.total);
-          this.importCurrentFile.set(event.file);
-          this.importProgress.set(Math.round(((event.current - 1) / event.total) * 100));
-        } else if (event.type === 'file_done') {
-          this.importProgress.set(Math.round((event.current / event.total) * 100));
-        } else if (event.type === 'complete') {
+    // No takeUntilDestroyed: this observable's teardown aborts the underlying SSE
+    // fetch, so cancelling on destroy would stop a running import part-way through
+    // with no record of where it stopped.
+    this.patientService.importXlsx(files, doctorId)
+      .subscribe({
+        next: (event) => {
+          if (event.type === 'progress') {
+            this.importTotal.set(event.total);
+            this.importCurrentFile.set(event.file);
+            this.importProgress.set(Math.round(((event.current - 1) / event.total) * 100));
+          } else if (event.type === 'file_done') {
+            this.importProgress.set(Math.round((event.current / event.total) * 100));
+          } else if (event.type === 'complete') {
+            this.importing.set(false);
+            const s = event.summary;
+            this.importError.set(false);
+            this.importMessage.set(
+              this.translate.format('home.importSummary', {
+                filesProcessed: s.filesProcessed,
+                patientsCreated: s.patientsCreated,
+                visitsCreated: s.visitsCreated,
+              }),
+            );
+            this.importProgress.set(100);
+            this.toast.success('toast.importSuccess');
+            this.scheduleImportMessageDismiss();
+            this.ngOnInit();
+          }
+        },
+        error: (err) => {
           this.importing.set(false);
-          const s = event.summary;
-          this.importError.set(false);
-          this.importMessage.set(
-            this.translate.format('home.importSummary', {
-              filesProcessed: s.filesProcessed,
-              patientsCreated: s.patientsCreated,
-              visitsCreated: s.visitsCreated,
-            }),
-          );
-          this.importProgress.set(100);
-          this.toast.success('toast.importSuccess');
+          this.importError.set(true);
+          const detail = err?.detail || err?.message || this.translate.instant('home.importUnknownError');
+          this.importMessage.set(this.translate.format('home.importFailed', { detail }));
+          this.importProgress.set(0);
           this.scheduleImportMessageDismiss();
-          this.ngOnInit();
-        }
-      },
-      error: (err) => {
-        this.importing.set(false);
-        this.importError.set(true);
-        const detail = err?.detail || err?.message || this.translate.instant('home.importUnknownError');
-        this.importMessage.set(this.translate.format('home.importFailed', { detail }));
-        this.importProgress.set(0);
-        this.scheduleImportMessageDismiss();
-      },
-    });
+        },
+      });
   }
 
   private scheduleImportMessageDismiss(): void {

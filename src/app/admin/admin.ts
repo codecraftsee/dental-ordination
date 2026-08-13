@@ -2,7 +2,7 @@ import { ChangeDetectionStrategy, Component, inject, signal, WritableSignal } fr
 import { MatCardModule } from '@angular/material/card';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
-import { Observable } from 'rxjs';
+import { catchError, forkJoin, Observable, of } from 'rxjs';
 import { TranslatePipe } from '../shared/translate.pipe';
 import { AdminService } from '../services/admin.service';
 import { PatientService } from '../services/patient.service';
@@ -56,6 +56,8 @@ export default class Admin {
     action.message.set('');
     action.isError.set(false);
 
+    // No takeUntilDestroyed: these are the slowest writes in the app, and navigating
+    // away must not abort a bulk delete that is already running on the server.
     this.getRequest(action.key).subscribe({
       next: () => {
         action.loading.set(false);
@@ -84,27 +86,28 @@ export default class Admin {
   }
 
   private refreshCaches(key: ActionKey): void {
+    // Each reload is isolated with catchError so one failure cannot cancel its
+    // siblings: forkJoin unsubscribes every remaining source on the first error,
+    // which would strand the other caches holding rows that no longer exist.
+    // Not torn down on destroy either — these caches are root-scoped and outlive
+    // this component, so the refresh has to land even if the admin navigates away.
+    forkJoin(this.cacheReloads(key).map(reload => reload.pipe(catchError(() => of(null)))))
+      .subscribe();
+  }
+
+  private cacheReloads(key: ActionKey): Observable<unknown>[] {
     switch (key) {
-      case 'visits':
-        this.visitService.loadAll().subscribe();
-        break;
-      case 'patients':
-        this.patientService.loadAll().subscribe();
-        this.visitService.loadAll().subscribe();
-        break;
-      case 'diagnoses':
-        this.diagnosisService.loadAll().subscribe();
-        break;
-      case 'treatments':
-        this.treatmentService.loadAll().subscribe();
-        break;
-      case 'all':
-        this.patientService.loadAll().subscribe();
-        this.visitService.loadAll().subscribe();
-        this.userService.loadAll().subscribe();
-        this.diagnosisService.loadAll().subscribe();
-        this.treatmentService.loadAll().subscribe();
-        break;
+      case 'visits':     return [this.visitService.loadAll()];
+      case 'patients':   return [this.patientService.loadAll(), this.visitService.loadAll()];
+      case 'diagnoses':  return [this.diagnosisService.loadAll()];
+      case 'treatments': return [this.treatmentService.loadAll()];
+      case 'all':        return [
+        this.patientService.loadAll(),
+        this.visitService.loadAll(),
+        this.userService.loadAll(),
+        this.diagnosisService.loadAll(),
+        this.treatmentService.loadAll(),
+      ];
     }
   }
 }
