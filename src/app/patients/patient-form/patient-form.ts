@@ -1,4 +1,5 @@
-import { ChangeDetectionStrategy, Component, inject, OnInit } from '@angular/core';
+import { ChangeDetectionStrategy, Component, DestroyRef, inject, OnInit } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { MatFormFieldModule } from '@angular/material/form-field';
@@ -38,6 +39,7 @@ export default class PatientForm implements OnInit {
   private router = inject(Router);
   private patientService = inject(PatientService);
   private toastService = inject(ToastService);
+  private destroyRef = inject(DestroyRef);
 
   isEditMode = false;
   patientId: string | null = null;
@@ -61,7 +63,7 @@ export default class PatientForm implements OnInit {
     });
 
     if (this.isEditMode && this.patientId) {
-      this.patientService.loadById(this.patientId).subscribe({
+      this.patientService.loadById(this.patientId).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
         next: patient => {
           this.form.patchValue({
             firstName: patient.firstName,
@@ -94,7 +96,7 @@ export default class PatientForm implements OnInit {
     const payload = { ...raw, dateOfBirth: this.formatDate(raw.dateOfBirth) };
 
     if (this.isEditMode && this.patientId) {
-      this.patientService.update(this.patientId, payload).subscribe({
+      this.patientService.update(this.patientId, payload).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
         next: patient => {
           this.toastService.success('toast.patientUpdated');
           this.router.navigate(['/patients', patient.id]);
@@ -102,7 +104,7 @@ export default class PatientForm implements OnInit {
         error: err => this.toastService.error(err),
       });
     } else {
-      this.patientService.create(payload).subscribe({
+      this.patientService.create(payload).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
         next: patient => {
           this.toastService.success('toast.patientCreated');
           this.router.navigate(['/patients', patient.id]);

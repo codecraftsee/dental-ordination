@@ -1,5 +1,7 @@
-import { ChangeDetectionStrategy, Component, inject, signal, computed, effect, viewChild, OnInit } from '@angular/core';
+import { ChangeDetectionStrategy, Component, DestroyRef, inject, signal, computed, effect, viewChild, OnInit } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { RouterLink } from '@angular/router';
+import { filter, switchMap } from 'rxjs';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
@@ -31,6 +33,7 @@ export default class StaffList implements OnInit {
   private userService = inject(UserService);
   private confirmDialogService = inject(ConfirmDialogService);
   private toastService = inject(ToastService);
+  private destroyRef = inject(DestroyRef);
   private paginator = viewChild(MatPaginator);
   private sort = viewChild(MatSort);
 
@@ -73,7 +76,7 @@ export default class StaffList implements OnInit {
   }
 
   ngOnInit(): void {
-    this.userService.loadAll().subscribe();
+    this.userService.loadAll().pipe(takeUntilDestroyed(this.destroyRef)).subscribe();
   }
 
   onSearch(event: Event): void {
@@ -83,13 +86,14 @@ export default class StaffList implements OnInit {
   deleteStaff(id: string): void {
     this.confirmDialogService
       .confirm('staff.deleteTitle', 'staff.deleteMessage')
-      .subscribe(confirmed => {
-        if (confirmed) {
-          this.userService.delete(id).subscribe({
-            next: () => this.toastService.success('toast.staffDeleted'),
-            error: err => this.toastService.error(err),
-          });
-        }
+      .pipe(
+        filter(Boolean),
+        switchMap(() => this.userService.delete(id)),
+        takeUntilDestroyed(this.destroyRef),
+      )
+      .subscribe({
+        next: () => this.toastService.success('toast.staffDeleted'),
+        error: err => this.toastService.error(err),
       });
   }
 }

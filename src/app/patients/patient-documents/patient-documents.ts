@@ -1,4 +1,6 @@
-import { ChangeDetectionStrategy, Component, computed, effect, inject, input, signal, untracked } from '@angular/core';
+import { ChangeDetectionStrategy, Component, DestroyRef, computed, effect, inject, input, signal, untracked } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { filter, switchMap } from 'rxjs';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatDialog } from '@angular/material/dialog';
@@ -36,6 +38,7 @@ export class PatientDocuments {
   private confirmDialogService = inject(ConfirmDialogService);
   private toastService = inject(ToastService);
   private dialog = inject(MatDialog);
+  private destroyRef = inject(DestroyRef);
 
   patientId = input.required<string>();
 
@@ -57,9 +60,11 @@ export class PatientDocuments {
         this.selectedDocument.set(undefined);
         this.pendingFile.set(undefined);
         this.description.set('');
-        this.documentService.loadByPatientId(id).subscribe({
-          error: err => this.toastService.error(err),
-        });
+        this.documentService.loadByPatientId(id)
+          .pipe(takeUntilDestroyed(this.destroyRef))
+          .subscribe({
+            error: err => this.toastService.error(err),
+          });
       });
     });
 
@@ -107,19 +112,21 @@ export class PatientDocuments {
 
     this.uploading.set(true);
     const desc = this.description().trim();
-    this.documentService.upload(this.patientId(), file, desc || undefined).subscribe({
-      next: doc => {
-        this.uploading.set(false);
-        this.pendingFile.set(undefined);
-        this.description.set('');
-        this.selectedDocument.set(doc);
-        this.toastService.success('patient.documents.uploadSuccess');
-      },
-      error: err => {
-        this.uploading.set(false);
-        this.toastService.error(err);
-      },
-    });
+    this.documentService.upload(this.patientId(), file, desc || undefined)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: doc => {
+          this.uploading.set(false);
+          this.pendingFile.set(undefined);
+          this.description.set('');
+          this.selectedDocument.set(doc);
+          this.toastService.success('patient.documents.uploadSuccess');
+        },
+        error: err => {
+          this.uploading.set(false);
+          this.toastService.error(err);
+        },
+      });
   }
 
   selectDocument(doc: PatientDocument): void {
@@ -148,17 +155,19 @@ export class PatientDocuments {
         icon: 'delete',
         iconColor: 'danger',
       })
-      .subscribe(confirmed => {
-        if (!confirmed) return;
-        this.documentService.delete(this.patientId(), doc.id).subscribe({
-          next: () => {
-            if (this.selectedDocument()?.id === doc.id) {
-              this.selectedDocument.set(undefined);
-            }
-            this.toastService.success('patient.documents.deleteSuccess');
-          },
-          error: err => this.toastService.error(err),
-        });
+      .pipe(
+        filter(Boolean),
+        switchMap(() => this.documentService.delete(this.patientId(), doc.id)),
+        takeUntilDestroyed(this.destroyRef),
+      )
+      .subscribe({
+        next: () => {
+          if (this.selectedDocument()?.id === doc.id) {
+            this.selectedDocument.set(undefined);
+          }
+          this.toastService.success('patient.documents.deleteSuccess');
+        },
+        error: err => this.toastService.error(err),
       });
   }
 

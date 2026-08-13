@@ -1,11 +1,12 @@
-import { ChangeDetectionStrategy, Component, inject, signal, viewChild, effect, OnInit } from '@angular/core';
+import { ChangeDetectionStrategy, Component, DestroyRef, inject, signal, viewChild, effect, OnInit } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { MatCardModule } from '@angular/material/card';
 import { MatTableModule, MatTableDataSource } from '@angular/material/table';
 import { MatPaginator, MatPaginatorModule } from '@angular/material/paginator';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
-import { forkJoin } from 'rxjs';
+import { filter, forkJoin, switchMap } from 'rxjs';
 import { TranslatePipe } from '../../shared/translate.pipe';
 import { LocalizedDatePipe } from '../../shared/localized-date.pipe';
 import { CurrencyFormatPipe } from '../../shared/currency-format.pipe';
@@ -38,6 +39,7 @@ export default class StaffDetail implements OnInit {
   private patientService = inject(PatientService);
   private diagnosisService = inject(DiagnosisService);
   private treatmentService = inject(TreatmentService);
+  private destroyRef = inject(DestroyRef);
 
   private paginator = viewChild(MatPaginator);
 
@@ -67,7 +69,7 @@ export default class StaffDetail implements OnInit {
       this.patientService.loadAll(),
       this.diagnosisService.loadAll(),
       this.treatmentService.loadAll(),
-    ]).subscribe({
+    ]).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: ([user]) => {
         this.member.set(user);
         const memberVisits = this.visitService.getByDoctorId(id);
@@ -116,7 +118,7 @@ export default class StaffDetail implements OnInit {
   resendInvite(): void {
     const u = this.member();
     if (!u) return;
-    this.userService.resendInvite(u.id).subscribe({
+    this.userService.resendInvite(u.id).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: () => this.toastService.success('toast.inviteResent'),
       error: err => this.toastService.error(err),
     });
@@ -127,16 +129,17 @@ export default class StaffDetail implements OnInit {
     if (!u) return;
     this.confirmDialogService
       .confirm('staff.deleteTitle', 'staff.deleteMessage')
-      .subscribe(confirmed => {
-        if (confirmed) {
-          this.userService.delete(u.id).subscribe({
-            next: () => {
-              this.toastService.success('toast.staffDeleted');
-              this.router.navigate(['/staff']);
-            },
-            error: err => this.toastService.error(err),
-          });
-        }
+      .pipe(
+        filter(Boolean),
+        switchMap(() => this.userService.delete(u.id)),
+        takeUntilDestroyed(this.destroyRef),
+      )
+      .subscribe({
+        next: () => {
+          this.toastService.success('toast.staffDeleted');
+          this.router.navigate(['/staff']);
+        },
+        error: err => this.toastService.error(err),
       });
   }
 }

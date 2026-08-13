@@ -1,10 +1,11 @@
-import { ChangeDetectionStrategy, Component, inject, signal, OnInit } from '@angular/core';
+import { ChangeDetectionStrategy, Component, DestroyRef, inject, signal, OnInit } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { MatCardModule } from '@angular/material/card';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatTooltipModule } from '@angular/material/tooltip';
-import { forkJoin } from 'rxjs';
+import { filter, forkJoin, switchMap } from 'rxjs';
 import { TranslatePipe } from '../../shared/translate.pipe';
 import { LocalizedDatePipe } from '../../shared/localized-date.pipe';
 import { CurrencyFormatPipe } from '../../shared/currency-format.pipe';
@@ -37,6 +38,7 @@ export default class VisitDetail implements OnInit {
   private userService = inject(UserService);
   private diagnosisService = inject(DiagnosisService);
   private treatmentService = inject(TreatmentService);
+  private destroyRef = inject(DestroyRef);
 
   visit = signal<Visit | undefined>(undefined);
 
@@ -53,7 +55,7 @@ export default class VisitDetail implements OnInit {
       this.userService.loadAll(),
       this.diagnosisService.loadAll(),
       this.treatmentService.loadAll(),
-    ]).subscribe({
+    ]).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: ([visit]) => this.visit.set(visit),
       error: () => this.router.navigate(['/visits']),
     });
@@ -101,9 +103,11 @@ export default class VisitDetail implements OnInit {
   togglePaid(): void {
     const v = this.visit();
     if (!v) return;
-    this.visitService.update(v.id, { paid: !v.paid }).subscribe(updated => {
-      this.visit.set(updated);
-    });
+    this.visitService.update(v.id, { paid: !v.paid })
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe(updated => {
+        this.visit.set(updated);
+      });
   }
 
   dismissImportWarning(event: Event): void {
@@ -115,12 +119,13 @@ export default class VisitDetail implements OnInit {
         icon: 'error_outline',
         iconColor: 'warning',
       })
-      .subscribe(confirmed => {
-        if (confirmed) {
-          this.visitService.dismissImportWarning(v.id).subscribe(updated => {
-            this.visit.set(updated);
-          });
-        }
+      .pipe(
+        filter(Boolean),
+        switchMap(() => this.visitService.dismissImportWarning(v.id)),
+        takeUntilDestroyed(this.destroyRef),
+      )
+      .subscribe(updated => {
+        this.visit.set(updated);
       });
   }
 
@@ -129,16 +134,17 @@ export default class VisitDetail implements OnInit {
     if (!v) return;
     this.confirmDialogService
       .confirm('visit.deleteTitle', 'visit.deleteMessage')
-      .subscribe(confirmed => {
-        if (confirmed) {
-          this.visitService.delete(v.id).subscribe({
-            next: () => {
-              this.toastService.success('toast.visitDeleted');
-              this.router.navigate(['/visits']);
-            },
-            error: err => this.toastService.error(err),
-          });
-        }
+      .pipe(
+        filter(Boolean),
+        switchMap(() => this.visitService.delete(v.id)),
+        takeUntilDestroyed(this.destroyRef),
+      )
+      .subscribe({
+        next: () => {
+          this.toastService.success('toast.visitDeleted');
+          this.router.navigate(['/visits']);
+        },
+        error: err => this.toastService.error(err),
       });
   }
 

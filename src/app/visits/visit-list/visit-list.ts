@@ -1,4 +1,5 @@
-import { ChangeDetectionStrategy, Component, inject, signal, computed, effect, viewChild, OnInit } from '@angular/core';
+import { ChangeDetectionStrategy, Component, DestroyRef, inject, signal, computed, effect, viewChild, OnInit } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { RouterLink } from '@angular/router';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
@@ -12,7 +13,7 @@ import { MatNativeDateModule } from '@angular/material/core';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatTooltipModule } from '@angular/material/tooltip';
-import { forkJoin } from 'rxjs';
+import { filter, forkJoin, switchMap } from 'rxjs';
 import { TranslatePipe } from '../../shared/translate.pipe';
 import { LocalizedDatePipe } from '../../shared/localized-date.pipe';
 import { CurrencyFormatPipe } from '../../shared/currency-format.pipe';
@@ -47,6 +48,7 @@ export default class VisitList implements OnInit {
   private treatmentService = inject(TreatmentService);
   private confirmDialogService = inject(ConfirmDialogService);
   private toastService = inject(ToastService);
+  private destroyRef = inject(DestroyRef);
   private paginator = viewChild(MatPaginator);
   private sort = viewChild(MatSort);
 
@@ -117,7 +119,7 @@ export default class VisitList implements OnInit {
       this.userService.loadAll(),
       this.diagnosisService.loadAll(),
       this.treatmentService.loadAll(),
-    ]).subscribe(() => {
+    ]).pipe(takeUntilDestroyed(this.destroyRef)).subscribe(() => {
       if (this.authService.hasRole(UserRole.Doctor)) {
         const userId = this.authService.user()?.id;
         if (userId) {
@@ -182,23 +184,25 @@ export default class VisitList implements OnInit {
         icon: 'error_outline',
         iconColor: 'warning',
       })
-      .subscribe(confirmed => {
-        if (confirmed) {
-          this.visitService.dismissImportWarning(id).subscribe();
-        }
-      });
+      .pipe(
+        filter(Boolean),
+        switchMap(() => this.visitService.dismissImportWarning(id)),
+        takeUntilDestroyed(this.destroyRef),
+      )
+      .subscribe();
   }
 
   deleteVisit(id: string): void {
     this.confirmDialogService
       .confirm('visit.deleteTitle', 'visit.deleteMessage')
-      .subscribe(confirmed => {
-        if (confirmed) {
-          this.visitService.delete(id).subscribe({
-            next: () => this.toastService.success('toast.visitDeleted'),
-            error: err => this.toastService.error(err),
-          });
-        }
+      .pipe(
+        filter(Boolean),
+        switchMap(() => this.visitService.delete(id)),
+        takeUntilDestroyed(this.destroyRef),
+      )
+      .subscribe({
+        next: () => this.toastService.success('toast.visitDeleted'),
+        error: err => this.toastService.error(err),
       });
   }
 

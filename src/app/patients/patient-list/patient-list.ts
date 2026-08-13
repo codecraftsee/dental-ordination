@@ -1,5 +1,7 @@
-import { ChangeDetectionStrategy, Component, inject, signal, computed, effect, viewChild, OnInit } from '@angular/core';
+import { ChangeDetectionStrategy, Component, DestroyRef, inject, signal, computed, effect, viewChild, OnInit } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { RouterLink } from '@angular/router';
+import { filter, switchMap } from 'rxjs';
 import { MatTableModule, MatTableDataSource } from '@angular/material/table';
 import { MatPaginator, MatPaginatorModule } from '@angular/material/paginator';
 import { MatSort, MatSortModule } from '@angular/material/sort';
@@ -34,6 +36,7 @@ export default class PatientList implements OnInit {
   private visitService = inject(VisitService);
   private confirmDialogService = inject(ConfirmDialogService);
   private toastService = inject(ToastService);
+  private destroyRef = inject(DestroyRef);
   private paginator = viewChild(MatPaginator);
   private sort = viewChild(MatSort);
 
@@ -73,9 +76,9 @@ export default class PatientList implements OnInit {
   }
 
   ngOnInit(): void {
-    this.patientService.loadAll().subscribe();
+    this.patientService.loadAll().pipe(takeUntilDestroyed(this.destroyRef)).subscribe();
     if (!this.visitService.isLoaded()) {
-      this.visitService.loadAll().subscribe();
+      this.visitService.loadAll().pipe(takeUntilDestroyed(this.destroyRef)).subscribe();
     }
   }
 
@@ -102,23 +105,25 @@ export default class PatientList implements OnInit {
         icon: 'error_outline',
         iconColor: 'warning',
       })
-      .subscribe(confirmed => {
-        if (confirmed) {
-          this.patientService.dismissImportWarning(id).subscribe();
-        }
-      });
+      .pipe(
+        filter(Boolean),
+        switchMap(() => this.patientService.dismissImportWarning(id)),
+        takeUntilDestroyed(this.destroyRef),
+      )
+      .subscribe();
   }
 
   deletePatient(id: string): void {
     this.confirmDialogService
       .confirm('patient.deleteTitle', 'patient.deleteMessage')
-      .subscribe(confirmed => {
-        if (confirmed) {
-          this.patientService.delete(id).subscribe({
-            next: () => this.toastService.success('toast.patientDeleted'),
-            error: err => this.toastService.error(err),
-          });
-        }
+      .pipe(
+        filter(Boolean),
+        switchMap(() => this.patientService.delete(id)),
+        takeUntilDestroyed(this.destroyRef),
+      )
+      .subscribe({
+        next: () => this.toastService.success('toast.patientDeleted'),
+        error: err => this.toastService.error(err),
       });
   }
 }

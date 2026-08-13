@@ -1,4 +1,5 @@
-import { ChangeDetectionStrategy, Component, inject, OnInit } from '@angular/core';
+import { ChangeDetectionStrategy, Component, DestroyRef, inject, OnInit } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { MatFormFieldModule } from '@angular/material/form-field';
@@ -25,6 +26,7 @@ export default class DiagnosisForm implements OnInit {
   private router = inject(Router);
   private diagnosisService = inject(DiagnosisService);
   private toastService = inject(ToastService);
+  private destroyRef = inject(DestroyRef);
 
   categories = Object.values(DiagnosisCategory);
   isEditMode = false;
@@ -44,7 +46,7 @@ export default class DiagnosisForm implements OnInit {
     });
 
     if (this.isEditMode && this.diagnosisId) {
-      this.diagnosisService.loadById(this.diagnosisId).subscribe({
+      this.diagnosisService.loadById(this.diagnosisId).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
         next: diagnosis => {
           this.form.patchValue({
             code: diagnosis.code,
@@ -69,7 +71,7 @@ export default class DiagnosisForm implements OnInit {
     }
 
     if (this.isEditMode && this.diagnosisId) {
-      this.diagnosisService.update(this.diagnosisId, this.form.value).subscribe({
+      this.diagnosisService.update(this.diagnosisId, this.form.value).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
         next: () => {
           this.toastService.success('toast.diagnosisUpdated');
           this.router.navigate(['/diagnoses']);
@@ -77,7 +79,7 @@ export default class DiagnosisForm implements OnInit {
         error: err => this.toastService.error(err),
       });
     } else {
-      this.diagnosisService.create(this.form.value).subscribe({
+      this.diagnosisService.create(this.form.value).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
         next: () => {
           this.toastService.success('toast.diagnosisCreated');
           this.router.navigate(['/diagnoses']);

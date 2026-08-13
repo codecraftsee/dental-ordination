@@ -1,5 +1,7 @@
-import { ChangeDetectionStrategy, Component, inject, signal, computed, effect, viewChild, OnInit } from '@angular/core';
+import { ChangeDetectionStrategy, Component, DestroyRef, inject, signal, computed, effect, viewChild, OnInit } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { RouterLink } from '@angular/router';
+import { filter, switchMap } from 'rxjs';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
@@ -30,6 +32,7 @@ export default class Diagnoses implements OnInit {
   private diagnosisService = inject(DiagnosisService);
   private confirmDialogService = inject(ConfirmDialogService);
   private toastService = inject(ToastService);
+  private destroyRef = inject(DestroyRef);
   private paginator = viewChild(MatPaginator);
   private sort = viewChild(MatSort);
 
@@ -59,7 +62,7 @@ export default class Diagnoses implements OnInit {
   }
 
   ngOnInit(): void {
-    this.diagnosisService.loadAll().subscribe();
+    this.diagnosisService.loadAll().pipe(takeUntilDestroyed(this.destroyRef)).subscribe();
   }
 
   onSearch(event: Event): void {
@@ -69,13 +72,14 @@ export default class Diagnoses implements OnInit {
   deleteDiagnosis(id: string): void {
     this.confirmDialogService
       .confirm('diagnosis.deleteTitle', 'diagnosis.deleteMessage')
-      .subscribe(confirmed => {
-        if (confirmed) {
-          this.diagnosisService.delete(id).subscribe({
-            next: () => this.toastService.success('toast.diagnosisDeleted'),
-            error: err => this.toastService.error(err),
-          });
-        }
+      .pipe(
+        filter(Boolean),
+        switchMap(() => this.diagnosisService.delete(id)),
+        takeUntilDestroyed(this.destroyRef),
+      )
+      .subscribe({
+        next: () => this.toastService.success('toast.diagnosisDeleted'),
+        error: err => this.toastService.error(err),
       });
   }
 }

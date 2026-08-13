@@ -1,5 +1,7 @@
-import { ChangeDetectionStrategy, Component, inject, signal, computed, effect, viewChild, OnInit } from '@angular/core';
+import { ChangeDetectionStrategy, Component, DestroyRef, inject, signal, computed, effect, viewChild, OnInit } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { RouterLink } from '@angular/router';
+import { filter, switchMap } from 'rxjs';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
@@ -31,6 +33,7 @@ export default class Treatments implements OnInit {
   private treatmentService = inject(TreatmentService);
   private confirmDialogService = inject(ConfirmDialogService);
   private toastService = inject(ToastService);
+  private destroyRef = inject(DestroyRef);
   private paginator = viewChild(MatPaginator);
   private sort = viewChild(MatSort);
 
@@ -60,7 +63,7 @@ export default class Treatments implements OnInit {
   }
 
   ngOnInit(): void {
-    this.treatmentService.loadAll().subscribe();
+    this.treatmentService.loadAll().pipe(takeUntilDestroyed(this.destroyRef)).subscribe();
   }
 
   onSearch(event: Event): void {
@@ -70,13 +73,14 @@ export default class Treatments implements OnInit {
   deleteTreatment(id: string): void {
     this.confirmDialogService
       .confirm('treatment.deleteTitle', 'treatment.deleteMessage')
-      .subscribe(confirmed => {
-        if (confirmed) {
-          this.treatmentService.delete(id).subscribe({
-            next: () => this.toastService.success('toast.treatmentDeleted'),
-            error: err => this.toastService.error(err),
-          });
-        }
+      .pipe(
+        filter(Boolean),
+        switchMap(() => this.treatmentService.delete(id)),
+        takeUntilDestroyed(this.destroyRef),
+      )
+      .subscribe({
+        next: () => this.toastService.success('toast.treatmentDeleted'),
+        error: err => this.toastService.error(err),
       });
   }
 }
