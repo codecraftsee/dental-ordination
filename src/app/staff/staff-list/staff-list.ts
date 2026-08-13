@@ -87,9 +87,10 @@ export default class StaffList implements OnInit {
     this.confirmDialogService
       .confirm('staff.deleteTitle', 'staff.deleteMessage')
       .pipe(
+        // Before switchMap: cancels the dialog, never an in-flight delete.
+        takeUntilDestroyed(this.destroyRef),
         filter(Boolean),
         switchMap(() => this.userService.delete(id)),
-        takeUntilDestroyed(this.destroyRef),
       )
       .subscribe({
         next: () => this.toastService.success('toast.staffDeleted'),

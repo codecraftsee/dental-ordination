@@ -144,6 +144,7 @@ export default class VisitForm implements OnInit {
       return;
     }
 
+    // No takeUntilDestroyed below: navigating away must not abort the write.
     const formValue = this.form.getRawValue();
     const payload = {
       ...formValue,
@@ -155,7 +156,7 @@ export default class VisitForm implements OnInit {
 
     if (this.isEditMode && this.visitId) {
       const { date: _date, ...updatePayload } = payload;
-      this.visitService.update(this.visitId, updatePayload).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
+      this.visitService.update(this.visitId, updatePayload).subscribe({
         next: visit => {
           this.toastService.success('toast.visitUpdated');
           this.router.navigate(['/visits', visit.id]);
@@ -163,7 +164,7 @@ export default class VisitForm implements OnInit {
         error: err => this.toastService.error(err),
       });
     } else {
-      this.visitService.create(payload).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
+      this.visitService.create(payload).subscribe({
         next: visit => {
           this.toastService.success('toast.visitCreated');
           if (this.returnTo) {

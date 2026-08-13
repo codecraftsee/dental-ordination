@@ -70,8 +70,9 @@ export default class DiagnosisForm implements OnInit {
       return;
     }
 
+    // No takeUntilDestroyed below: navigating away must not abort the write.
     if (this.isEditMode && this.diagnosisId) {
-      this.diagnosisService.update(this.diagnosisId, this.form.value).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
+      this.diagnosisService.update(this.diagnosisId, this.form.value).subscribe({
         next: () => {
           this.toastService.success('toast.diagnosisUpdated');
           this.router.navigate(['/diagnoses']);
@@ -79,7 +80,7 @@ export default class DiagnosisForm implements OnInit {
         error: err => this.toastService.error(err),
       });
     } else {
-      this.diagnosisService.create(this.form.value).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
+      this.diagnosisService.create(this.form.value).subscribe({
         next: () => {
           this.toastService.success('toast.diagnosisCreated');
           this.router.navigate(['/diagnoses']);

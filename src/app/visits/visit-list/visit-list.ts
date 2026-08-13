@@ -185,9 +185,10 @@ export default class VisitList implements OnInit {
         iconColor: 'warning',
       })
       .pipe(
+        // Before switchMap: cancels the dialog, never an in-flight write.
+        takeUntilDestroyed(this.destroyRef),
         filter(Boolean),
         switchMap(() => this.visitService.dismissImportWarning(id)),
-        takeUntilDestroyed(this.destroyRef),
       )
       .subscribe();
   }
@@ -196,9 +197,10 @@ export default class VisitList implements OnInit {
     this.confirmDialogService
       .confirm('visit.deleteTitle', 'visit.deleteMessage')
       .pipe(
+        // Before switchMap: cancels the dialog, never an in-flight delete.
+        takeUntilDestroyed(this.destroyRef),
         filter(Boolean),
         switchMap(() => this.visitService.delete(id)),
-        takeUntilDestroyed(this.destroyRef),
       )
       .subscribe({
         next: () => this.toastService.success('toast.visitDeleted'),

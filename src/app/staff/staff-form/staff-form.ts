@@ -100,6 +100,7 @@ export default class StaffForm implements OnInit {
       return;
     }
 
+    // No takeUntilDestroyed below: navigating away must not abort the write.
     const value = this.form.getRawValue();
     const payload = {
       email: value.email,
@@ -113,7 +114,7 @@ export default class StaffForm implements OnInit {
 
     if (this.isEditMode && this.userId) {
       const { email: _email, ...updatePayload } = payload;
-      this.userService.update(this.userId, updatePayload).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
+      this.userService.update(this.userId, updatePayload).subscribe({
         next: user => {
           this.toastService.success('toast.staffUpdated');
           this.router.navigate(['/staff', user.id]);
@@ -121,7 +122,7 @@ export default class StaffForm implements OnInit {
         error: err => this.toastService.error(err),
       });
     } else {
-      this.userService.create(payload).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
+      this.userService.create(payload).subscribe({
         next: user => {
           this.toastService.success('toast.staffCreated');
           this.router.navigate(['/staff', user.id]);

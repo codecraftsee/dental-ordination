@@ -112,8 +112,9 @@ export class PatientDocuments {
 
     this.uploading.set(true);
     const desc = this.description().trim();
+    // No takeUntilDestroyed: this component is lazy mat-tab content and is destroyed
+    // on every tab switch, which would abort the upload mid-body.
     this.documentService.upload(this.patientId(), file, desc || undefined)
-      .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: doc => {
           this.uploading.set(false);
@@ -156,9 +157,11 @@ export class PatientDocuments {
         iconColor: 'danger',
       })
       .pipe(
+        // Before switchMap: cancels the dialog, never an in-flight delete. This
+        // component is lazy mat-tab content, so it is destroyed on every tab switch.
+        takeUntilDestroyed(this.destroyRef),
         filter(Boolean),
         switchMap(() => this.documentService.delete(this.patientId(), doc.id)),
-        takeUntilDestroyed(this.destroyRef),
       )
       .subscribe({
         next: () => {

@@ -73,9 +73,10 @@ export default class Diagnoses implements OnInit {
     this.confirmDialogService
       .confirm('diagnosis.deleteTitle', 'diagnosis.deleteMessage')
       .pipe(
+        // Before switchMap: cancels the dialog, never an in-flight delete.
+        takeUntilDestroyed(this.destroyRef),
         filter(Boolean),
         switchMap(() => this.diagnosisService.delete(id)),
-        takeUntilDestroyed(this.destroyRef),
       )
       .subscribe({
         next: () => this.toastService.success('toast.diagnosisDeleted'),

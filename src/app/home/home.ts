@@ -131,8 +131,10 @@ export default class Home implements OnInit {
     this.importTotal.set(0);
     this.clearImportMessageTimeout();
 
+    // No takeUntilDestroyed: this observable's teardown aborts the underlying SSE
+    // fetch, so cancelling on destroy would stop a running import part-way through
+    // with no record of where it stopped.
     this.patientService.importXlsx(files, doctorId)
-      .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: (event) => {
           if (event.type === 'progress') {

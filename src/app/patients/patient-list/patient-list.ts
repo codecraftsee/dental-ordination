@@ -106,9 +106,10 @@ export default class PatientList implements OnInit {
         iconColor: 'warning',
       })
       .pipe(
+        // Before switchMap: cancels the dialog, never an in-flight write.
+        takeUntilDestroyed(this.destroyRef),
         filter(Boolean),
         switchMap(() => this.patientService.dismissImportWarning(id)),
-        takeUntilDestroyed(this.destroyRef),
       )
       .subscribe();
   }
@@ -117,9 +118,10 @@ export default class PatientList implements OnInit {
     this.confirmDialogService
       .confirm('patient.deleteTitle', 'patient.deleteMessage')
       .pipe(
+        // Before switchMap: cancels the dialog, never an in-flight delete.
+        takeUntilDestroyed(this.destroyRef),
         filter(Boolean),
         switchMap(() => this.patientService.delete(id)),
-        takeUntilDestroyed(this.destroyRef),
       )
       .subscribe({
         next: () => this.toastService.success('toast.patientDeleted'),

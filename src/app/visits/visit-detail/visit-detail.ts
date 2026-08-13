@@ -103,8 +103,8 @@ export default class VisitDetail implements OnInit {
   togglePaid(): void {
     const v = this.visit();
     if (!v) return;
+    // No takeUntilDestroyed: navigating away must not abort the write.
     this.visitService.update(v.id, { paid: !v.paid })
-      .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe(updated => {
         this.visit.set(updated);
       });
@@ -120,9 +120,10 @@ export default class VisitDetail implements OnInit {
         iconColor: 'warning',
       })
       .pipe(
+        // Before switchMap: cancels the dialog, never an in-flight write.
+        takeUntilDestroyed(this.destroyRef),
         filter(Boolean),
         switchMap(() => this.visitService.dismissImportWarning(v.id)),
-        takeUntilDestroyed(this.destroyRef),
       )
       .subscribe(updated => {
         this.visit.set(updated);
@@ -135,9 +136,10 @@ export default class VisitDetail implements OnInit {
     this.confirmDialogService
       .confirm('visit.deleteTitle', 'visit.deleteMessage')
       .pipe(
+        // Before switchMap: cancels the dialog, never an in-flight delete.
+        takeUntilDestroyed(this.destroyRef),
         filter(Boolean),
         switchMap(() => this.visitService.delete(v.id)),
-        takeUntilDestroyed(this.destroyRef),
       )
       .subscribe({
         next: () => {

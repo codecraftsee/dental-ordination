@@ -74,9 +74,10 @@ export default class Treatments implements OnInit {
     this.confirmDialogService
       .confirm('treatment.deleteTitle', 'treatment.deleteMessage')
       .pipe(
+        // Before switchMap: cancels the dialog, never an in-flight delete.
+        takeUntilDestroyed(this.destroyRef),
         filter(Boolean),
         switchMap(() => this.treatmentService.delete(id)),
-        takeUntilDestroyed(this.destroyRef),
       )
       .subscribe({
         next: () => this.toastService.success('toast.treatmentDeleted'),

@@ -1,9 +1,8 @@
-import { ChangeDetectionStrategy, Component, DestroyRef, inject, signal, WritableSignal } from '@angular/core';
-import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { ChangeDetectionStrategy, Component, inject, signal, WritableSignal } from '@angular/core';
 import { MatCardModule } from '@angular/material/card';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
-import { forkJoin, Observable } from 'rxjs';
+import { catchError, forkJoin, Observable, of } from 'rxjs';
 import { TranslatePipe } from '../shared/translate.pipe';
 import { AdminService } from '../services/admin.service';
 import { PatientService } from '../services/patient.service';
@@ -39,7 +38,6 @@ export default class Admin {
   private visitService = inject(VisitService);
   private diagnosisService = inject(DiagnosisService);
   private treatmentService = inject(TreatmentService);
-  private destroyRef = inject(DestroyRef);
 
   readonly actions: ActionState[] = [
     this.makeAction('visits', 'admin.deleteVisits', 'admin.deleteVisitsDesc', false),
@@ -58,7 +56,9 @@ export default class Admin {
     action.message.set('');
     action.isError.set(false);
 
-    this.getRequest(action.key).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
+    // No takeUntilDestroyed: these are the slowest writes in the app, and navigating
+    // away must not abort a bulk delete that is already running on the server.
+    this.getRequest(action.key).subscribe({
       next: () => {
         action.loading.set(false);
         action.confirmInput.set('');
@@ -86,7 +86,13 @@ export default class Admin {
   }
 
   private refreshCaches(key: ActionKey): void {
-    forkJoin(this.cacheReloads(key)).pipe(takeUntilDestroyed(this.destroyRef)).subscribe();
+    // Each reload is isolated with catchError so one failure cannot cancel its
+    // siblings: forkJoin unsubscribes every remaining source on the first error,
+    // which would strand the other caches holding rows that no longer exist.
+    // Not torn down on destroy either — these caches are root-scoped and outlive
+    // this component, so the refresh has to land even if the admin navigates away.
+    forkJoin(this.cacheReloads(key).map(reload => reload.pipe(catchError(() => of(null)))))
+      .subscribe();
   }
 
   private cacheReloads(key: ActionKey): Observable<unknown>[] {

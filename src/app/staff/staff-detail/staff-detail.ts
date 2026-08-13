@@ -118,7 +118,8 @@ export default class StaffDetail implements OnInit {
   resendInvite(): void {
     const u = this.member();
     if (!u) return;
-    this.userService.resendInvite(u.id).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
+    // No takeUntilDestroyed: navigating away must not abort the write.
+    this.userService.resendInvite(u.id).subscribe({
       next: () => this.toastService.success('toast.inviteResent'),
       error: err => this.toastService.error(err),
     });
@@ -130,9 +131,10 @@ export default class StaffDetail implements OnInit {
     this.confirmDialogService
       .confirm('staff.deleteTitle', 'staff.deleteMessage')
       .pipe(
+        // Before switchMap: cancels the dialog, never an in-flight delete.
+        takeUntilDestroyed(this.destroyRef),
         filter(Boolean),
         switchMap(() => this.userService.delete(u.id)),
-        takeUntilDestroyed(this.destroyRef),
       )
       .subscribe({
         next: () => {

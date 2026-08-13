@@ -92,11 +92,12 @@ export default class PatientForm implements OnInit {
       return;
     }
 
+    // No takeUntilDestroyed below: navigating away must not abort the write.
     const raw = this.form.value;
     const payload = { ...raw, dateOfBirth: this.formatDate(raw.dateOfBirth) };
 
     if (this.isEditMode && this.patientId) {
-      this.patientService.update(this.patientId, payload).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
+      this.patientService.update(this.patientId, payload).subscribe({
         next: patient => {
           this.toastService.success('toast.patientUpdated');
           this.router.navigate(['/patients', patient.id]);
@@ -104,7 +105,7 @@ export default class PatientForm implements OnInit {
         error: err => this.toastService.error(err),
       });
     } else {
-      this.patientService.create(payload).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
+      this.patientService.create(payload).subscribe({
         next: patient => {
           this.toastService.success('toast.patientCreated');
           this.router.navigate(['/patients', patient.id]);
