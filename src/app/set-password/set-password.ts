@@ -1,5 +1,4 @@
-import { ChangeDetectionStrategy, Component, DestroyRef, inject, OnInit, signal } from '@angular/core';
-import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { ChangeDetectionStrategy, Component, inject, OnInit, signal } from '@angular/core';
 import { AbstractControl, FormBuilder, FormControl, FormGroupDirective, NgForm, ReactiveFormsModule, ValidationErrors, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { ErrorStateMatcher } from '@angular/material/core';
@@ -35,7 +34,6 @@ export default class SetPassword implements OnInit {
   private route = inject(ActivatedRoute);
   private router = inject(Router);
   private authService = inject(AuthService);
-  private destroyRef = inject(DestroyRef);
 
   readonly mismatchMatcher = new PasswordMismatchMatcher();
   readonly loading = signal(false);
@@ -71,9 +69,12 @@ export default class SetPassword implements OnInit {
 
     const { password, passwordConfirm } = this.form.value;
 
+    // No takeUntilDestroyed: the server applies the password change and consumes
+    // the invite token regardless of whether we are still listening, and the new
+    // tokens are persisted in a tap. Cancelling would change the password while
+    // leaving the user signed out, holding a link that no longer works.
     this.authService
       .setPassword({ token: this.token, password: password!, passwordConfirm: passwordConfirm! })
-      .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: () => {
           this.loading.set(false);

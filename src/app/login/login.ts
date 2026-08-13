@@ -1,5 +1,4 @@
-import { ChangeDetectionStrategy, Component, DestroyRef, inject, signal } from '@angular/core';
-import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import { switchMap } from 'rxjs';
@@ -22,7 +21,6 @@ export default class Login {
   private fb = inject(FormBuilder);
   private authService = inject(AuthService);
   private router = inject(Router);
-  private destroyRef = inject(DestroyRef);
 
   form = this.fb.group({
     email: ['', [Validators.required, Validators.email]],
@@ -46,9 +44,11 @@ export default class Login {
     this.error.set('');
 
     const { email, password } = this.form.value;
+    // No takeUntilDestroyed: login persists its tokens to localStorage in a tap.
+    // Cancelling would leave the server having issued a session that never reaches
+    // the client, logging the user out despite a successful login.
     this.authService.login({ email: email!, password: password! }).pipe(
       switchMap(() => this.authService.loadCurrentUser()),
-      takeUntilDestroyed(this.destroyRef),
     ).subscribe({
       next: () => {
         this.loading.set(false);

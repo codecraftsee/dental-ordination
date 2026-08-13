@@ -16,7 +16,7 @@
  * outstanding.
  */
 import { TestBed, ComponentFixture } from '@angular/core/testing';
-import { provideRouter } from '@angular/router';
+import { ActivatedRoute, provideRouter } from '@angular/router';
 import { provideHttpClient, HttpClient } from '@angular/common/http';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { provideNoopAnimations } from '@angular/platform-browser/animations';
@@ -26,6 +26,8 @@ import { vi } from 'vitest';
 import DiagnosisForm from './diagnoses/diagnosis-form/diagnosis-form';
 import Admin from './admin/admin';
 import { PatientDocuments } from './patients/patient-documents/patient-documents';
+import Login from './login/login';
+import SetPassword from './set-password/set-password';
 import { TranslateService } from './services/translate.service';
 import { ToastService } from './services/toast.service';
 import { ConfirmDialogService } from './services/confirm-dialog.service';
@@ -160,6 +162,41 @@ describe('write-survives-destroy', () => {
       fixture.destroy();
 
       expect(req.cancelled).toBe(true);
+    });
+  });
+
+  describe('auth writes (persist their tokens in a tap)', () => {
+    it('does not cancel a login when the component is destroyed mid-write', async () => {
+      configure();
+      await TestBed.compileComponents();
+      const fixture = TestBed.createComponent(Login);
+      fixture.detectChanges();
+      fixture.componentInstance.form.setValue({ email: 'a@b.com', password: 'secret123' });
+      fixture.componentInstance.onSubmit();
+
+      const req = httpMock.expectOne(r => r.method === 'POST');
+      fixture.destroy();
+
+      expect(req.cancelled).toBe(false);
+    });
+
+    it('does not cancel a password set when the component is destroyed mid-write', async () => {
+      configure([
+        {
+          provide: ActivatedRoute,
+          useValue: { snapshot: { queryParamMap: new Map([['token', 'invite-token']]) } },
+        },
+      ]);
+      await TestBed.compileComponents();
+      const fixture = TestBed.createComponent(SetPassword);
+      fixture.detectChanges();
+      fixture.componentInstance.form.setValue({ password: 'secret123', passwordConfirm: 'secret123' });
+      fixture.componentInstance.onSubmit();
+
+      const req = httpMock.expectOne(r => r.method === 'POST');
+      fixture.destroy();
+
+      expect(req.cancelled).toBe(false);
     });
   });
 
