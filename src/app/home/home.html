@@ -8,7 +8,7 @@
           <mat-icon>people</mat-icon>
         </div>
         <div class="stat-body">
-          <div class="stat-value">{{ totalPatients }}</div>
+          <div class="stat-value">{{ totalPatients() }}</div>
           <div class="stat-label">{{ 'home.totalPatients' | translate }}</div>
         </div>
       </mat-card-content>
@@ -19,7 +19,7 @@
           <mat-icon>stethoscope</mat-icon>
         </div>
         <div class="stat-body">
-          <div class="stat-value">{{ totalDoctors }}</div>
+          <div class="stat-value">{{ totalDoctors() }}</div>
           <div class="stat-label">{{ 'home.totalDoctors' | translate }}</div>
         </div>
       </mat-card-content>
@@ -30,7 +30,7 @@
           <mat-icon>today</mat-icon>
         </div>
         <div class="stat-body">
-          <div class="stat-value">{{ visitsThisMonth }}</div>
+          <div class="stat-value">{{ visitsThisMonth() }}</div>
           <div class="stat-label">{{ 'home.visitsThisMonth' | translate }}</div>
         </div>
       </mat-card-content>
@@ -41,7 +41,7 @@
           <mat-icon>bar_chart</mat-icon>
         </div>
         <div class="stat-body">
-          <div class="stat-value">{{ totalVisits }}</div>
+          <div class="stat-value">{{ totalVisits() }}</div>
           <div class="stat-label">{{ 'home.totalVisits' | translate }}</div>
         </div>
       </mat-card-content>
