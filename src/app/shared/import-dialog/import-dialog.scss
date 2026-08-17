@@ -249,9 +249,13 @@
     color: var(--color-danger);
   }
 
+  // Body text stays --color-text: --color-danger on --color-danger-bg is 3.96:1
+  // in light and 3.63:1 in dark, both under AA. The rejection is already carried
+  // by the icon, the tinted row and the strike-through, so nothing is lost by not
+  // colouring the text — and none of those signals is colour alone.
   .import-dialog__file-name,
   .import-dialog__file-size {
-    color: var(--color-danger);
+    color: var(--color-text);
     text-decoration: line-through;
   }
 }
@@ -294,7 +298,8 @@
 .import-dialog__warning-desc {
   margin: 2px 0 0;
   font-size: 0.8125rem;
-  color: var(--color-text-secondary);
+  // Not --color-text-secondary: on --color-danger-bg that is 3.32:1 in light.
+  color: var(--color-text);
 }
 
 .import-dialog__summary {
