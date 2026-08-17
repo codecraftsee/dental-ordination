@@ -150,6 +150,46 @@ describe('PatientDocuments', () => {
     httpMock.verify();
   });
 
+  it('documentCount tracks the list through uploads and deletes', () => {
+    const docsUrl = `${environment.apiUrl}/api/patients/p-1/documents`;
+    const second: PatientDocument = { ...doc, id: 'd-2', filename: 'scan.jpg' };
+
+    fixture.detectChanges();
+    httpMock.expectOne(docsUrl).flush([doc, second]);
+    expect(component.documentCount()).toBe(2);
+
+    const file = new File(['x'], 'new.pdf', { type: 'application/pdf' });
+    component.pendingFile.set(file);
+    component.upload();
+    httpMock
+      .expectOne(r => r.method === 'POST' && r.url === docsUrl)
+      .flush({ ...doc, id: 'd-3', filename: 'new.pdf' });
+    expect(component.documentCount()).toBe(3);
+
+    component.deleteDocument(second);
+    httpMock
+      .expectOne(r => r.method === 'DELETE' && r.url === `${docsUrl}/d-2`)
+      .flush(null);
+    expect(component.documentCount()).toBe(2);
+
+    httpMock.verify();
+  });
+
+  it('documentCount is scoped to the current patient', () => {
+    const docsUrl = (id: string) => `${environment.apiUrl}/api/patients/${id}/documents`;
+
+    fixture.detectChanges();
+    httpMock.expectOne(docsUrl('p-1')).flush([doc]);
+    expect(component.documentCount()).toBe(1);
+
+    fixture.componentRef.setInput('patientId', 'p-2');
+    fixture.detectChanges();
+    httpMock.expectOne(docsUrl('p-2')).flush([]);
+    expect(component.documentCount()).toBe(0);
+
+    httpMock.verify();
+  });
+
   it('openPreview opens the fullscreen dialog with the document as data', () => {
     const dialog = TestBed.inject(MatDialog);
     const openSpy = vi.spyOn(dialog, 'open');

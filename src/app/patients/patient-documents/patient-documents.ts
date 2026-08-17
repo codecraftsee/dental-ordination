@@ -49,6 +49,7 @@ export class PatientDocuments {
   uploading = signal(false);
 
   docs = computed<PatientDocument[]>(() => this.documentService.getAllFor(this.patientId()));
+  documentCount = computed(() => this.docs().length);
 
   displayedColumns = ['name', 'type', 'size', 'uploadedAt', 'actions'];
   dataSource = new MatTableDataSource<PatientDocument>();

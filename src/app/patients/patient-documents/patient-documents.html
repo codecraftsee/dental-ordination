@@ -30,6 +30,9 @@
             <mat-icon>close</mat-icon>
           </button>
         </div>
+        <p class="upload-zone__count" aria-live="polite">
+          {{ 'patient.documents.count' | translate: { count: documentCount() } }}
+        </p>
         <div class="upload-zone__form">
           <label class="upload-zone__field">
             <span class="upload-zone__label">{{ 'patient.documents.description' | translate }}</span>

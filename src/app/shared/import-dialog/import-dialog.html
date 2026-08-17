@@ -62,15 +62,43 @@
           } @else {
             <div class="import-dialog__file-list">
               @for (file of selectedFiles(); track file.name; let i = $index) {
-                <div class="import-dialog__file-item">
-                  <mat-icon>description</mat-icon>
+                <div class="import-dialog__file-item" [class.import-dialog__file-item--invalid]="isOversized(file)">
+                  <mat-icon>{{ isOversized(file) ? 'error_outline' : 'description' }}</mat-icon>
                   <span class="import-dialog__file-name">{{ file.name }}</span>
+                  <span class="import-dialog__file-size">{{ formatSize(file.size) }}</span>
                   <button type="button" class="import-dialog__file-remove" (click)="removeFile(i)" [attr.aria-label]="'common.delete' | translate">
                     <mat-icon>close</mat-icon>
                   </button>
                 </div>
               }
             </div>
+
+            @if (oversizedFiles().length > 0) {
+              <div class="import-dialog__warning" role="alert">
+                <mat-icon>warning</mat-icon>
+                <div class="import-dialog__warning-body">
+                  <p class="import-dialog__warning-title">{{ 'home.importTooLargeTitle' | translate }}</p>
+                  <p class="import-dialog__warning-desc">{{ tooLargeHint() }}</p>
+                </div>
+              </div>
+            }
+
+            <dl class="import-dialog__summary">
+              <div class="import-dialog__stat">
+                <dt class="import-dialog__stat-label">{{ 'home.importPlanFiles' | translate }}</dt>
+                <dd class="import-dialog__stat-value">{{ acceptedCount() }}</dd>
+              </div>
+              <div class="import-dialog__stat">
+                <dt class="import-dialog__stat-label">{{ 'home.importPlanSize' | translate }}</dt>
+                <dd class="import-dialog__stat-value">{{ totalSize() }}</dd>
+              </div>
+              @if (batchCount() > 1) {
+                <div class="import-dialog__stat">
+                  <dt class="import-dialog__stat-label">{{ 'home.importPlanBatches' | translate }}</dt>
+                  <dd class="import-dialog__stat-value">{{ batchCount() }}</dd>
+                </div>
+              }
+            </dl>
             <label class="import-dialog__browse-btn btn btn-outline btn-sm">
               {{ 'home.importAddMore' | translate }}
               <input type="file" multiple accept=".xlsx" (change)="onFilesSelected($event)" />
@@ -94,7 +122,7 @@
         <mat-icon>arrow_back</mat-icon>
         {{ 'common.back' | translate }}
       </button>
-      <button matButton="elevated" class="btn-amber" (click)="confirm()" [disabled]="selectedFiles().length === 0">
+      <button matButton="elevated" class="btn-amber" (click)="confirm()" [disabled]="acceptedCount() === 0">
         <mat-icon>upload_file</mat-icon>
         {{ 'home.importStart' | translate }}
       </button>

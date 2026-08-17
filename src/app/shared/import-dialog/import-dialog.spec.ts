@@ -8,6 +8,15 @@ import { TranslateService } from '../../services/translate.service';
 import { UserService } from '../../services/user.service';
 import { User, UserRole } from '../../models/user.model';
 
+const MB = 1024 * 1024;
+
+/** A File of a given size without allocating the bytes. */
+function fileOf(name: string, size: number): File {
+  const file = new File(['x'], name);
+  Object.defineProperty(file, 'size', { value: size });
+  return file;
+}
+
 describe('ImportDialog', () => {
   let component: ImportDialog;
   let fixture: ComponentFixture<ImportDialog>;
@@ -60,7 +69,13 @@ describe('ImportDialog', () => {
         },
         {
           provide: TranslateService,
-          useValue: { translate: (key: string) => key, version: signal('en'), currentLang: signal('en') },
+          useValue: {
+            translate: (key: string) => key,
+            format: (key: string, params: Record<string, string | number>) =>
+              `${key}:${JSON.stringify(params)}`,
+            version: signal('en'),
+            currentLang: signal('en'),
+          },
         },
       ],
     }).compileComponents();
@@ -125,6 +140,41 @@ describe('ImportDialog', () => {
     component.selectedFiles.set([file]);
     component.confirm();
     expect(mockDialogRef.close).toHaveBeenCalledWith({ doctorId: 'doc-1', files: [file] });
+  });
+
+  it('summarises the selection as files, size and upload count', () => {
+    component.selectedFiles.set([fileOf('a.xlsx', 2 * MB), fileOf('b.xlsx', 3 * MB)]);
+    expect(component.acceptedCount()).toBe(2);
+    expect(component.totalSize()).toBe('5.0 MB');
+    expect(component.batchCount()).toBe(1);
+    expect(component.oversizedFiles()).toEqual([]);
+  });
+
+  it('reports more than one upload when the selection exceeds a request', () => {
+    component.selectedFiles.set(Array.from({ length: 4 }, (_, i) => fileOf(`f${i}.xlsx`, 30 * MB)));
+    expect(component.batchCount()).toBeGreaterThan(1);
+  });
+
+  it('flags a file too large to ever be sent and keeps it out of the import', () => {
+    const good = fileOf('ok.xlsx', MB);
+    const huge = fileOf('huge.xlsx', 200 * MB);
+    component.selectedFiles.set([good, huge]);
+
+    expect(component.isOversized(huge)).toBe(true);
+    expect(component.isOversized(good)).toBe(false);
+    expect(component.oversizedFiles()).toEqual([huge]);
+    expect(component.acceptedCount()).toBe(1);
+
+    // Still listed for the user to see, but never handed to the import.
+    expect(component.selectedFiles()).toEqual([good, huge]);
+    component.confirm();
+    expect(mockDialogRef.close).toHaveBeenCalledWith({ doctorId: undefined, files: [good] });
+  });
+
+  it('leaves nothing to import when every file is oversized', () => {
+    component.selectedFiles.set([fileOf('huge.xlsx', 200 * MB)]);
+    expect(component.acceptedCount()).toBe(0);
+    expect(component.batchCount()).toBe(0);
   });
 
   it('cancel() closes the dialog with no value', () => {
