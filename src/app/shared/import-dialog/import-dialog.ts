@@ -84,9 +84,12 @@ export class ImportDialog {
 
   onFilesSelected(event: Event): void {
     const input = event.target as HTMLInputElement;
-    if (input.files && input.files.length > 0) {
-      this.selectedFiles.set(Array.from(input.files));
+    if (input.files) {
+      this.addFiles(Array.from(input.files));
     }
+    // Clear the input, or picking the same file again fires no change event and
+    // the second "add more" appears to do nothing.
+    input.value = '';
   }
 
   onDragOver(event: DragEvent): void {
@@ -102,12 +105,32 @@ export class ImportDialog {
     event.preventDefault();
     this.dragging.set(false);
     const files = event.dataTransfer?.files;
-    if (files && files.length > 0) {
-      const xlsx = Array.from(files).filter(f => f.name.endsWith('.xlsx'));
-      if (xlsx.length > 0) {
-        this.selectedFiles.set(xlsx);
+    if (!files) return;
+    this.addFiles(Array.from(files).filter(f => f.name.toLowerCase().endsWith('.xlsx')));
+  }
+
+  /**
+   * Append to the selection rather than replace it.
+   *
+   * One handler backs both the first pick and "Add more files", and it used to
+   * `set`, so adding a second batch silently discarded everything chosen before it.
+   *
+   * Deduped by filename: re-picking a file already in the list is the natural way
+   * to hit this, and the list is tracked by name in the template, so letting a
+   * duplicate through would trip `@for`'s duplicate-key check as well.
+   */
+  private addFiles(incoming: File[]): void {
+    if (incoming.length === 0) return;
+    this.selectedFiles.update(current => {
+      const seen = new Set(current.map(f => f.name));
+      const added: File[] = [];
+      for (const file of incoming) {
+        if (seen.has(file.name)) continue;
+        seen.add(file.name);
+        added.push(file);
       }
-    }
+      return added.length > 0 ? [...current, ...added] : current;
+    });
   }
 
   removeFile(index: number): void {

@@ -17,6 +17,19 @@ function fileOf(name: string, size: number): File {
   return file;
 }
 
+/** jsdom has no usable FileList, so the handlers get a shaped stand-in. */
+function changeEvent(files: File[]): Event {
+  const input = { files, value: 'C:\\fakepath\\picked.xlsx' } as unknown as HTMLInputElement;
+  return { target: input } as unknown as Event;
+}
+
+function dropEvent(files: File[]): DragEvent {
+  return {
+    preventDefault: () => undefined,
+    dataTransfer: { files },
+  } as unknown as DragEvent;
+}
+
 describe('ImportDialog', () => {
   let component: ImportDialog;
   let fixture: ComponentFixture<ImportDialog>;
@@ -140,6 +153,42 @@ describe('ImportDialog', () => {
     component.selectedFiles.set([file]);
     component.confirm();
     expect(mockDialogRef.close).toHaveBeenCalledWith({ doctorId: 'doc-1', files: [file] });
+  });
+
+  it('adds to the selection instead of replacing it', () => {
+    component.onFilesSelected(changeEvent([fileOf('a.xlsx', MB)]));
+    component.onFilesSelected(changeEvent([fileOf('b.xlsx', MB)]));
+    expect(component.selectedFiles().map(f => f.name)).toEqual(['a.xlsx', 'b.xlsx']);
+  });
+
+  it('ignores a file already in the selection', () => {
+    component.onFilesSelected(changeEvent([fileOf('a.xlsx', MB), fileOf('b.xlsx', MB)]));
+    component.onFilesSelected(changeEvent([fileOf('b.xlsx', MB), fileOf('c.xlsx', MB)]));
+    expect(component.selectedFiles().map(f => f.name)).toEqual(['a.xlsx', 'b.xlsx', 'c.xlsx']);
+  });
+
+  it('dedupes within a single pick as well', () => {
+    component.onFilesSelected(changeEvent([fileOf('a.xlsx', MB), fileOf('a.xlsx', MB)]));
+    expect(component.selectedFiles().map(f => f.name)).toEqual(['a.xlsx']);
+  });
+
+  it('clears the input so the same file can be picked again', () => {
+    const event = changeEvent([fileOf('a.xlsx', MB)]);
+    component.onFilesSelected(event);
+    expect((event.target as HTMLInputElement).value).toBe('');
+  });
+
+  it('drop appends, and keeps only xlsx regardless of case', () => {
+    component.selectedFiles.set([fileOf('a.xlsx', MB)]);
+    component.onDrop(dropEvent([fileOf('b.XLSX', MB), fileOf('notes.pdf', MB)]));
+    expect(component.selectedFiles().map(f => f.name)).toEqual(['a.xlsx', 'b.XLSX']);
+  });
+
+  it('a drop of nothing usable leaves the selection alone', () => {
+    const existing = [fileOf('a.xlsx', MB)];
+    component.selectedFiles.set(existing);
+    component.onDrop(dropEvent([fileOf('notes.pdf', MB)]));
+    expect(component.selectedFiles()).toBe(existing);
   });
 
   it('summarises the selection as files, size and upload count', () => {
