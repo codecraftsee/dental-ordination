@@ -27,6 +27,12 @@ export interface PatientCreate {
   email?: string;
 }
 
+/**
+ * No `importIncomplete` here: the backend's `PatientUpdate` schema has no such field
+ * and Pydantic drops unknown keys silently, so sending it looked like it worked and
+ * did nothing. The flag is cleared through `PatientService.dismissImportWarning`,
+ * which PATCHes `/dismiss-warning`.
+ */
 export interface PatientUpdate {
   firstName?: string;
   lastName?: string;
@@ -37,5 +43,4 @@ export interface PatientUpdate {
   city?: string;
   phone?: string;
   email?: string;
-  importIncomplete?: boolean;
 }
