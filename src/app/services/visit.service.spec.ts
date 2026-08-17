@@ -51,6 +51,23 @@ describe('VisitService', () => {
     expect(service.getAll()).toEqual([]);
   });
 
+  it('coerces the string price Pydantic sends for Decimal into a number', () => {
+    service.loadAll().subscribe();
+    httpMock
+      .expectOne(() => true)
+      .flush([
+        { ...visit({ id: '1', date: '2026-03-10' }), price: '1500.00' },
+        { ...visit({ id: '2', date: '2026-03-11' }), price: '0.00' },
+        { ...visit({ id: '3', date: '2026-03-12' }), price: null },
+      ]);
+
+    expect(service.getById('1')?.price).toBe(1500);
+    // '0.00' is truthy where 0 is falsy, so an unpaid zero-price visit used to read
+    // as money owed in patient-list's `!v.paid && v.price` check.
+    expect(service.getById('2')?.price).toBe(0);
+    expect(service.getById('3')?.price).toBeUndefined();
+  });
+
   it('isLoaded returns false before loadAll', () => {
     expect(service.isLoaded()).toBe(false);
   });

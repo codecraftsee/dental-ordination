@@ -42,6 +42,19 @@ describe('TreatmentService', () => {
     httpMock.verify();
   });
 
+  it('coerces the string defaultPrice Pydantic sends for Decimal into a number', () => {
+    service.loadAll().subscribe();
+    httpMock
+      .expectOne(() => true)
+      .flush([
+        { ...mockTreatments[0], defaultPrice: '3000.00' },
+        { ...mockTreatments[1], defaultPrice: null },
+      ]);
+
+    expect(service.getById('1')?.defaultPrice).toBe(3000);
+    expect(service.getById('2')?.defaultPrice).toBeUndefined();
+  });
+
   function loadMocks(): void {
     service.loadAll().subscribe();
     httpMock.expectOne(() => true).flush(mockTreatments);

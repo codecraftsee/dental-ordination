@@ -1,11 +1,16 @@
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { Visit, VisitCreate, VisitUpdate } from '../models/visit.model';
-import { EntityCacheService, matchesQuery } from './entity-cache.service';
+import { EntityCacheService, matchesQuery, toNumber } from './entity-cache.service';
 
 @Injectable({ providedIn: 'root' })
 export class VisitService extends EntityCacheService<Visit, VisitCreate, VisitUpdate> {
   protected readonly path = '/api/visits';
+
+  /** `price` is a Decimal on the backend, so it arrives as a string. See `toNumber`. */
+  protected override normalize(visit: Visit): Visit {
+    return { ...visit, price: toNumber(visit.price) };
+  }
 
   override loadAll(params?: {
     patientId?: string;

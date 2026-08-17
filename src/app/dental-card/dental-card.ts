@@ -44,7 +44,7 @@ export default class DentalCard {
   displayedColumns = ['date', 'diagnosis', 'treatment', 'price', 'paid', 'doctor'];
 
   totalCost = computed(() => {
-    return this.visits().reduce((sum, v) => sum + (Number(v.price) || 0), 0);
+    return this.visits().reduce((sum, v) => sum + (v.price ?? 0), 0);
   });
 
   constructor() {

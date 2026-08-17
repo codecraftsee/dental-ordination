@@ -1,9 +1,25 @@
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { inject, signal } from '@angular/core';
-import { Observable, tap } from 'rxjs';
+import { map, Observable, tap } from 'rxjs';
 import { environment } from '../../environments/environment';
 
 export type QueryParams = Record<string, string | undefined>;
+
+/**
+ * Coerce a numeric field that the API sends as a string.
+ *
+ * The backend types money as `Decimal` and Pydantic v2 serializes Decimal to JSON
+ * as a string, with no custom encoder on our schemas. Our models declare `number`,
+ * so without this the value is a string at runtime and everything downstream is
+ * subtly wrong: `toLocaleString` returns the raw digits instead of formatting,
+ * mat-sort compares lexicographically ('900.00' > '1500.00'), and `'0.00'` is
+ * truthy where `0` is falsy.
+ */
+export function toNumber(value: number | string | null | undefined): number | undefined {
+  if (value == null || value === '') return undefined;
+  const parsed = Number(value);
+  return Number.isFinite(parsed) ? parsed : undefined;
+}
 
 /**
  * The signal-caching CRUD core shared by every entity service.
@@ -47,6 +63,7 @@ export abstract class EntityCacheService<T extends { id: string }, TCreate, TUpd
       if (value) httpParams = httpParams.set(key, value);
     }
     return this.http.get<T[]>(this.apiUrl, { params: httpParams }).pipe(
+      map(fetched => fetched.map(item => this.normalize(item))),
       tap(fetched => {
         this.items.set(fetched);
         this.loaded = true;
@@ -55,19 +72,21 @@ export abstract class EntityCacheService<T extends { id: string }, TCreate, TUpd
   }
 
   loadById(id: string): Observable<T> {
-    return this.http.get<T>(`${this.apiUrl}/${id}`);
+    return this.http.get<T>(`${this.apiUrl}/${id}`).pipe(map(item => this.normalize(item)));
   }
 
   create(data: TCreate): Observable<T> {
-    return this.http
-      .post<T>(this.apiUrl, data)
-      .pipe(tap(created => this.items.set([created, ...this.items()])));
+    return this.http.post<T>(this.apiUrl, data).pipe(
+      map(created => this.normalize(created)),
+      tap(created => this.items.set([created, ...this.items()])),
+    );
   }
 
   update(id: string, data: TUpdate): Observable<T> {
-    return this.http
-      .put<T>(`${this.apiUrl}/${id}`, data)
-      .pipe(tap(updated => this.replace(id, updated)));
+    return this.http.put<T>(`${this.apiUrl}/${id}`, data).pipe(
+      map(updated => this.normalize(updated)),
+      tap(updated => this.replace(id, updated)),
+    );
   }
 
   delete(id: string): Observable<void> {
@@ -78,9 +97,20 @@ export abstract class EntityCacheService<T extends { id: string }, TCreate, TUpd
 
   /** PATCH a sub-path of one entity and replace it in the cache. */
   protected patchOne(id: string, subPath: string, body: unknown = {}): Observable<T> {
-    return this.http
-      .patch<T>(`${this.apiUrl}/${id}/${subPath}`, body)
-      .pipe(tap(updated => this.replace(id, updated)));
+    return this.http.patch<T>(`${this.apiUrl}/${id}/${subPath}`, body).pipe(
+      map(updated => this.normalize(updated)),
+      tap(updated => this.replace(id, updated)),
+    );
+  }
+
+  /**
+   * Fix up one entity as it arrives from the API, before anything else sees it.
+   *
+   * Every response passes through here — list, single, create, update, patch — so an
+   * override is the one place a subclass has to repair a field. Identity by default.
+   */
+  protected normalize(entity: T): T {
+    return entity;
   }
 
   private replace(id: string, updated: T): void {

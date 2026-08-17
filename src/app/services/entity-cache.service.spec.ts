@@ -3,7 +3,7 @@ import { TestBed } from '@angular/core/testing';
 import { provideHttpClient } from '@angular/common/http';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { Observable } from 'rxjs';
-import { EntityCacheService, matchesQuery } from './entity-cache.service';
+import { EntityCacheService, matchesQuery, toNumber } from './entity-cache.service';
 import { environment } from '../../environments/environment';
 
 interface Thing {
@@ -21,6 +21,24 @@ class ThingService extends EntityCacheService<Thing, ThingCreate, ThingUpdate> {
 
   dismiss(id: string): Observable<Thing> {
     return this.patchOne(id, 'dismiss-warning');
+  }
+}
+
+interface Counted {
+  id: string;
+  count?: number;
+}
+
+@Injectable({ providedIn: 'root' })
+class CountedService extends EntityCacheService<Counted, Omit<Counted, 'id'>, Partial<Counted>> {
+  protected readonly path = '/api/counted';
+
+  bump(id: string): Observable<Counted> {
+    return this.patchOne(id, 'bump');
+  }
+
+  protected override normalize(entity: Counted): Counted {
+    return { ...entity, count: toNumber(entity.count) };
   }
 }
 
@@ -127,6 +145,91 @@ describe('EntityCacheService', () => {
       .expectOne(r => r.method === 'DELETE')
       .flush({ detail: 'nope' }, { status: 500, statusText: 'Server Error' });
     expect(service.getAll().map(t => t.id)).toEqual(['1', '2']);
+  });
+});
+
+describe('EntityCacheService normalize hook', () => {
+  let service: CountedService;
+  let httpMock: HttpTestingController;
+  const API_COUNTED = `${environment.apiUrl}/api/counted`;
+
+  beforeEach(() => {
+    TestBed.configureTestingModule({
+      providers: [provideHttpClient(), provideHttpClientTesting()],
+    });
+    service = TestBed.inject(CountedService);
+    httpMock = TestBed.inject(HttpTestingController);
+  });
+
+  afterEach(() => {
+    httpMock.verify();
+  });
+
+  // Every ingress is covered separately: a normalize applied on load but skipped on
+  // create is exactly the hole that leaves one stringly-typed row in a numeric cache.
+  it('runs on loadAll', () => {
+    service.loadAll().subscribe();
+    httpMock.expectOne(API_COUNTED).flush([{ id: '1', count: '1500.00' }]);
+    expect(service.getById('1')?.count).toBe(1500);
+  });
+
+  it('runs on loadById', () => {
+    let received: Counted | undefined;
+    service.loadById('1').subscribe(c => (received = c));
+    httpMock.expectOne(`${API_COUNTED}/1`).flush({ id: '1', count: '42.50' });
+    expect(received?.count).toBe(42.5);
+  });
+
+  it('runs on create', () => {
+    service.create({}).subscribe();
+    httpMock.expectOne(r => r.method === 'POST').flush({ id: '9', count: '7.00' });
+    expect(service.getById('9')?.count).toBe(7);
+  });
+
+  it('runs on update', () => {
+    service.loadAll().subscribe();
+    httpMock.expectOne(API_COUNTED).flush([{ id: '1', count: '1.00' }]);
+    service.update('1', {}).subscribe();
+    httpMock.expectOne(r => r.method === 'PUT').flush({ id: '1', count: '2.00' });
+    expect(service.getById('1')?.count).toBe(2);
+  });
+
+  it('runs on patchOne', () => {
+    service.loadAll().subscribe();
+    httpMock.expectOne(API_COUNTED).flush([{ id: '1', count: '1.00' }]);
+    service.bump('1').subscribe();
+    httpMock.expectOne(r => r.method === 'PATCH').flush({ id: '1', count: '3.00' });
+    expect(service.getById('1')?.count).toBe(3);
+  });
+
+  it('leaves the cache sortable as numbers, not lexicographically', () => {
+    service.loadAll().subscribe();
+    httpMock
+      .expectOne(API_COUNTED)
+      .flush([{ id: 'a', count: '900.00' }, { id: 'b', count: '1500.00' }]);
+    const sorted = [...service.getAll()].sort((x, y) => (x.count ?? 0) - (y.count ?? 0));
+    expect(sorted.map(c => c.id)).toEqual(['a', 'b']);
+  });
+});
+
+describe('toNumber', () => {
+  it('parses the strings Pydantic sends for Decimal', () => {
+    expect(toNumber('1500.00')).toBe(1500);
+    expect(toNumber('0.00')).toBe(0);
+    expect(toNumber('-12.5')).toBe(-12.5);
+  });
+
+  it('passes numbers through unchanged', () => {
+    expect(toNumber(0)).toBe(0);
+    expect(toNumber(1500)).toBe(1500);
+  });
+
+  it('maps absent and unparseable values to undefined', () => {
+    expect(toNumber(null)).toBeUndefined();
+    expect(toNumber(undefined)).toBeUndefined();
+    expect(toNumber('')).toBeUndefined();
+    expect(toNumber('abc')).toBeUndefined();
+    expect(toNumber(Number.NaN)).toBeUndefined();
   });
 });
 
