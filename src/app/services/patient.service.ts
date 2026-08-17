@@ -1,9 +1,10 @@
-import { Injectable, NgZone, inject, signal } from '@angular/core';
-import { HttpClient, HttpParams } from '@angular/common/http';
-import { Observable, tap } from 'rxjs';
+import { Injectable, NgZone, inject } from '@angular/core';
+import { Observable } from 'rxjs';
 import { environment } from '../../environments/environment';
 import { Patient, PatientCreate, PatientUpdate } from '../models/patient.model';
 import { AuthService } from './auth.service';
+import { EntityCacheService, matchesQuery } from './entity-cache.service';
+import { snakeToCamelKeys } from '../interceptors/case-transform.interceptor';
 
 export interface ImportResult {
   patientsCreated: number;
@@ -19,98 +20,38 @@ export type ImportProgressEvent =
   | { type: 'complete'; summary: ImportResult };
 
 @Injectable({ providedIn: 'root' })
-export class PatientService {
-  private http = inject(HttpClient);
+export class PatientService extends EntityCacheService<Patient, PatientCreate, PatientUpdate> {
+  protected readonly path = '/api/patients';
+
   private authService = inject(AuthService);
   private ngZone = inject(NgZone);
-  private apiUrl = environment.apiUrl + '/api/patients';
 
-  private readonly items = signal<Patient[]>([]);
-  private loaded = false;
-
-  getAll(): Patient[] {
-    return this.items();
-  }
-
-  getById(id: string): Patient | undefined {
-    return this.items().find(p => p.id === id);
-  }
-
-  loadAll(params?: { search?: string; city?: string }): Observable<Patient[]> {
-    let httpParams = new HttpParams();
-    if (params?.search) httpParams = httpParams.set('search', params.search);
-    if (params?.city) httpParams = httpParams.set('city', params.city);
-
-    return this.http.get<Patient[]>(this.apiUrl, { params: httpParams }).pipe(
-      tap(patients => {
-        this.items.set(patients);
-        this.loaded = true;
-      }),
-    );
-  }
-
-  loadById(id: string): Observable<Patient> {
-    return this.http.get<Patient>(`${this.apiUrl}/${id}`);
-  }
-
-  create(data: PatientCreate): Observable<Patient> {
-    return this.http.post<Patient>(this.apiUrl, data).pipe(
-      tap(patient => this.items.set([patient, ...this.items()])),
-    );
-  }
-
-  update(id: string, data: PatientUpdate): Observable<Patient> {
-    return this.http.put<Patient>(`${this.apiUrl}/${id}`, data).pipe(
-      tap(updated => {
-        this.items.set(this.items().map(p => (p.id === id ? updated : p)));
-      }),
-    );
+  override loadAll(params?: { search?: string; city?: string }): Observable<Patient[]> {
+    return super.loadAll({ search: params?.search, city: params?.city });
   }
 
   dismissImportWarning(id: string): Observable<Patient> {
-    return this.http.patch<Patient>(`${this.apiUrl}/${id}/dismiss-warning`, {}).pipe(
-      tap(updated => {
-        this.items.set(this.items().map(p => (p.id === id ? updated : p)));
-      }),
-    );
-  }
-
-  delete(id: string): Observable<void> {
-    return this.http.delete<void>(`${this.apiUrl}/${id}`).pipe(
-      tap(() => this.items.set(this.items().filter(p => p.id !== id))),
-    );
+    return this.patchOne(id, 'dismiss-warning');
   }
 
   search(query: string, filters: { city?: string; gender?: string }): Patient[] {
-    let results = this.items();
-    if (filters.city) {
-      results = results.filter(p => p.city === filters.city);
-    }
-    if (filters.gender) {
-      results = results.filter(p => p.gender === filters.gender);
-    }
-    if (query.trim()) {
-      const q = query.toLowerCase().trim();
-      results = results.filter(
-        p =>
-          p.firstName.toLowerCase().includes(q) ||
-          p.lastName.toLowerCase().includes(q) ||
-          (p.phone || '').includes(q) ||
-          (p.city || '').toLowerCase().includes(q),
-      );
-    }
-    return results;
+    return this.getAll()
+      .filter(p => !filters.city || p.city === filters.city)
+      .filter(p => !filters.gender || p.gender === filters.gender)
+      .filter(p => matchesQuery(p, query, item => [item.firstName, item.lastName, item.phone, item.city]));
   }
 
   getCities(): string[] {
-    const cities = new Set(this.items().map(p => p.city).filter(Boolean) as string[]);
+    const cities = new Set(this.getAll().map(p => p.city).filter(Boolean) as string[]);
     return [...cities].sort();
   }
 
-  isLoaded(): boolean {
-    return this.loaded;
-  }
-
+  /**
+   * Streams the XLSX import over SSE. This goes through `fetch` rather than
+   * HttpClient because HttpClient cannot surface a response body incrementally,
+   * which also means it bypasses the case interceptor — hence the local
+   * conversion below.
+   */
   importXlsx(files: File[], doctorId?: string): Observable<ImportProgressEvent> {
     return new Observable(observer => {
       const controller = new AbortController();
@@ -144,7 +85,7 @@ export class PatientService {
           for (const part of parts) {
             const line = part.trim();
             if (line.startsWith('data: ')) {
-              const parsed = this.snakeToCamel(JSON.parse(line.slice(6))) as ImportProgressEvent;
+              const parsed = snakeToCamelKeys(JSON.parse(line.slice(6))) as ImportProgressEvent;
               this.ngZone.run(() => observer.next(parsed));
             }
           }
@@ -159,18 +100,5 @@ export class PatientService {
         reader?.cancel();
       };
     });
-  }
-
-  private snakeToCamel(obj: unknown): unknown {
-    if (Array.isArray(obj)) return obj.map(v => this.snakeToCamel(v));
-    if (obj !== null && typeof obj === 'object') {
-      return Object.fromEntries(
-        Object.entries(obj as Record<string, unknown>).map(([k, v]) => [
-          k.replace(/_([a-z])/g, (_, c: string) => c.toUpperCase()),
-          this.snakeToCamel(v),
-        ]),
-      );
-    }
-    return obj;
   }
 }

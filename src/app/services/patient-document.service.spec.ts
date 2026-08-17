@@ -6,7 +6,9 @@ import { PatientDocument } from '../models/patient-document.model';
 import { environment } from '../../environments/environment';
 
 const PATIENT_ID = 'p-1';
+const OTHER_PATIENT_ID = 'p-2';
 const DOCS_URL = `${environment.apiUrl}/api/patients/${PATIENT_ID}/documents`;
+const OTHER_DOCS_URL = `${environment.apiUrl}/api/patients/${OTHER_PATIENT_ID}/documents`;
 
 const mockDocs: PatientDocument[] = [
   {
@@ -31,6 +33,16 @@ const mockDocs: PatientDocument[] = [
   },
 ];
 
+const otherDoc: PatientDocument = {
+  id: 'd-8',
+  patientId: OTHER_PATIENT_ID,
+  filename: 'consent.pdf',
+  contentType: 'application/pdf',
+  sizeBytes: 120_000,
+  uploadedAt: '2026-04-20T10:00:00Z',
+  signedUrl: 'https://storage.example/consent.pdf?token=xyz',
+};
+
 describe('PatientDocumentService', () => {
   let service: PatientDocumentService;
   let httpMock: HttpTestingController;
@@ -47,8 +59,8 @@ describe('PatientDocumentService', () => {
     httpMock.verify();
   });
 
-  it('getAll returns empty array before any load', () => {
-    expect(service.getAll()).toEqual([]);
+  it('getAllFor returns empty array before any load', () => {
+    expect(service.getAllFor(PATIENT_ID)).toEqual([]);
   });
 
   it('isLoadedFor returns false before load', () => {
@@ -60,7 +72,7 @@ describe('PatientDocumentService', () => {
       expect(docs).toEqual(mockDocs);
     });
     httpMock.expectOne(DOCS_URL).flush(mockDocs);
-    expect(service.getAll()).toEqual(mockDocs);
+    expect(service.getAllFor(PATIENT_ID)).toEqual(mockDocs);
     expect(service.isLoadedFor(PATIENT_ID)).toBe(true);
     expect(service.isLoadedFor('other')).toBe(false);
   });
@@ -68,8 +80,55 @@ describe('PatientDocumentService', () => {
   it('getById returns the correct document after load', () => {
     service.loadByPatientId(PATIENT_ID).subscribe();
     httpMock.expectOne(DOCS_URL).flush(mockDocs);
-    expect(service.getById('d-1')?.filename).toBe('xray.pdf');
-    expect(service.getById('missing')).toBeUndefined();
+    expect(service.getById(PATIENT_ID, 'd-1')?.filename).toBe('xray.pdf');
+    expect(service.getById(PATIENT_ID, 'missing')).toBeUndefined();
+  });
+
+  it('caches each patient separately instead of overwriting one shared list', () => {
+    service.loadByPatientId(PATIENT_ID).subscribe();
+    httpMock.expectOne(DOCS_URL).flush(mockDocs);
+
+    service.loadByPatientId(OTHER_PATIENT_ID).subscribe();
+    // The second patient reads empty, not the first patient's documents, while its
+    // own request is still in flight — this is the bleed the flat cache allowed.
+    expect(service.getAllFor(OTHER_PATIENT_ID)).toEqual([]);
+
+    httpMock.expectOne(OTHER_DOCS_URL).flush([otherDoc]);
+    expect(service.getAllFor(OTHER_PATIENT_ID)).toEqual([otherDoc]);
+    expect(service.getAllFor(PATIENT_ID)).toEqual(mockDocs);
+  });
+
+  it('a late response for an abandoned patient does not overwrite the current one', () => {
+    service.loadByPatientId(PATIENT_ID).subscribe();
+    const firstReq = httpMock.expectOne(DOCS_URL);
+
+    service.loadByPatientId(OTHER_PATIENT_ID).subscribe();
+    httpMock.expectOne(OTHER_DOCS_URL).flush([otherDoc]);
+
+    firstReq.flush(mockDocs);
+
+    expect(service.getAllFor(OTHER_PATIENT_ID)).toEqual([otherDoc]);
+    expect(service.getAllFor(PATIENT_ID)).toEqual(mockDocs);
+  });
+
+  it('upload and delete only touch the given patient bucket', () => {
+    service.loadByPatientId(PATIENT_ID).subscribe();
+    httpMock.expectOne(DOCS_URL).flush(mockDocs);
+    service.loadByPatientId(OTHER_PATIENT_ID).subscribe();
+    httpMock.expectOne(OTHER_DOCS_URL).flush([otherDoc]);
+
+    const file = new File(['x'], 'new.png', { type: 'image/png' });
+    service.upload(OTHER_PATIENT_ID, file).subscribe();
+    httpMock.expectOne(OTHER_DOCS_URL).flush({ ...otherDoc, id: 'd-9' });
+    expect(service.getAllFor(OTHER_PATIENT_ID).length).toBe(2);
+    expect(service.getAllFor(PATIENT_ID)).toEqual(mockDocs);
+
+    service.delete(OTHER_PATIENT_ID, 'd-9').subscribe();
+    httpMock
+      .expectOne(req => req.method === 'DELETE' && req.url === `${OTHER_DOCS_URL}/d-9`)
+      .flush(null);
+    expect(service.getAllFor(OTHER_PATIENT_ID)).toEqual([otherDoc]);
+    expect(service.getAllFor(PATIENT_ID)).toEqual(mockDocs);
   });
 
   it('upload posts FormData with file field and prepends to cache', () => {
@@ -97,8 +156,8 @@ describe('PatientDocumentService', () => {
     expect(body.get('description')).toBe('checkup notes');
     req.flush(uploaded);
 
-    expect(service.getAll()[0].id).toBe('d-3');
-    expect(service.getAll().length).toBe(3);
+    expect(service.getAllFor(PATIENT_ID)[0].id).toBe('d-3');
+    expect(service.getAllFor(PATIENT_ID).length).toBe(3);
   });
 
   it('upload omits description when blank', () => {
@@ -117,7 +176,7 @@ describe('PatientDocumentService', () => {
     service.delete(PATIENT_ID, 'd-1').subscribe();
     httpMock.expectOne(req => req.method === 'DELETE' && req.url === `${DOCS_URL}/d-1`).flush(null);
 
-    expect(service.getAll().length).toBe(1);
-    expect(service.getById('d-1')).toBeUndefined();
+    expect(service.getAllFor(PATIENT_ID).length).toBe(1);
+    expect(service.getById(PATIENT_ID, 'd-1')).toBeUndefined();
   });
 });

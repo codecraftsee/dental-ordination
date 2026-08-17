@@ -6,6 +6,7 @@ const mockTranslations = {
   'nav.home': 'Home',
   'home.importingFilesCount_one': '1 file',
   'home.importingFilesCount_other': '{count} files',
+  'home.importingFilesCount_few': '{count} fajla',
   'home.importSummary': 'Imported {filesProcessed} file(s): {patientsCreated} new patient(s), {visitsCreated} visit(s).',
   'home.importFailed': 'Import failed: {detail}',
 };
@@ -67,6 +68,32 @@ describe('TranslateService', () => {
     const service = TestBed.inject(TranslateService);
     await service.setLanguage('en');
     expect(service.translatePlural('home.importingFilesCount', 5)).toBe('5 files');
+  });
+
+  // Serbian has a third plural category, `few`, for 2-4 (and 22-24, 32-34...) that
+  // English does not. The category comes from Intl.PluralRules rather than a
+  // hand-rolled one/other split, so `sr.json`'s `_few` key is live — these lock that
+  // in, since a regression here is silent: it just picks the `_other` wording.
+  it('translatePlural selects the Serbian few form for 2-4', async () => {
+    const service = TestBed.inject(TranslateService);
+    await service.setLanguage('sr');
+    expect(service.translatePlural('home.importingFilesCount', 2)).toBe('2 fajla');
+    expect(service.translatePlural('home.importingFilesCount', 4)).toBe('4 fajla');
+    expect(service.translatePlural('home.importingFilesCount', 22)).toBe('22 fajla');
+  });
+
+  it('translatePlural keeps one and other distinct in Serbian', async () => {
+    const service = TestBed.inject(TranslateService);
+    await service.setLanguage('sr');
+    expect(service.translatePlural('home.importingFilesCount', 1)).toBe('1 file');
+    expect(service.translatePlural('home.importingFilesCount', 21)).toBe('1 file');
+    expect(service.translatePlural('home.importingFilesCount', 5)).toBe('5 files');
+  });
+
+  it('translatePlural falls back to _other when the language has no such category', async () => {
+    const service = TestBed.inject(TranslateService);
+    await service.setLanguage('en');
+    expect(service.translatePlural('home.importingFilesCount', 2)).toBe('2 files');
   });
 
   it('translatePlural falls back to baseKey when no variant found', async () => {

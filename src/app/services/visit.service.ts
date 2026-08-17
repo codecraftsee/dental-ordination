@@ -1,100 +1,51 @@
-import { Injectable, inject, signal } from '@angular/core';
-import { HttpClient, HttpParams } from '@angular/common/http';
-import { Observable, tap } from 'rxjs';
-import { environment } from '../../environments/environment';
+import { Injectable } from '@angular/core';
+import { Observable } from 'rxjs';
 import { Visit, VisitCreate, VisitUpdate } from '../models/visit.model';
+import { EntityCacheService, matchesQuery, toNumber } from './entity-cache.service';
 
 @Injectable({ providedIn: 'root' })
-export class VisitService {
-  private http = inject(HttpClient);
-  private apiUrl = environment.apiUrl + '/api/visits';
+export class VisitService extends EntityCacheService<Visit, VisitCreate, VisitUpdate> {
+  protected readonly path = '/api/visits';
 
-  private readonly items = signal<Visit[]>([]);
-  private loaded = false;
-
-  getAll(): Visit[] {
-    return this.items();
+  /** `price` is a Decimal on the backend, so it arrives as a string. See `toNumber`. */
+  protected override normalize(visit: Visit): Visit {
+    return { ...visit, price: toNumber(visit.price) };
   }
 
-  getById(id: string): Visit | undefined {
-    return this.items().find(v => v.id === id);
-  }
-
-  loadAll(params?: {
+  override loadAll(params?: {
     patientId?: string;
     doctorId?: string;
     dateFrom?: string;
     dateTo?: string;
   }): Observable<Visit[]> {
-    let httpParams = new HttpParams();
-    if (params?.patientId) httpParams = httpParams.set('patient_id', params.patientId);
-    if (params?.doctorId) httpParams = httpParams.set('doctor_id', params.doctorId);
-    if (params?.dateFrom) httpParams = httpParams.set('date_from', params.dateFrom);
-    if (params?.dateTo) httpParams = httpParams.set('date_to', params.dateTo);
-
-    return this.http.get<Visit[]>(this.apiUrl, { params: httpParams }).pipe(
-      tap(visits => {
-        this.items.set(visits);
-        this.loaded = true;
-      }),
-    );
-  }
-
-  loadById(id: string): Observable<Visit> {
-    return this.http.get<Visit>(`${this.apiUrl}/${id}`);
-  }
-
-  create(data: VisitCreate): Observable<Visit> {
-    return this.http.post<Visit>(this.apiUrl, data).pipe(
-      tap(visit => this.items.set([visit, ...this.items()])),
-    );
-  }
-
-  update(id: string, data: VisitUpdate): Observable<Visit> {
-    return this.http.put<Visit>(`${this.apiUrl}/${id}`, data).pipe(
-      tap(updated => {
-        this.items.set(this.items().map(v => (v.id === id ? updated : v)));
-      }),
-    );
+    return super.loadAll({ ...params });
   }
 
   dismissImportWarning(id: string): Observable<Visit> {
-    return this.http.patch<Visit>(`${this.apiUrl}/${id}/dismiss-warning`, {}).pipe(
-      tap(updated => {
-        this.items.set(this.items().map(v => (v.id === id ? updated : v)));
-      }),
-    );
-  }
-
-  delete(id: string): Observable<void> {
-    return this.http.delete<void>(`${this.apiUrl}/${id}`).pipe(
-      tap(() => this.items.set(this.items().filter(v => v.id !== id))),
-    );
+    return this.patchOne(id, 'dismiss-warning');
   }
 
   getByPatientId(patientId: string): Visit[] {
-    return this.items()
+    return this.getAll()
       .filter(v => v.patientId === patientId)
-      .sort((a, b) => b.date.localeCompare(a.date));
+      .sort(byDateDescending);
   }
 
   getByDoctorId(doctorId: string): Visit[] {
-    return this.items()
+    return this.getAll()
       .filter(v => v.doctorId === doctorId)
-      .sort((a, b) => b.date.localeCompare(a.date));
+      .sort(byDateDescending);
   }
 
   getRecent(count: number): Visit[] {
-    return [...this.items()]
-      .sort((a, b) => b.date.localeCompare(a.date))
-      .slice(0, count);
+    return [...this.getAll()].sort(byDateDescending).slice(0, count);
   }
 
   getThisMonthCount(): number {
     const now = new Date();
     const year = now.getFullYear();
     const month = now.getMonth();
-    return this.items().filter(v => {
+    return this.getAll().filter(v => {
       const d = new Date(v.date);
       return d.getFullYear() === year && d.getMonth() === month;
     }).length;
@@ -106,36 +57,23 @@ export class VisitService {
     patientNames: Map<string, string>,
     doctorNames: Map<string, string>,
   ): Visit[] {
-    let results = this.items();
-    if (filters.patientId) {
-      results = results.filter(v => v.patientId === filters.patientId);
-    }
-    if (filters.doctorId) {
-      results = results.filter(v => v.doctorId === filters.doctorId);
-    }
-    if (filters.dateFrom) {
-      results = results.filter(v => v.date >= filters.dateFrom!);
-    }
-    if (filters.dateTo) {
-      results = results.filter(v => v.date <= filters.dateTo!);
-    }
-    if (query.trim()) {
-      const q = query.toLowerCase().trim();
-      results = results.filter(v => {
-        const patientName = patientNames.get(v.patientId) || '';
-        const doctorName = doctorNames.get(v.doctorId) || '';
-        return (
-          patientName.toLowerCase().includes(q) ||
-          doctorName.toLowerCase().includes(q) ||
-          (v.diagnosisNotes || '').toLowerCase().includes(q) ||
-          (v.treatmentNotes || '').toLowerCase().includes(q)
-        );
-      });
-    }
-    return results.sort((a, b) => b.date.localeCompare(a.date));
+    return this.getAll()
+      .filter(v => !filters.patientId || v.patientId === filters.patientId)
+      .filter(v => !filters.doctorId || v.doctorId === filters.doctorId)
+      .filter(v => !filters.dateFrom || v.date >= filters.dateFrom)
+      .filter(v => !filters.dateTo || v.date <= filters.dateTo)
+      .filter(v =>
+        matchesQuery(v, query, item => [
+          patientNames.get(item.patientId),
+          doctorNames.get(item.doctorId),
+          item.diagnosisNotes,
+          item.treatmentNotes,
+        ]),
+      )
+      .sort(byDateDescending);
   }
+}
 
-  isLoaded(): boolean {
-    return this.loaded;
-  }
+function byDateDescending(a: Visit, b: Visit): number {
+  return b.date.localeCompare(a.date);
 }

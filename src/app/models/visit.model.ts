@@ -35,6 +35,10 @@ export interface VisitCreate {
   paid?: boolean;
 }
 
+/**
+ * No `importIncomplete` here — see the note on `PatientUpdate`. The flag is cleared
+ * through `VisitService.dismissImportWarning`, which PATCHes `/dismiss-warning`.
+ */
 export interface VisitUpdate {
   patientId?: string;
   doctorId?: string;
@@ -46,5 +50,4 @@ export interface VisitUpdate {
   treatmentNotes?: string;
   price?: number;
   paid?: boolean;
-  importIncomplete?: boolean;
 }

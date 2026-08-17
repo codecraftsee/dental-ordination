@@ -78,7 +78,7 @@ export default class PatientDetail implements OnInit {
   patientDebt = computed(() =>
     this.allVisits()
       .filter(v => !v.paid && v.price)
-      .reduce((sum, v) => sum + (Number(v.price) || 0), 0)
+      .reduce((sum, v) => sum + (v.price ?? 0), 0)
   );
 
   hasUnpaidVisits = computed(() =>
