@@ -266,6 +266,36 @@ describe('PatientService', () => {
       expect(err.filesProcessed).toBe(400);
     });
 
+    it('numbers the next batch from what completed, not from the batch size', async () => {
+      let call = 0;
+      vi.stubGlobal('fetch', vi.fn(async (_url: string, init: RequestInit) => {
+        call++;
+        const files = (init.body as FormData).getAll('files').map(f => (f as File).name);
+        if (call > 1) return new Response(sseBody(files, call), { status: 200 });
+
+        // The API's outer `except`: three files stream, then a fatal `complete`
+        // and the generator stops. The other 197 are never processed.
+        const events: unknown[] = files.slice(0, 3).flatMap((file, i) => [
+          { type: 'progress', current: i + 1, total: files.length, file },
+          { type: 'file_done', current: i + 1, total: files.length, file, patients_created: 1, visits_created: 2, errors: [] },
+        ]);
+        events.push({ type: 'complete', summary: { files_processed: 3, errors: ['Fatal error: boom'] } });
+        return new Response(events.map(e => `data: ${JSON.stringify(e)}\n\n`).join(''), { status: 200 });
+      }));
+
+      const seen: ImportProgressEvent[] = [];
+      await new Promise<void>(done =>
+        service.importXlsx(makeFiles(450)).subscribe({ next: e => seen.push(e), complete: done }),
+      );
+
+      const fileDone = seen.filter(e => e.type === 'file_done');
+      // Batch 1 finished 3 of its 200, so batch 2 starts at 4 — not at 201,
+      // which would march the bar over 197 files that never ran.
+      expect(fileDone.map(e => e.current).slice(0, 5)).toEqual([1, 2, 3, 4, 5]);
+      expect(fileDone).toHaveLength(3 + 200 + 50);
+      expect(fileDone[fileDone.length - 1].current).toBe(253);
+    });
+
     /**
      * A single request authenticated once and ran to completion. Split into
      * batches, the run has to outlive an access token that expires part-way —

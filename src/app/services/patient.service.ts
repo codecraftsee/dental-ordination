@@ -155,6 +155,13 @@ export class PatientService extends EntityCacheService<Patient, PatientCreate, P
           reader = response.body!.getReader();
           const decoder = new TextDecoder();
           let buffer = '';
+          // How far this batch actually got, which is not always how many files
+          // it carried: the API's generator has an outer `except` that yields a
+          // single `complete` and stops, so a batch that dies at file 3 of 200
+          // streams no further events. Counting `file_done` — emitted after a
+          // file is processed, unlike `progress`, which precedes it — keeps the
+          // next batch from being numbered over files that never ran.
+          let batchDone = 0;
 
           while (true) {
             const { done, value } = await reader.read();
@@ -173,6 +180,10 @@ export class PatientService extends EntityCacheService<Patient, PatientCreate, P
                 continue;
               }
 
+              if (parsed.type === 'file_done') {
+                batchDone = Math.max(batchDone, parsed.current);
+              }
+
               // `current`/`total` arrive scoped to this request, so without
               // this the progress bar would restart at zero on every batch.
               const event = {
@@ -184,7 +195,7 @@ export class PatientService extends EntityCacheService<Patient, PatientCreate, P
             }
           }
 
-          filesDone += batch.length;
+          filesDone += batchDone;
         }
 
         if (cancelled) return;
