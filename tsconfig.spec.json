@@ -4,16 +4,11 @@
   "extends": "./tsconfig.json",
   "compilerOptions": {
     "outDir": "./out-tsc/spec",
-    // i18n-plurals.spec.ts asserts invariants over the real public/i18n/*.json.
+    // i18n-plurals.spec.ts imports public/i18n/*.json to assert invariants over
+    // the same data the app ships.
     "resolveJsonModule": true,
-    // "node" is here for i18n-plurals.spec.ts only, which reads the real
-    // translation files off disk rather than importing them, so that a key
-    // added to public/i18n/*.json is covered without also being compiled in.
-    // Test-time only: tsconfig.app.json does not include this, so nothing in
-    // src/app can reach a node API and still build for the browser.
     "types": [
-      "vitest/globals",
-      "node"
+      "vitest/globals"
     ]
   },
   "include": [
