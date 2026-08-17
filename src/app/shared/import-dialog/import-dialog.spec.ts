@@ -10,9 +10,17 @@ import { User, UserRole } from '../../models/user.model';
 
 const MB = 1024 * 1024;
 
-/** A File of a given size without allocating the bytes. */
-function fileOf(name: string, size: number): File {
-  const file = new File(['x'], name);
+/**
+ * A File of a given size without allocating the bytes.
+ *
+ * `lastModified` is pinned rather than left to default to `Date.now()`: dedupe
+ * keys on name+size+mtime, so an implicit timestamp would make two identical
+ * fixtures duplicates or not depending on whether they landed in the same
+ * millisecond. Pass a distinct `mtime` to model genuinely different files that
+ * happen to share a name.
+ */
+function fileOf(name: string, size: number, mtime = 0): File {
+  const file = new File(['x'], name, { lastModified: mtime });
   Object.defineProperty(file, 'size', { value: size });
   return file;
 }
@@ -189,6 +197,28 @@ describe('ImportDialog', () => {
     component.selectedFiles.set(existing);
     component.onDrop(dropEvent([fileOf('notes.pdf', MB)]));
     expect(component.selectedFiles()).toBe(existing);
+  });
+
+  it('keeps same-named files from different folders', () => {
+    // Deduping on the bare name would drop the second karton.xlsx silently.
+    const a = fileOf('karton.xlsx', MB);
+    const b = fileOf('karton.xlsx', 2 * MB);
+    component.onFilesSelected(changeEvent([a]));
+    component.onFilesSelected(changeEvent([b]));
+    expect(component.selectedFiles()).toEqual([a, b]);
+  });
+
+  it('still drops a genuinely identical re-pick', () => {
+    const a = fileOf('karton.xlsx', MB);
+    component.onFilesSelected(changeEvent([a]));
+    component.onFilesSelected(changeEvent([a]));
+    expect(component.selectedFiles()).toEqual([a]);
+  });
+
+  it('the picker rejects non-xlsx, as the drop zone does', () => {
+    // accept=".xlsx" is only a hint; the picker's "All Files" option defeats it.
+    component.onFilesSelected(changeEvent([fileOf('a.xlsx', MB), fileOf('notes.pdf', MB)]));
+    expect(component.selectedFiles().map(f => f.name)).toEqual(['a.xlsx']);
   });
 
   it('summarises the selection as files, size and upload count', () => {

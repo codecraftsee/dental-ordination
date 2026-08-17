@@ -2,7 +2,9 @@ import { TestBed } from '@angular/core/testing';
 import { provideHttpClient } from '@angular/common/http';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { vi } from 'vitest';
+import { of } from 'rxjs';
 import { ImportProgressEvent, PatientService } from './patient.service';
+import { AuthService } from './auth.service';
 import { Patient } from '../models/patient.model';
 import { environment } from '../../environments/environment';
 
@@ -262,6 +264,72 @@ describe('PatientService', () => {
       expect(err.detail).toBe('Too many files');
       // The two batches before it are committed server-side and stay there.
       expect(err.filesProcessed).toBe(400);
+    });
+
+    /**
+     * A single request authenticated once and ran to completion. Split into
+     * batches, the run has to outlive an access token that expires part-way —
+     * and it cannot lean on errorInterceptor, which only wraps HttpClient.
+     */
+    describe('access token expiring mid-run', () => {
+      /** 401s the nth request, serves every other one. */
+      const stubFetchFailingAuthOn = (nth: number) => {
+        const sent: (string | null)[] = [];
+        let call = 0;
+        vi.stubGlobal('fetch', vi.fn(async (_url: string, init: RequestInit) => {
+          call++;
+          sent.push((init.headers as Record<string, string>)?.['Authorization'] ?? null);
+          if (call === nth) {
+            return new Response(JSON.stringify({ detail: 'Could not validate credentials' }), { status: 401 });
+          }
+          const files = (init.body as FormData).getAll('files').map(f => (f as File).name);
+          return new Response(sseBody(files, call), { status: 200 });
+        }));
+        return sent;
+      };
+
+      it('refreshes once and retries the batch, then finishes the run', async () => {
+        const auth = TestBed.inject(AuthService);
+        let token = 'old-token';
+        vi.spyOn(auth, 'getAccessToken').mockImplementation(() => token);
+        const refresh = vi.spyOn(auth, 'refreshToken').mockImplementation(() => {
+          token = 'new-token';
+          return of({ accessToken: 'new-token', refreshToken: 'r' } as never);
+        });
+
+        const sent = stubFetchFailingAuthOn(2);
+        const events: ImportProgressEvent[] = [];
+        await new Promise<void>(done =>
+          service.importXlsx(makeFiles(450)).subscribe({ next: e => events.push(e), complete: done }),
+        );
+
+        expect(refresh).toHaveBeenCalledTimes(1);
+        // Batch 2 sent twice: once on the stale token, once on the fresh one.
+        expect(sent).toEqual([
+          'Bearer old-token', 'Bearer old-token', 'Bearer new-token', 'Bearer new-token',
+        ]);
+        // The run still delivers every file exactly once, despite the retry.
+        expect(events.filter(e => e.type === 'file_done')).toHaveLength(450);
+        expect(events.filter(e => e.type === 'complete')).toHaveLength(1);
+      });
+
+      it('surfaces the 401 without retrying again when the refresh fails', async () => {
+        const auth = TestBed.inject(AuthService);
+        vi.spyOn(auth, 'getAccessToken').mockReturnValue('expired');
+        // refreshToken() resolves to null once it has given up and logged out.
+        const refresh = vi.spyOn(auth, 'refreshToken').mockReturnValue(of(null));
+
+        const sent = stubFetchFailingAuthOn(2);
+        const err = await new Promise<{ detail: string; filesProcessed: number }>(resolve =>
+          service.importXlsx(makeFiles(450)).subscribe({ error: resolve }),
+        );
+
+        expect(refresh).toHaveBeenCalledTimes(1);
+        // Two requests only: the failed batch is not re-sent on a dead session.
+        expect(sent).toHaveLength(2);
+        expect(err.detail).toBe('Could not validate credentials');
+        expect(err.filesProcessed).toBe(200);
+      });
     });
   });
 });

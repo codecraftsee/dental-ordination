@@ -1,5 +1,5 @@
 import { Injectable, NgZone, inject } from '@angular/core';
-import { Observable } from 'rxjs';
+import { Observable, firstValueFrom } from 'rxjs';
 import { environment } from '../../environments/environment';
 import { Patient, PatientCreate, PatientUpdate } from '../models/patient.model';
 import { AuthService } from './auth.service';
@@ -96,23 +96,54 @@ export class PatientService extends EntityCacheService<Patient, PatientCreate, P
         }
       };
 
+      // The token is read here rather than passed in, so the retry above picks
+      // up whatever refreshToken() has just written to storage.
+      const sendBatch = (batch: File[]) => {
+        const formData = new FormData();
+        for (const file of batch) formData.append('files', file);
+        if (doctorId) formData.append('doctor_id', doctorId);
+        const token = this.authService.getAccessToken();
+
+        return fetch(environment.apiUrl + '/api/import/xlsx', {
+          method: 'POST',
+          headers: token ? { Authorization: `Bearer ${token}` } : {},
+          body: formData,
+          signal: controller.signal,
+        });
+      };
+
       const run = async () => {
+        // Without this an empty plan falls straight through to the synthetic
+        // `complete` below and reports a successful import of nothing: success
+        // toast, zeroed summary, five caches reloaded. The dialog cannot reach it
+        // (Start is disabled when nothing is importable), but "succeeds when
+        // nothing was sent" is the wrong contract for a public method.
+        if (accepted.length === 0) {
+          throw { code: 'noFiles', filesProcessed: 0 };
+        }
+
         let filesDone = 0;
 
         for (const batch of batches) {
           if (cancelled) return;
 
-          const formData = new FormData();
-          for (const file of batch) formData.append('files', file);
-          if (doctorId) formData.append('doctor_id', doctorId);
-          const token = this.authService.getAccessToken();
+          let response = await sendBatch(batch);
 
-          const response = await fetch(environment.apiUrl + '/api/import/xlsx', {
-            method: 'POST',
-            headers: token ? { Authorization: `Bearer ${token}` } : {},
-            body: formData,
-            signal: controller.signal,
-          });
+          // Refresh once and retry, mirroring errorInterceptor. That
+          // interceptor is an HttpInterceptorFn and this request goes through
+          // `fetch`, so it never sees this call — and batching is what made
+          // that gap reachable. A single request authenticated once and ran to
+          // completion however long it took; a run split into batches has to
+          // survive the access token expiring part-way through, which at
+          // ACCESS_TOKEN_EXPIRE_MINUTES=30 a large import can easily outlive.
+          //
+          // Nothing was processed under a 401, so re-sending the batch cannot
+          // double-import. If the refresh fails it returns null and has already
+          // logged out, and the original 401 falls through to the throw below.
+          if (response.status === 401) {
+            const refreshed = await firstValueFrom(this.authService.refreshToken());
+            if (refreshed) response = await sendBatch(batch);
+          }
 
           if (!response.ok) {
             // Carries the API's `detail`, which is what the caller renders.

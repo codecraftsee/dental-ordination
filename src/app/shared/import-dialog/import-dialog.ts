@@ -5,8 +5,14 @@ import { MatIconModule } from '@angular/material/icon';
 import { TranslatePipe } from '../translate.pipe';
 import { TranslateService } from '../../services/translate.service';
 import { UserService } from '../../services/user.service';
-import { MAX_REQUEST_BYTES, formatBytes, planImport } from '../../services/import-batch';
+import { MAX_REQUEST_BYTES, planImport } from '../../services/import-batch';
+import { formatBytes } from '../format-bytes';
 import { UserRole } from '../../models/user.model';
+
+/** `accept=".xlsx"` is only a picker hint, so both entry paths filter for real. */
+function isXlsx(file: File): boolean {
+  return file.name.toLowerCase().endsWith('.xlsx');
+}
 
 export interface ImportDialogResult {
   doctorId: string | undefined;
@@ -85,7 +91,10 @@ export class ImportDialog {
   onFilesSelected(event: Event): void {
     const input = event.target as HTMLInputElement;
     if (input.files) {
-      this.addFiles(Array.from(input.files));
+      // Filtered here as well as in onDrop: `accept=".xlsx"` is only a hint to the
+      // picker, and its "All Files" option defeats it, so an unfiltered pick would
+      // put a .pdf into the plan's file and byte counts and then upload it.
+      this.addFiles(Array.from(input.files).filter(isXlsx));
     }
     // Clear the input, or picking the same file again fires no change event and
     // the second "add more" appears to do nothing.
@@ -106,7 +115,7 @@ export class ImportDialog {
     this.dragging.set(false);
     const files = event.dataTransfer?.files;
     if (!files) return;
-    this.addFiles(Array.from(files).filter(f => f.name.toLowerCase().endsWith('.xlsx')));
+    this.addFiles(Array.from(files).filter(isXlsx));
   }
 
   /**
@@ -115,18 +124,21 @@ export class ImportDialog {
    * One handler backs both the first pick and "Add more files", and it used to
    * `set`, so adding a second batch silently discarded everything chosen before it.
    *
-   * Deduped by filename: re-picking a file already in the list is the natural way
-   * to hit this, and the list is tracked by name in the template, so letting a
-   * duplicate through would trip `@for`'s duplicate-key check as well.
+   * Deduped on name + size + mtime, not on name alone: two patient folders can
+   * each hold a `karton.xlsx`, and dropping one of them because the other was
+   * picked first is silent data loss in an import tool. The template tracks the
+   * File object itself, so repeated names are fine there.
    */
   private addFiles(incoming: File[]): void {
     if (incoming.length === 0) return;
     this.selectedFiles.update(current => {
-      const seen = new Set(current.map(f => f.name));
+      const identity = (f: File) => `${f.name}|${f.size}|${f.lastModified}`;
+      const seen = new Set(current.map(identity));
       const added: File[] = [];
       for (const file of incoming) {
-        if (seen.has(file.name)) continue;
-        seen.add(file.name);
+        const key = identity(file);
+        if (seen.has(key)) continue;
+        seen.add(key);
         added.push(file);
       }
       return added.length > 0 ? [...current, ...added] : current;

@@ -61,7 +61,7 @@
             </label>
           } @else {
             <div class="import-dialog__file-list">
-              @for (file of selectedFiles(); track file.name; let i = $index) {
+              @for (file of selectedFiles(); track file; let i = $index) {
                 <div class="import-dialog__file-item" [class.import-dialog__file-item--invalid]="isOversized(file)">
                   <mat-icon>{{ isOversized(file) ? 'error_outline' : 'description' }}</mat-icon>
                   <span class="import-dialog__file-name">{{ file.name }}</span>

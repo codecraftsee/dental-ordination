@@ -24,6 +24,8 @@
   "home.importDropFiles": "Drag & drop XLSX files here",
   "home.importBrowse": "Browse Files",
   "home.importAddMore": "Add More Files",
+  "home.importFailedPartial": "Import stopped after {files} file(s) were imported: {detail}",
+  "home.importNoFiles": "No files to import",
   "home.importPlanFiles": "Files",
   "home.importPlanSize": "Total size",
   "home.importPlanBatches": "Uploads",

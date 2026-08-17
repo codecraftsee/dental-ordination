@@ -91,10 +91,24 @@ export class PatientImportService {
       error: err => {
         this._importing.set(false);
         this._error.set(true);
-        const detail = err?.detail || err?.message || this.translate.instant('home.importUnknownError');
-        this._message.set(this.translate.format('home.importFailed', { detail }));
+
+        const filesProcessed: number = err?.filesProcessed ?? 0;
+        const detail = err?.code === 'noFiles'
+          ? this.translate.instant('home.importNoFiles')
+          : err?.detail || err?.message || this.translate.instant('home.importUnknownError');
+
+        // Batching made partial success the normal failure mode: earlier batches
+        // are committed server-side and stay there, so a bare "import failed"
+        // would leave the user looking at a patient list that still shows the
+        // pre-import state with no hint that hundreds of records did land.
+        this._message.set(
+          filesProcessed > 0
+            ? this.translate.format('home.importFailedPartial', { files: filesProcessed, detail })
+            : this.translate.format('home.importFailed', { detail }),
+        );
         this._progress.set(0);
         this.scheduleMessageDismiss();
+        if (filesProcessed > 0) this.refreshCaches();
       },
     });
   }

@@ -39,6 +39,7 @@ const translateStub = {
     translate: (key: string) => key,
     instant: (key: string) => key,
     format: (key: string) => key,
+    translatePlural: (key: string, count: number) => `${key}:${count}`,
     version: signal('en'),
     currentLang: signal('en'),
   },

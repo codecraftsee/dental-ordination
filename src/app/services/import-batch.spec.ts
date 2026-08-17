@@ -1,4 +1,4 @@
-import { MAX_FILES_PER_REQUEST, MAX_REQUEST_BYTES, formatBytes, planImport } from './import-batch';
+import { MAX_FILES_PER_REQUEST, MAX_REQUEST_BYTES, planImport } from './import-batch';
 
 /** A File of a given size without allocating the bytes. */
 function fileOf(name: string, size: number): File {
@@ -94,14 +94,5 @@ describe('planImport', () => {
     const plan = planImport([fileOf('a.xlsx', MAX_REQUEST_BYTES + 1)]);
     expect(plan.batches).toEqual([]);
     expect(plan.accepted).toEqual([]);
-  });
-});
-
-describe('formatBytes', () => {
-  it('formats across units', () => {
-    expect(formatBytes(0)).toBe('0 B');
-    expect(formatBytes(512)).toBe('512 B');
-    expect(formatBytes(1024)).toBe('1.0 KB');
-    expect(formatBytes(80 * MB)).toBe('80.0 MB');
   });
 });
