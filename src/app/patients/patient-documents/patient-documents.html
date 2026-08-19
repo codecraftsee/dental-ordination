@@ -58,6 +58,16 @@
     </div>
   }
 
+  <!--
+    Outside the upload zone's pending-file branch on purpose. It used to sit in the
+    review step, where `upload()` clearing pendingFile unmounted it at the exact
+    moment the count would have incremented — and an aria-live region that is
+    inserted and removed along with its text is never announced.
+  -->
+  <p class="docs-count" aria-live="polite">
+    {{ 'patient.documents.count' | translate: { count: documentCount() } }}
+  </p>
+
   <div class="docs-layout">
 
     <div class="docs-table-col">

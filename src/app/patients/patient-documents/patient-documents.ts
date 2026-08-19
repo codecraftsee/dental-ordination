@@ -20,6 +20,7 @@ import {
   PatientDocumentService,
 } from '../../services/patient-document.service';
 
+import { formatBytes } from '../../shared/format-bytes';
 import { PatientDocument } from '../../models/patient-document.model';
 import { Permission } from '../../models/user.model';
 
@@ -49,6 +50,7 @@ export class PatientDocuments {
   uploading = signal(false);
 
   docs = computed<PatientDocument[]>(() => this.documentService.getAllFor(this.patientId()));
+  documentCount = computed(() => this.docs().length);
 
   displayedColumns = ['name', 'type', 'size', 'uploadedAt', 'actions'];
   dataSource = new MatTableDataSource<PatientDocument>();
@@ -198,13 +200,8 @@ export class PatientDocuments {
     return contentType.startsWith('image/');
   }
 
-  formatBytes(bytes: number): string {
-    if (!bytes) return '0 B';
-    const units = ['B', 'KB', 'MB', 'GB'];
-    const i = Math.min(Math.floor(Math.log(bytes) / Math.log(1024)), units.length - 1);
-    const value = bytes / Math.pow(1024, i);
-    return `${value.toFixed(i === 0 ? 0 : 1)} ${units[i]}`;
-  }
+  /** Shared with the import dialog — see `shared/format-bytes.ts`. */
+  formatBytes = formatBytes;
 
   private acceptFile(file: File): void {
     if (!this.validateFile(file)) return;

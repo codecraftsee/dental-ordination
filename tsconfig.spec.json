@@ -4,6 +4,9 @@
   "extends": "./tsconfig.json",
   "compilerOptions": {
     "outDir": "./out-tsc/spec",
+    // i18n-plurals.spec.ts imports public/i18n/*.json to assert invariants over
+    // the same data the app ships.
+    "resolveJsonModule": true,
     "types": [
       "vitest/globals"
     ]
