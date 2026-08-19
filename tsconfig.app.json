@@ -10,6 +10,11 @@
     "src/**/*.ts"
   ],
   "exclude": [
-    "src/**/*.spec.ts"
+    "src/**/*.spec.ts",
+    // Test-only: referenced solely by the unit-test target's setupFiles in
+    // angular.json, never imported by the app. It was type-checked here anyway,
+    // so registering a Vitest hook in it broke `ng build` while `ng test` stayed
+    // green — a split the CI job only catches at the build step.
+    "src/test-setup.ts"
   ]
 }
