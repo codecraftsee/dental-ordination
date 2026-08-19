@@ -6,7 +6,37 @@ import { vi } from 'vitest';
 import { ImportDialog } from './import-dialog';
 import { TranslateService } from '../../services/translate.service';
 import { UserService } from '../../services/user.service';
-import { Permission, User, UserRole } from '../../models/user.model';
+import { User, UserRole } from '../../models/user.model';
+
+const MB = 1024 * 1024;
+
+/**
+ * A File of a given size without allocating the bytes.
+ *
+ * `lastModified` is pinned rather than left to default to `Date.now()`: dedupe
+ * keys on name+size+mtime, so an implicit timestamp would make two identical
+ * fixtures duplicates or not depending on whether they landed in the same
+ * millisecond. Pass a distinct `mtime` to model genuinely different files that
+ * happen to share a name.
+ */
+function fileOf(name: string, size: number, mtime = 0): File {
+  const file = new File(['x'], name, { lastModified: mtime });
+  Object.defineProperty(file, 'size', { value: size });
+  return file;
+}
+
+/** jsdom has no usable FileList, so the handlers get a shaped stand-in. */
+function changeEvent(files: File[]): Event {
+  const input = { files, value: 'C:\\fakepath\\picked.xlsx' } as unknown as HTMLInputElement;
+  return { target: input } as unknown as Event;
+}
+
+function dropEvent(files: File[]): DragEvent {
+  return {
+    preventDefault: () => undefined,
+    dataTransfer: { files },
+  } as unknown as DragEvent;
+}
 
 describe('ImportDialog', () => {
   let component: ImportDialog;
@@ -60,7 +90,13 @@ describe('ImportDialog', () => {
         },
         {
           provide: TranslateService,
-          useValue: { translate: (key: string) => key, version: signal('en'), currentLang: signal('en') },
+          useValue: {
+            translate: (key: string) => key,
+            format: (key: string, params: Record<string, string | number>) =>
+              `${key}:${JSON.stringify(params)}`,
+            version: signal('en'),
+            currentLang: signal('en'),
+          },
         },
       ],
     }).compileComponents();
@@ -125,6 +161,99 @@ describe('ImportDialog', () => {
     component.selectedFiles.set([file]);
     component.confirm();
     expect(mockDialogRef.close).toHaveBeenCalledWith({ doctorId: 'doc-1', files: [file] });
+  });
+
+  it('adds to the selection instead of replacing it', () => {
+    component.onFilesSelected(changeEvent([fileOf('a.xlsx', MB)]));
+    component.onFilesSelected(changeEvent([fileOf('b.xlsx', MB)]));
+    expect(component.selectedFiles().map(f => f.name)).toEqual(['a.xlsx', 'b.xlsx']);
+  });
+
+  it('ignores a file already in the selection', () => {
+    component.onFilesSelected(changeEvent([fileOf('a.xlsx', MB), fileOf('b.xlsx', MB)]));
+    component.onFilesSelected(changeEvent([fileOf('b.xlsx', MB), fileOf('c.xlsx', MB)]));
+    expect(component.selectedFiles().map(f => f.name)).toEqual(['a.xlsx', 'b.xlsx', 'c.xlsx']);
+  });
+
+  it('dedupes within a single pick as well', () => {
+    component.onFilesSelected(changeEvent([fileOf('a.xlsx', MB), fileOf('a.xlsx', MB)]));
+    expect(component.selectedFiles().map(f => f.name)).toEqual(['a.xlsx']);
+  });
+
+  it('clears the input so the same file can be picked again', () => {
+    const event = changeEvent([fileOf('a.xlsx', MB)]);
+    component.onFilesSelected(event);
+    expect((event.target as HTMLInputElement).value).toBe('');
+  });
+
+  it('drop appends, and keeps only xlsx regardless of case', () => {
+    component.selectedFiles.set([fileOf('a.xlsx', MB)]);
+    component.onDrop(dropEvent([fileOf('b.XLSX', MB), fileOf('notes.pdf', MB)]));
+    expect(component.selectedFiles().map(f => f.name)).toEqual(['a.xlsx', 'b.XLSX']);
+  });
+
+  it('a drop of nothing usable leaves the selection alone', () => {
+    const existing = [fileOf('a.xlsx', MB)];
+    component.selectedFiles.set(existing);
+    component.onDrop(dropEvent([fileOf('notes.pdf', MB)]));
+    expect(component.selectedFiles()).toBe(existing);
+  });
+
+  it('keeps same-named files from different folders', () => {
+    // Deduping on the bare name would drop the second karton.xlsx silently.
+    const a = fileOf('karton.xlsx', MB);
+    const b = fileOf('karton.xlsx', 2 * MB);
+    component.onFilesSelected(changeEvent([a]));
+    component.onFilesSelected(changeEvent([b]));
+    expect(component.selectedFiles()).toEqual([a, b]);
+  });
+
+  it('still drops a genuinely identical re-pick', () => {
+    const a = fileOf('karton.xlsx', MB);
+    component.onFilesSelected(changeEvent([a]));
+    component.onFilesSelected(changeEvent([a]));
+    expect(component.selectedFiles()).toEqual([a]);
+  });
+
+  it('the picker rejects non-xlsx, as the drop zone does', () => {
+    // accept=".xlsx" is only a hint; the picker's "All Files" option defeats it.
+    component.onFilesSelected(changeEvent([fileOf('a.xlsx', MB), fileOf('notes.pdf', MB)]));
+    expect(component.selectedFiles().map(f => f.name)).toEqual(['a.xlsx']);
+  });
+
+  it('summarises the selection as files, size and upload count', () => {
+    component.selectedFiles.set([fileOf('a.xlsx', 2 * MB), fileOf('b.xlsx', 3 * MB)]);
+    expect(component.acceptedCount()).toBe(2);
+    expect(component.totalSize()).toBe('5.0 MB');
+    expect(component.batchCount()).toBe(1);
+    expect(component.oversizedFiles()).toEqual([]);
+  });
+
+  it('reports more than one upload when the selection exceeds a request', () => {
+    component.selectedFiles.set(Array.from({ length: 4 }, (_, i) => fileOf(`f${i}.xlsx`, 30 * MB)));
+    expect(component.batchCount()).toBeGreaterThan(1);
+  });
+
+  it('flags a file too large to ever be sent and keeps it out of the import', () => {
+    const good = fileOf('ok.xlsx', MB);
+    const huge = fileOf('huge.xlsx', 200 * MB);
+    component.selectedFiles.set([good, huge]);
+
+    expect(component.isOversized(huge)).toBe(true);
+    expect(component.isOversized(good)).toBe(false);
+    expect(component.oversizedFiles()).toEqual([huge]);
+    expect(component.acceptedCount()).toBe(1);
+
+    // Still listed for the user to see, but never handed to the import.
+    expect(component.selectedFiles()).toEqual([good, huge]);
+    component.confirm();
+    expect(mockDialogRef.close).toHaveBeenCalledWith({ doctorId: undefined, files: [good] });
+  });
+
+  it('leaves nothing to import when every file is oversized', () => {
+    component.selectedFiles.set([fileOf('huge.xlsx', 200 * MB)]);
+    expect(component.acceptedCount()).toBe(0);
+    expect(component.batchCount()).toBe(0);
   });
 
   it('cancel() closes the dialog with no value', () => {

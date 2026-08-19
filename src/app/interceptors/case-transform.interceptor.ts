@@ -24,6 +24,15 @@ function transformKeys(obj: unknown, transformer: (key: string) => string): unkn
   return result;
 }
 
+/**
+ * Deep snake_case → camelCase rename, exported for the one payload that cannot go
+ * through the interceptor: the SSE import stream reads its body with `fetch`, so
+ * HttpClient never sees it.
+ */
+export function snakeToCamelKeys(obj: unknown): unknown {
+  return transformKeys(obj, snakeToCamel);
+}
+
 export const caseTransformInterceptor: HttpInterceptorFn = (req, next) => {
   if (!req.url.startsWith(environment.apiUrl)) {
     return next(req);
@@ -34,6 +43,22 @@ export const caseTransformInterceptor: HttpInterceptorFn = (req, next) => {
     req = req.clone({
       body: transformKeys(req.body, camelToSnake),
     });
+  }
+
+  // Transform outgoing query params the same way. The API names every query param
+  // in snake_case, and camelToSnake leaves an already-snake_case key alone, so this
+  // is safe to apply to every request.
+  if (req.params.keys().length > 0) {
+    let params = req.params;
+    for (const key of req.params.keys()) {
+      const snakeKey = camelToSnake(key);
+      if (snakeKey === key) continue;
+      params = params.delete(key);
+      for (const value of req.params.getAll(key) ?? []) {
+        params = params.append(snakeKey, value);
+      }
+    }
+    req = req.clone({ params });
   }
 
   // Transform incoming response body: snake_case → camelCase

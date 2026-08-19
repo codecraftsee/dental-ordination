@@ -35,10 +35,28 @@ const browserGlobals = window as unknown as Record<string, unknown>;
     removeListener(): void {}
   }
 
-  if (typeof browserGlobals['matchMedia'] !== 'function') {
+  const installMatchMedia = () => {
     browserGlobals['matchMedia'] = (query: string): MediaQueryList =>
       new TestMediaQueryList(query);
+  };
+
+  if (typeof browserGlobals['matchMedia'] !== 'function') {
+    installMatchMedia();
   }
+
+  // Reinstalled after every test, because `window` is shared by every spec file
+  // that lands in the same Vitest worker and several specs replace matchMedia
+  // with a partial stub and never put it back. A stub carrying only `matches`
+  // satisfies theme.service but not Angular CDK's BreakpointObserver, which calls
+  // the deprecated `mql.addListener` — so the next spec in that worker to render
+  // a Material component throws "mql.addListener is not a function" as an
+  // *unhandled* error. Every test still passes and Vitest still exits non-zero.
+  //
+  // It only bites when file-to-worker packing puts the offender first, which is
+  // why it shows up on CI's smaller machines and not locally. Assigning rather
+  // than redefining: specs use Object.defineProperty without `configurable`, and
+  // redefining that throws.
+  afterEach(installMatchMedia);
 }
 
 {

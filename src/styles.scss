@@ -29,6 +29,11 @@
   // Typography
   --color-text: #172b4c;
   --color-text-secondary: #7e8299;
+  // Quieter than --color-text-secondary's role but still AA-legible: this one is
+  // used for supporting figures (file sizes, stat labels) that sit on
+  // --color-surface-variant, where #7e8299 only reaches 3.05:1. 4.84:1 there,
+  // 6.01:1 on white.
+  --color-text-muted: #5e6278;
   --color-border: #e4e6ef;
 
   // Semantic colors
@@ -676,6 +681,9 @@ mat-card.stat-card {
   --color-background: #1a1d23;
   --color-text: #e9ecef;
   --color-text-secondary: #b5b5c3;
+  // Dimmer than the light theme's muted, not darker — inverted like every other
+  // token here. 5.50:1 on --color-surface-variant, 7.03:1 on --color-surface.
+  --color-text-muted: #a1a5b7;
   --color-border: #2d3748;
   --color-success-bg: #1a2e1e;
   --color-warning-bg: #2e2510;

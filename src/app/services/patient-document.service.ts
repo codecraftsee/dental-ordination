@@ -17,27 +17,27 @@ export class PatientDocumentService {
   private http = inject(HttpClient);
   private baseUrl = environment.apiUrl + '/api/patients';
 
-  private readonly items = signal<PatientDocument[]>([]);
-  private loadedForPatientId: string | undefined;
+  // Keyed by patient rather than a single `items` list: the documents tab is shared
+  // across patients, so one flat cache renders the previous patient's documents under
+  // the new patient's name until the new response lands, and lets a late response for
+  // an abandoned patient overwrite the current one.
+  private readonly itemsByPatientId = signal<Record<string, PatientDocument[]>>({});
 
-  getAll(): PatientDocument[] {
-    return this.items();
+  getAllFor(patientId: string): PatientDocument[] {
+    return this.itemsByPatientId()[patientId] ?? [];
   }
 
-  getById(id: string): PatientDocument | undefined {
-    return this.items().find(d => d.id === id);
+  getById(patientId: string, id: string): PatientDocument | undefined {
+    return this.getAllFor(patientId).find(d => d.id === id);
   }
 
   isLoadedFor(patientId: string): boolean {
-    return this.loadedForPatientId === patientId;
+    return patientId in this.itemsByPatientId();
   }
 
   loadByPatientId(patientId: string): Observable<PatientDocument[]> {
     return this.http.get<PatientDocument[]>(`${this.baseUrl}/${patientId}/documents`).pipe(
-      tap(docs => {
-        this.items.set(docs);
-        this.loadedForPatientId = patientId;
-      }),
+      tap(docs => this.setFor(patientId, docs)),
     );
   }
 
@@ -49,12 +49,23 @@ export class PatientDocumentService {
     }
     return this.http
       .post<PatientDocument>(`${this.baseUrl}/${patientId}/documents`, formData)
-      .pipe(tap(doc => this.items.update(prev => [doc, ...prev])));
+      .pipe(tap(doc => this.setFor(patientId, [doc, ...this.getAllFor(patientId)])));
   }
 
   delete(patientId: string, documentId: string): Observable<void> {
     return this.http
       .delete<void>(`${this.baseUrl}/${patientId}/documents/${documentId}`)
-      .pipe(tap(() => this.items.update(prev => prev.filter(d => d.id !== documentId))));
+      .pipe(
+        tap(() =>
+          this.setFor(
+            patientId,
+            this.getAllFor(patientId).filter(d => d.id !== documentId),
+          ),
+        ),
+      );
+  }
+
+  private setFor(patientId: string, docs: PatientDocument[]): void {
+    this.itemsByPatientId.update(prev => ({ ...prev, [patientId]: docs }));
   }
 }

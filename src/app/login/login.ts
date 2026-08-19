@@ -1,6 +1,7 @@
 import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
+import { switchMap } from 'rxjs';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatCardModule } from '@angular/material/card';
@@ -43,19 +44,17 @@ export default class Login {
     this.error.set('');
 
     const { email, password } = this.form.value;
-    this.authService.login({ email: email!, password: password! }).subscribe({
+    // No takeUntilDestroyed: login persists its tokens to localStorage in a tap.
+    // Cancelling would leave the server having issued a session that never reaches
+    // the client, logging the user out despite a successful login.
+    this.authService.login({ email: email!, password: password! }).pipe(
+      switchMap(() => this.authService.loadCurrentUser()),
+    ).subscribe({
       next: () => {
-        this.authService.loadCurrentUser().subscribe({
-          next: () => {
-            this.loading.set(false);
-            this.router.navigate(['/']);
-          },
-          error: () => {
-            this.loading.set(false);
-            this.error.set('login.error');
-          },
-        });
+        this.loading.set(false);
+        this.router.navigate(['/']);
       },
+      // Covers a failure of either call — both previously set the same state.
       error: () => {
         this.loading.set(false);
         this.error.set('login.error');

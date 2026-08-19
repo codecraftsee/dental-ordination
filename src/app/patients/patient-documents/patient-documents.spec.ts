@@ -1,6 +1,7 @@
-import { TestBed } from '@angular/core/testing';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideHttpClient } from '@angular/common/http';
-import { provideHttpClientTesting } from '@angular/common/http/testing';
+import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
+import { environment } from '../../../environments/environment';
 import { provideRouter } from '@angular/router';
 import { provideNoopAnimations } from '@angular/platform-browser/animations';
 import { MatDialog } from '@angular/material/dialog';
@@ -29,6 +30,8 @@ describe('PatientDocuments', () => {
   let toastSuccess: ReturnType<typeof vi.fn>;
   let confirmFn: ReturnType<typeof vi.fn>;
   let docService: PatientDocumentService;
+  let fixture: ComponentFixture<PatientDocuments>;
+  let httpMock: HttpTestingController;
 
   beforeEach(() => {
     toastError = vi.fn();
@@ -46,10 +49,11 @@ describe('PatientDocuments', () => {
       ],
     });
 
-    const fixture = TestBed.createComponent(PatientDocuments);
+    fixture = TestBed.createComponent(PatientDocuments);
     fixture.componentRef.setInput('patientId', 'p-1');
     component = fixture.componentInstance;
     docService = TestBed.inject(PatientDocumentService);
+    httpMock = TestBed.inject(HttpTestingController);
   });
 
   it('formatBytes produces human-readable sizes', () => {
@@ -122,6 +126,68 @@ describe('PatientDocuments', () => {
     const deleteSpy = vi.spyOn(docService, 'delete');
     component.deleteDocument(doc);
     expect(deleteSpy).not.toHaveBeenCalled();
+  });
+
+  it('shows no documents from the previous patient while the new one is loading', () => {
+    const docsUrl = (id: string) => `${environment.apiUrl}/api/patients/${id}/documents`;
+
+    fixture.detectChanges();
+    httpMock.expectOne(docsUrl('p-1')).flush([doc]);
+    fixture.detectChanges();
+    expect(component.docs()).toEqual([doc]);
+    expect(component.dataSource.data).toEqual([doc]);
+
+    fixture.componentRef.setInput('patientId', 'p-2');
+    fixture.detectChanges();
+    const secondReq = httpMock.expectOne(docsUrl('p-2'));
+    expect(component.docs()).toEqual([]);
+    expect(component.dataSource.data).toEqual([]);
+
+    const otherDoc: PatientDocument = { ...doc, id: 'd-2', patientId: 'p-2', filename: 'consent.pdf' };
+    secondReq.flush([otherDoc]);
+    fixture.detectChanges();
+    expect(component.docs()).toEqual([otherDoc]);
+    httpMock.verify();
+  });
+
+  it('documentCount tracks the list through uploads and deletes', () => {
+    const docsUrl = `${environment.apiUrl}/api/patients/p-1/documents`;
+    const second: PatientDocument = { ...doc, id: 'd-2', filename: 'scan.jpg' };
+
+    fixture.detectChanges();
+    httpMock.expectOne(docsUrl).flush([doc, second]);
+    expect(component.documentCount()).toBe(2);
+
+    const file = new File(['x'], 'new.pdf', { type: 'application/pdf' });
+    component.pendingFile.set(file);
+    component.upload();
+    httpMock
+      .expectOne(r => r.method === 'POST' && r.url === docsUrl)
+      .flush({ ...doc, id: 'd-3', filename: 'new.pdf' });
+    expect(component.documentCount()).toBe(3);
+
+    component.deleteDocument(second);
+    httpMock
+      .expectOne(r => r.method === 'DELETE' && r.url === `${docsUrl}/d-2`)
+      .flush(null);
+    expect(component.documentCount()).toBe(2);
+
+    httpMock.verify();
+  });
+
+  it('documentCount is scoped to the current patient', () => {
+    const docsUrl = (id: string) => `${environment.apiUrl}/api/patients/${id}/documents`;
+
+    fixture.detectChanges();
+    httpMock.expectOne(docsUrl('p-1')).flush([doc]);
+    expect(component.documentCount()).toBe(1);
+
+    fixture.componentRef.setInput('patientId', 'p-2');
+    fixture.detectChanges();
+    httpMock.expectOne(docsUrl('p-2')).flush([]);
+    expect(component.documentCount()).toBe(0);
+
+    httpMock.verify();
   });
 
   it('openPreview opens the fullscreen dialog with the document as data', () => {

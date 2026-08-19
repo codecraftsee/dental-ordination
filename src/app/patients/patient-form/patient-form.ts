@@ -1,4 +1,5 @@
-import { ChangeDetectionStrategy, Component, inject, OnInit } from '@angular/core';
+import { ChangeDetectionStrategy, Component, DestroyRef, inject, OnInit } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { MatFormFieldModule } from '@angular/material/form-field';
@@ -38,6 +39,7 @@ export default class PatientForm implements OnInit {
   private router = inject(Router);
   private patientService = inject(PatientService);
   private toastService = inject(ToastService);
+  private destroyRef = inject(DestroyRef);
 
   isEditMode = false;
   patientId: string | null = null;
@@ -61,7 +63,7 @@ export default class PatientForm implements OnInit {
     });
 
     if (this.isEditMode && this.patientId) {
-      this.patientService.loadById(this.patientId).subscribe({
+      this.patientService.loadById(this.patientId).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
         next: patient => {
           this.form.patchValue({
             firstName: patient.firstName,
@@ -90,6 +92,7 @@ export default class PatientForm implements OnInit {
       return;
     }
 
+    // No takeUntilDestroyed below: navigating away must not abort the write.
     const raw = this.form.value;
     const payload = { ...raw, dateOfBirth: this.formatDate(raw.dateOfBirth) };
 

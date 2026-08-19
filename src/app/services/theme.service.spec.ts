@@ -1,13 +1,33 @@
 import { TestBed } from '@angular/core/testing';
 import { ThemeService } from './theme.service';
 
+/**
+ * ThemeService only reads `.matches`, but the stub replaces a window global that
+ * outlives this file, and Angular CDK calls `addListener` on whatever it finds.
+ * A `{ matches }` literal is why CI failed with "mql.addListener is not a
+ * function" from an unrelated spec. test-setup.ts now restores the shim after
+ * every test; keeping the stub complete means it is also valid while in use.
+ */
+function stubMatchMedia(matches: boolean): void {
+  Object.defineProperty(window, 'matchMedia', {
+    writable: true,
+    value: vi.fn().mockImplementation((media: string) => ({
+      matches,
+      media,
+      onchange: null,
+      addListener: vi.fn(),
+      removeListener: vi.fn(),
+      addEventListener: vi.fn(),
+      removeEventListener: vi.fn(),
+      dispatchEvent: vi.fn(),
+    })),
+  });
+}
+
 describe('ThemeService', () => {
   beforeEach(() => {
     localStorage.clear();
-    Object.defineProperty(window, 'matchMedia', {
-      writable: true,
-      value: vi.fn().mockReturnValue({ matches: false }),
-    });
+    stubMatchMedia(false);
     TestBed.configureTestingModule({});
   });
 
@@ -47,10 +67,7 @@ describe('ThemeService', () => {
   });
 
   it('uses OS dark preference when no localStorage value exists', () => {
-    Object.defineProperty(window, 'matchMedia', {
-      writable: true,
-      value: vi.fn().mockReturnValue({ matches: true }),
-    });
+    stubMatchMedia(true);
     const service = TestBed.inject(ThemeService);
     expect(service.theme()).toBe('dark');
   });

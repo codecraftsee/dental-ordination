@@ -69,6 +69,10 @@ export default class SetPassword implements OnInit {
 
     const { password, passwordConfirm } = this.form.value;
 
+    // No takeUntilDestroyed: the server applies the password change and consumes
+    // the invite token regardless of whether we are still listening, and the new
+    // tokens are persisted in a tap. Cancelling would change the password while
+    // leaving the user signed out, holding a link that no longer works.
     this.authService
       .setPassword({ token: this.token, password: password!, passwordConfirm: passwordConfirm! })
       .subscribe({

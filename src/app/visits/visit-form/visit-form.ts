@@ -1,7 +1,8 @@
-import { ChangeDetectionStrategy, Component, inject, OnInit, OnDestroy } from '@angular/core';
+import { ChangeDetectionStrategy, Component, DestroyRef, inject, OnInit } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import { Router, RouterLink, ActivatedRoute } from '@angular/router';
-import { Subscription, forkJoin, of, switchMap } from 'rxjs';
+import { forkJoin, of, switchMap } from 'rxjs';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
@@ -38,7 +39,7 @@ import { UserRole } from '../../models/user.model';
   styleUrl: './visit-form.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export default class VisitForm implements OnInit, OnDestroy {
+export default class VisitForm implements OnInit {
   private fb = inject(FormBuilder);
   private router = inject(Router);
   private route = inject(ActivatedRoute);
@@ -48,6 +49,7 @@ export default class VisitForm implements OnInit, OnDestroy {
   private diagnosisService = inject(DiagnosisService);
   private treatmentService = inject(TreatmentService);
   private toastService = inject(ToastService);
+  private destroyRef = inject(DestroyRef);
 
   get patients() { return this.patientService.getAll(); }
   get doctors() { return this.userService.getByRole(UserRole.Doctor); }
@@ -60,7 +62,6 @@ export default class VisitForm implements OnInit, OnDestroy {
   prefilledPatientId: string | null = null;
   returnTo: string | null = null;
   private patchingForm = false;
-  private treatmentSub?: Subscription;
 
   ngOnInit(): void {
     this.visitId = this.route.snapshot.paramMap.get('id');
@@ -98,6 +99,7 @@ export default class VisitForm implements OnInit, OnDestroy {
       switchMap(() =>
         this.isEditMode && this.visitId ? this.visitService.loadById(this.visitId) : of(null),
       ),
+      takeUntilDestroyed(this.destroyRef),
     ).subscribe({
       next: visit => {
         if (visit) {
@@ -120,18 +122,16 @@ export default class VisitForm implements OnInit, OnDestroy {
       error: () => this.router.navigate(['/visits']),
     });
 
-    this.treatmentSub = this.form.get('treatmentId')!.valueChanges.subscribe(treatmentId => {
-      if (treatmentId && !this.patchingForm) {
-        const treatment = this.treatmentService.getById(treatmentId);
-        if (treatment) {
-          this.form.get('price')!.setValue(treatment.defaultPrice);
+    this.form.get('treatmentId')!.valueChanges
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe(treatmentId => {
+        if (treatmentId && !this.patchingForm) {
+          const treatment = this.treatmentService.getById(treatmentId);
+          if (treatment) {
+            this.form.get('price')!.setValue(treatment.defaultPrice);
+          }
         }
-      }
-    });
-  }
-
-  ngOnDestroy(): void {
-    this.treatmentSub?.unsubscribe();
+      });
   }
 
   get f() {
@@ -144,6 +144,7 @@ export default class VisitForm implements OnInit, OnDestroy {
       return;
     }
 
+    // No takeUntilDestroyed below: navigating away must not abort the write.
     const formValue = this.form.getRawValue();
     const payload = {
       ...formValue,

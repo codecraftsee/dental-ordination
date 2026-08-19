@@ -1,4 +1,5 @@
-import { ChangeDetectionStrategy, Component, computed, effect, inject, input, signal, untracked } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, DestroyRef, effect, inject, input, signal, untracked } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { forkJoin } from 'rxjs';
 import { TranslatePipe } from '../shared/translate.pipe';
 import { LocalizedDatePipe } from '../shared/localized-date.pipe';
@@ -32,6 +33,7 @@ export default class DentalCard {
   private userService = inject(UserService);
   private diagnosisService = inject(DiagnosisService);
   private treatmentService = inject(TreatmentService);
+  private destroyRef = inject(DestroyRef);
 
   patientId = input.required<string>();
 
@@ -42,7 +44,7 @@ export default class DentalCard {
   displayedColumns = ['date', 'diagnosis', 'treatment', 'price', 'paid', 'doctor'];
 
   totalCost = computed(() => {
-    return this.visits().reduce((sum, v) => sum + (Number(v.price) || 0), 0);
+    return this.visits().reduce((sum, v) => sum + (v.price ?? 0), 0);
   });
 
   constructor() {
@@ -59,7 +61,9 @@ export default class DentalCard {
       this.userService.loadAll(),
       this.diagnosisService.loadAll(),
       this.treatmentService.loadAll(),
-    ]).subscribe(([patient]) => {
+    ]).pipe(
+      takeUntilDestroyed(this.destroyRef),
+    ).subscribe(([patient]) => {
       this.patient.set(patient);
       const sorted = this.visitService.getByPatientId(id).sort((a, b) => a.date.localeCompare(b.date));
       this.visits.set(sorted);

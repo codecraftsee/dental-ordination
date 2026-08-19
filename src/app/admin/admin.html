@@ -21,8 +21,11 @@
           <p class="action-desc">{{ action.descKey | translate }}</p>
 
           <div class="confirm-row">
-            <label class="confirm-label">{{ 'admin.typeToConfirm' | translate }}</label>
+            <label class="confirm-label" [for]="'confirm-' + action.key">{{
+              'admin.typeToConfirm' | translate
+            }}</label>
             <input
+              [id]="'confirm-' + action.key"
               type="text"
               class="form-control confirm-input"
               [placeholder]="'admin.confirmPlaceholder' | translate"
