@@ -6,10 +6,13 @@ import { signal } from '@angular/core';
 import { App } from './app';
 import { AuthService } from './services/auth.service';
 import { TranslateService } from './services/translate.service';
+import { ImportRunStatus } from './services/import-run-status';
 
 describe('App', () => {
   let component: App;
   let fixture: ComponentFixture<App>;
+
+  const mockImportStatus = { running: signal(false), visible: signal(false) };
 
   const mockAuthService = {
     isAuthenticated: signal(false),
@@ -34,8 +37,11 @@ describe('App', () => {
         provideRouter([]),
         { provide: AuthService, useValue: mockAuthService },
         { provide: TranslateService, useValue: mockTranslateService },
+        { provide: ImportRunStatus, useValue: mockImportStatus },
       ],
     }).compileComponents();
+
+    mockImportStatus.running.set(false);
 
     fixture = TestBed.createComponent(App);
     component = fixture.componentInstance;
@@ -97,5 +103,38 @@ describe('App', () => {
   it('logout delegates to authService', () => {
     component.logout();
     expect(mockAuthService.logout).toHaveBeenCalled();
+  });
+
+  /**
+   * Closing or reloading the tab is the one thing that actually destroys a
+   * running import — router navigation is harmless, because the run lives in a
+   * root-provided service and the progress panel follows the user across routes.
+   */
+  describe('leaving the page during an import', () => {
+    const unloadEvent = () => {
+      const event = {
+        preventDefault: vi.fn(),
+        returnValue: undefined as unknown as string,
+      };
+      return event as unknown as BeforeUnloadEvent & { preventDefault: ReturnType<typeof vi.fn> };
+    };
+
+    it('prompts while an import is running', () => {
+      mockImportStatus.running.set(true);
+      const event = unloadEvent();
+
+      component.onBeforeUnload(event);
+
+      expect(event.preventDefault).toHaveBeenCalled();
+      expect(event.returnValue).toBe('');
+    });
+
+    it('does not prompt when nothing is running', () => {
+      const event = unloadEvent();
+
+      component.onBeforeUnload(event);
+
+      expect(event.preventDefault).not.toHaveBeenCalled();
+    });
   });
 });

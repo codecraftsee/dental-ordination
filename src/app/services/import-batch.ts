@@ -17,8 +17,26 @@
  * request. Both limits are applied per batch.
  */
 
-/** Matches the "at most 200 files per request" the import endpoint documents. */
-export const MAX_FILES_PER_REQUEST = 200;
+/**
+ * Files per request. The endpoint documents "at most 200"; we send far fewer,
+ * because this constant turns out to bound three things the user actually feels
+ * and only one of them is a backend limit:
+ *
+ * - **Cancel granularity.** Within one request the server streams every file it
+ *   carries and the client cannot interject, so cancelling wastes at most one
+ *   batch of work.
+ * - **Resume waste.** A resumed run re-sends whatever the interrupted batch had
+ *   not confirmed, and re-importing a file costs a full parse even though it
+ *   lands as `visits_skipped`.
+ * - **How long the progress bar sits still.** `fetch` cannot report upload
+ *   progress and no SSE event arrives until the whole body is in, so each batch
+ *   begins with a dead window proportional to its size. At 200 files / 80 MB
+ *   that window reads as a hang.
+ *
+ * 50 keeps all three small. The extra requests are sequential and cheap; a
+ * 8,000-file run makes ~163 of them instead of 41.
+ */
+export const MAX_FILES_PER_REQUEST = 50;
 
 /**
  * Bytes per request, held below Caddy's 100 MB so multipart framing, the field

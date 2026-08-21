@@ -99,6 +99,11 @@ export const routes: Routes = [
     canActivate: [authGuard, permissionGuard([Permission.VisitsUpdate])],
   },
   {
+    path: 'import',
+    loadComponent: () => import('./import/import'),
+    canActivate: [authGuard, permissionGuard([Permission.AdminImport])],
+  },
+  {
     path: 'admin',
     loadComponent: () => import('./admin/admin'),
     canActivate: [authGuard, permissionGuard([Permission.AdminBulkDelete])],

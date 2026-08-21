@@ -24,37 +24,6 @@
   gap: var(--spacing-md);
 }
 
-.import-progress-card {
-  margin: 1rem 0;
-
-  .import-progress-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: var(--spacing-xs);
-  }
-
-  mat-progress-bar {
-    border-radius: var(--radius-sm);
-  }
-
-  .import-total {
-    display: block;
-    text-align: right;
-    margin-top: var(--spacing-xs);
-    color: var(--color-text-secondary);
-  }
-}
-
-.import-message-card {
-  margin: 1rem 0;
-  border-left: 4px solid var(--color-success);
-
-  &.import-message-error {
-    border-left-color: var(--color-warning);
-  }
-}
-
 .recent-visits-section {
   h2 {
     font-size: 1.2rem;

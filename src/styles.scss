@@ -43,6 +43,12 @@
   --color-warning-bg: #fff8e1;
   --color-danger: #dc3545;
   --color-danger-bg: #ffebee;
+  // Text-weight variants of the status colours. The fill colours above are tuned
+  // for borders, icons and 4px accents; as small text they fail AA badly —
+  // #28a745 on --color-success-bg is 2.78:1, #dc3545 on --color-danger-bg 3.96:1.
+  // These pass on both their own tint and --color-surface, in both themes.
+  --color-success-text: #1b7a33;
+  --color-danger-text: #b3202e;
   --color-info: #17a2b8;
   --color-info-bg: #e0f7fa;
   --color-error: #dc3545;
@@ -689,6 +695,10 @@ mat-card.stat-card {
   --color-warning-bg: #2e2510;
   --color-danger-bg: #2e1a1a;
   --color-info-bg: #0f2535;
+  // Lightened rather than darkened, like every other token here: 6.34:1 and
+  // 5.95:1 on their own tints, 6.75:1 and 5.57:1 on --color-surface.
+  --color-success-text: #4cc266;
+  --color-danger-text: #f4737f;
 }
 
 @media (max-width: 767px) {

@@ -1,0 +1,289 @@
+<div class="container import-page">
+  <h1 class="section-title">{{ 'import.title' | translate }}</h1>
+
+  @if (persistenceDegraded()) {
+    <p class="import-page__notice import-page__notice--warn" role="alert">
+      <mat-icon>warning</mat-icon>
+      <span>{{ 'import.storageDegraded' | translate }}</span>
+    </p>
+  }
+
+  @if (interrupted()) {
+    <mat-card class="import-page__card import-page__card--interrupted">
+      <mat-card-content>
+        <h2 class="import-page__card-title">
+          <mat-icon>history</mat-icon>
+          {{ 'import.interruptedTitle' | translate }}
+        </h2>
+        <p>{{ interruptedHint() }}</p>
+        <div class="import-page__actions">
+          <button matButton type="button" (click)="discardInterrupted()">
+            {{ 'import.interruptedDiscard' | translate }}
+          </button>
+        </div>
+      </mat-card-content>
+    </mat-card>
+  }
+
+  <mat-card class="import-page__card">
+    <mat-card-content>
+      <h2 class="import-page__card-title">
+        <mat-icon>person_search</mat-icon>
+        {{ 'home.importDoctorTitle' | translate }}
+      </h2>
+      <p class="import-page__hint">{{ 'home.importDoctorDesc' | translate }}</p>
+
+      <label class="import-page__field">
+        <span class="import-page__field-label">{{ 'home.importDoctor' | translate }}</span>
+        <select
+          class="form-control"
+          [value]="selectedDoctorId()"
+          (change)="setDoctor($event)"
+          [disabled]="importing()"
+        >
+          <option value="">{{ 'home.importDoctorAuto' | translate }}</option>
+          @for (doctor of doctors(); track doctor.id) {
+            <option [value]="doctor.id">Dr. {{ doctor.firstName }} {{ doctor.lastName }}</option>
+          }
+        </select>
+      </label>
+    </mat-card-content>
+  </mat-card>
+
+  <mat-card class="import-page__card">
+    <mat-card-content>
+      <h2 class="import-page__card-title">
+        <mat-icon>folder_open</mat-icon>
+        {{ 'import.selectTitle' | translate }}
+      </h2>
+
+      <div
+        class="import-page__dropzone"
+        [class.import-page__dropzone--active]="dragging()"
+        (dragover)="onDragOver($event)"
+        (dragleave)="onDragLeave()"
+        (drop)="onDrop($event)"
+      >
+        <mat-icon class="import-page__dropzone-icon">cloud_upload</mat-icon>
+        <p class="import-page__dropzone-text">{{ 'home.importDropFiles' | translate }}</p>
+
+        <div class="import-page__pickers">
+          <!-- Folder picking matches how the cards are actually stored: one
+               folder per patient, thousands of them. -->
+          <label class="btn btn-outline btn-sm import-page__picker">
+            <mat-icon>drive_folder_upload</mat-icon>
+            {{ 'import.pickFolder' | translate }}
+            <input type="file" webkitdirectory multiple (change)="onFilesSelected($event)" />
+          </label>
+          <label class="btn btn-outline btn-sm import-page__picker">
+            <mat-icon>description</mat-icon>
+            {{ 'home.importBrowse' | translate }}
+            <input type="file" multiple accept=".xlsx" (change)="onFilesSelected($event)" />
+          </label>
+        </div>
+      </div>
+
+      @if (selectedFiles().length > 0) {
+        @if (alreadyImportedCount() > 0) {
+          <p class="import-page__notice">
+            <mat-icon>done_all</mat-icon>
+            <span>{{ skippedHint() }}</span>
+          </p>
+        }
+
+        @if (oversizedFiles().length > 0) {
+          <div class="import-page__notice import-page__notice--warn" role="alert">
+            <mat-icon>warning</mat-icon>
+            <div>
+              <p class="import-page__notice-title">{{ 'home.importTooLargeTitle' | translate }}</p>
+              <p>{{ tooLargeHint() }}</p>
+            </div>
+          </div>
+        }
+
+        <!-- The summary, not the list: a selection of 8,000 cards must not put
+             8,000 rows in the DOM before anyone has asked to see them. -->
+        <dl class="import-page__summary">
+          <div>
+            <dt>{{ 'home.importPlanFiles' | translate }}</dt>
+            <dd>{{ acceptedCount() }}</dd>
+          </div>
+          <div>
+            <dt>{{ 'home.importPlanSize' | translate }}</dt>
+            <dd>{{ totalSize() }}</dd>
+          </div>
+          <div>
+            <dt>{{ 'home.importPlanBatches' | translate }}</dt>
+            <dd>{{ batchCount() }}</dd>
+          </div>
+          <div>
+            <dt>{{ 'import.planDuration' | translate }}</dt>
+            <dd>{{ estimatedDuration() }}</dd>
+          </div>
+        </dl>
+        <p class="import-page__hint">{{ estimateHint() }}</p>
+
+        <div class="import-page__actions">
+          <button matButton type="button" (click)="toggleFileList()" [attr.aria-expanded]="showFileList()">
+            <mat-icon>{{ showFileList() ? 'expand_less' : 'expand_more' }}</mat-icon>
+            {{ (showFileList() ? 'import.hideList' : 'import.showList') | translate }}
+          </button>
+          <button matButton type="button" (click)="clearSelection()" [disabled]="importing()">
+            {{ 'import.clearSelection' | translate }}
+          </button>
+          <button matButton="elevated" class="btn-amber" type="button" (click)="start()" [disabled]="!canStart()">
+            <mat-icon>upload_file</mat-icon>
+            {{ 'home.importStart' | translate }}
+          </button>
+        </div>
+
+        @if (showFileList()) {
+          <!--
+            cdkVirtualFor rather than @for: virtual scrolling needs the viewport
+            to drive rendering, and this is the one list that can hold thousands
+            of rows. The rendered row count stays flat as the selection grows.
+          -->
+          <cdk-virtual-scroll-viewport
+            itemSize="40"
+            class="import-page__viewport"
+            tabindex="0"
+            role="region"
+            [attr.aria-label]="'import.fileListLabel' | translate"
+          >
+            <div *cdkVirtualFor="let file of filesToImport()" class="import-page__file">
+              <mat-icon>description</mat-icon>
+              <span class="import-page__file-name">{{ file.name }}</span>
+              <span class="import-page__file-size">{{ formatSize(file.size) }}</span>
+              <button
+                type="button"
+                class="import-page__file-remove"
+                (click)="removeFile(file)"
+                [disabled]="importing()"
+                [attr.aria-label]="removeLabel(file)"
+              >
+                <mat-icon>close</mat-icon>
+              </button>
+            </div>
+          </cdk-virtual-scroll-viewport>
+        }
+      }
+    </mat-card-content>
+  </mat-card>
+
+  @if (hasReport()) {
+    <mat-card class="import-page__card">
+      <mat-card-content>
+        <h2 class="import-page__card-title">
+          <mat-icon>fact_check</mat-icon>
+          {{ 'import.reportTitle' | translate }}
+        </h2>
+
+        @if (reportTallies(); as tallies) {
+          <dl class="import-page__summary">
+            <div>
+              <dt>{{ 'import.reportImported' | translate }}</dt>
+              <dd>{{ tallies.filesImported }}</dd>
+            </div>
+            <div>
+              <dt>{{ 'import.reportUpdated' | translate }}</dt>
+              <dd>{{ tallies.patientsUpdated }}</dd>
+            </div>
+            <div>
+              <dt>{{ 'import.reportSkipped' | translate }}</dt>
+              <dd>{{ tallies.filesSkipped }}</dd>
+            </div>
+            <div>
+              <dt>{{ 'import.reportIncomplete' | translate }}</dt>
+              <dd>{{ tallies.filesIncomplete }}</dd>
+            </div>
+            <div class="import-page__tally--failed">
+              <dt>{{ 'import.reportFailed' | translate }}</dt>
+              <dd>{{ tallies.filesFailed }}</dd>
+            </div>
+          </dl>
+        }
+
+        @if (canResume()) {
+          <p class="import-page__notice">
+            <mat-icon>replay</mat-icon>
+            <span>{{ 'import.resumeHint' | translate }}</span>
+          </p>
+        }
+
+        @if (showingStoredRowsOnly()) {
+          <p class="import-page__hint">{{ 'import.reportStoredOnly' | translate }}</p>
+        }
+        @if (reportTruncated()) {
+          <p class="import-page__hint import-page__hint--warn">{{ 'import.reportTruncated' | translate }}</p>
+        }
+
+        <div class="import-page__filters">
+          @for (outcome of outcomeFilters; track outcome) {
+            <button
+              type="button"
+              class="import-page__chip"
+              [class.import-page__chip--active]="outcomeFilter() === outcome"
+              [attr.aria-pressed]="outcomeFilter() === outcome"
+              (click)="setOutcomeFilter(outcome)"
+            >
+              {{ outcomeKey(outcome) | translate }}
+            </button>
+          }
+
+          <label class="import-page__search">
+            <span class="import-page__field-label">{{ 'import.searchFiles' | translate }}</span>
+            <input
+              type="search"
+              class="form-control"
+              [value]="search()"
+              (input)="onSearch($event)"
+            />
+          </label>
+        </div>
+
+        <div class="import-page__actions">
+          <button matButton type="button" (click)="exportCsv()" [disabled]="filteredRows().length === 0">
+            <mat-icon>download</mat-icon>
+            {{ 'import.exportCsv' | translate }}
+          </button>
+          @if (canResume()) {
+            <button matButton="elevated" type="button" (click)="resume()" [disabled]="importing()">
+              <mat-icon>play_arrow</mat-icon>
+              {{ 'import.resumeOutstanding' | translate }}
+            </button>
+          }
+        </div>
+
+        @if (filteredRows().length === 0) {
+          <p class="import-page__hint">{{ 'import.reportNoRows' | translate }}</p>
+        } @else {
+          <!--
+            A region rather than faked table roles: the CDK puts its own content
+            wrapper between the viewport and the rows, so role="table"/"row" would
+            break the required-children rule and fail AXE. Each row reads as
+            "Failed — card7.xlsx — reason", which needs no column headers.
+          -->
+          <cdk-virtual-scroll-viewport
+            itemSize="44"
+            class="import-page__viewport"
+            tabindex="0"
+            role="region"
+            [attr.aria-label]="'import.reportListLabel' | translate"
+          >
+            <div *cdkVirtualFor="let row of filteredRows()" class="import-page__row">
+              <!-- data attribute rather than a class binding: [class]="..." would
+                   replace the base class instead of adding to it. -->
+              <span class="import-page__badge" [attr.data-outcome]="row.outcome">
+                {{ outcomeKey(row.outcome) | translate }}
+              </span>
+              <span class="import-page__file-name" [title]="row.name">{{ row.name }}</span>
+              <span class="import-page__row-errors" [title]="row.errors.join('; ')">
+                {{ row.errors.join('; ') }}
+              </span>
+            </div>
+          </cdk-virtual-scroll-viewport>
+        }
+      </mat-card-content>
+    </mat-card>
+  }
+</div>
