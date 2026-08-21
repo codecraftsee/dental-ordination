@@ -46,6 +46,18 @@
       <main class="main-content">
         <router-outlet />
       </main>
+
+      <!--
+        Rendered by the shell, not by a route: an import runs for tens of minutes
+        and its progress has to stay reachable wherever the user navigates.
+
+        Deferred because it is idle almost always — loading it eagerly put the
+        import service graph and Material's dialog and progress bar in the
+        initial bundle, for a screen only admins ever open.
+      -->
+      @defer (when importStatus.visible()) {
+        <app-import-progress />
+      }
     </mat-sidenav-content>
   </mat-sidenav-container>
 } @else {
