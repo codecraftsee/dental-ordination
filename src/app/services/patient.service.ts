@@ -4,21 +4,50 @@ import { environment } from '../../environments/environment';
 import { Patient, PatientCreate, PatientUpdate } from '../models/patient.model';
 import { AuthService } from './auth.service';
 import { EntityCacheService, matchesQuery } from './entity-cache.service';
-import { planImport } from './import-batch';
 import { snakeToCamelKeys } from '../interceptors/case-transform.interceptor';
 
-export interface ImportResult {
+/**
+ * The counters the API keeps. Every one of these is in `_empty_counts()` on the
+ * server and is sent on both `file_done` and `complete`; the frontend used to
+ * declare only three of them and silently drop the rest, which is why nothing
+ * could report duplicates skipped or records imported with gaps.
+ */
+export interface ImportCounts {
   patientsCreated: number;
   patientsFound: number;
+  /** Blank fields on an existing patient filled in by a later card. */
+  patientsUpdated: number;
   visitsCreated: number;
+  visitsSkipped: number;
+  patientsIncomplete: number;
+  visitsIncomplete: number;
+}
+
+export interface ImportResult extends ImportCounts {
   filesProcessed: number;
   errors: string[];
 }
 
+/**
+ * Events from **one** import request. `current` and `total` are scoped to that
+ * request; numbering them across a whole selection is the orchestrator's job
+ * (`PatientImportService`), not this layer's.
+ */
 export type ImportProgressEvent =
   | { type: 'progress'; current: number; total: number; file: string }
-  | { type: 'file_done'; current: number; total: number; file: string; patientsCreated: number; visitsCreated: number; errors: string[] }
+  | ({ type: 'file_done'; current: number; total: number; file: string; errors: string[] } & ImportCounts)
   | { type: 'complete'; summary: ImportResult };
+
+/**
+ * A batch request that never produced a stream. `status` is 0 when the request
+ * failed before a response existed at all — DNS, offline, connection reset —
+ * which is the case worth retrying.
+ */
+export interface ImportBatchError {
+  status: number;
+  detail?: string;
+  code?: string;
+}
 
 @Injectable({ providedIn: 'root' })
 export class PatientService extends EntityCacheService<Patient, PatientCreate, PatientUpdate> {
@@ -48,59 +77,35 @@ export class PatientService extends EntityCacheService<Patient, PatientCreate, P
   }
 
   /**
-   * Streams the XLSX import over SSE. This goes through `fetch` rather than
-   * HttpClient because HttpClient cannot surface a response body incrementally,
-   * which also means it bypasses the case interceptor — hence the local
-   * conversion below.
+   * Streams **one** import request over SSE and emits its events verbatim.
    *
-   * Large selections are uploaded as several sequential requests, split by
-   * `planImport` on both bytes and file count — see `import-batch.ts` for which
-   * backend limit each one answers to. One request holds every file it carries in
-   * server memory for as long as it runs, and a connection dropped near the end
-   * loses the progress stream for everything still queued behind it; batching
-   * bounds both. Sequential, not parallel: the point is to cap what is in flight,
-   * and the server processes files one at a time regardless.
+   * This goes through `fetch` rather than HttpClient because HttpClient cannot
+   * surface a response body incrementally, which also means it bypasses the case
+   * interceptor — hence the local `snakeToCamelKeys` conversion below.
    *
-   * Files too large to fit in any single request are dropped here rather than
-   * failing the run — the import dialog surfaces them to the user before it gets
-   * this far, so reaching this with an oversized file means a non-dialog caller.
+   * Deliberately one request and nothing more. Splitting a selection, numbering
+   * progress across it, accumulating summaries, retrying, cancelling and resuming
+   * all belong to `PatientImportService`. While they lived here there was no seam
+   * to abort a single batch or to let a run continue past a failed one, and none
+   * of it could be tested without faking a multi-request `fetch`.
    *
-   * Subscribers cannot tell: `current`/`total` are renumbered across the whole
-   * selection and the per-request `complete` events are accumulated into a
-   * single one emitted at the end, so the event stream has the same shape it
-   * has always had.
+   * `signal` lets the caller abort mid-stream; unsubscribing aborts as well, so
+   * the request cannot outlive its subscription either way.
    */
-  importXlsx(files: File[], doctorId?: string): Observable<ImportProgressEvent> {
+  importXlsxBatch(files: File[], doctorId?: string, signal?: AbortSignal): Observable<ImportProgressEvent> {
     return new Observable(observer => {
       const controller = new AbortController();
+      const abort = () => controller.abort();
+      if (signal?.aborted) controller.abort();
+      else signal?.addEventListener('abort', abort, { once: true });
+
       let reader: ReadableStreamDefaultReader<Uint8Array> | undefined;
-      let cancelled = false;
 
-      const { batches, accepted } = planImport(files);
-
-      // Summed across batches. Written generically so a counter added to the
-      // API's summary keeps totalling correctly instead of reporting whatever
-      // the last batch happened to see.
-      const summary: Record<string, unknown> = {
-        patientsCreated: 0, patientsFound: 0, visitsCreated: 0, filesProcessed: 0, errors: [],
-      };
-      const accumulate = (batchSummary: Record<string, unknown>) => {
-        for (const [key, value] of Object.entries(batchSummary ?? {})) {
-          if (typeof value === 'number') {
-            summary[key] = ((summary[key] as number) ?? 0) + value;
-          } else if (Array.isArray(value)) {
-            summary[key] = [...((summary[key] as unknown[]) ?? []), ...value];
-          } else {
-            summary[key] = value;
-          }
-        }
-      };
-
-      // The token is read here rather than passed in, so the retry above picks
-      // up whatever refreshToken() has just written to storage.
-      const sendBatch = (batch: File[]) => {
+      // The token is read per attempt rather than passed in, so the retry below
+      // picks up whatever refreshToken() has just written to storage.
+      const send = () => {
         const formData = new FormData();
-        for (const file of batch) formData.append('files', file);
+        for (const file of files) formData.append('files', file);
         if (doctorId) formData.append('doctor_id', doctorId);
         const token = this.authService.getAccessToken();
 
@@ -113,96 +118,63 @@ export class PatientService extends EntityCacheService<Patient, PatientCreate, P
       };
 
       const run = async () => {
-        // Without this an empty plan falls straight through to the synthetic
-        // `complete` below and reports a successful import of nothing: success
-        // toast, zeroed summary, five caches reloaded. The dialog cannot reach it
-        // (Start is disabled when nothing is importable), but "succeeds when
-        // nothing was sent" is the wrong contract for a public method.
-        if (accepted.length === 0) {
-          throw { code: 'noFiles', filesProcessed: 0 };
+        let response: Response;
+        try {
+          response = await send();
+        } catch (err) {
+          if (err instanceof DOMException && err.name === 'AbortError') throw err;
+          // A `fetch` that rejects never reached a response: offline, DNS
+          // failure, connection reset. Status 0 is what tells the orchestrator
+          // this is worth retrying, as distinct from a server that answered.
+          const error: ImportBatchError = { status: 0, detail: (err as Error)?.message };
+          throw error;
         }
 
-        let filesDone = 0;
-
-        for (const batch of batches) {
-          if (cancelled) return;
-
-          let response = await sendBatch(batch);
-
-          // Refresh once and retry, mirroring errorInterceptor. That
-          // interceptor is an HttpInterceptorFn and this request goes through
-          // `fetch`, so it never sees this call — and batching is what made
-          // that gap reachable. A single request authenticated once and ran to
-          // completion however long it took; a run split into batches has to
-          // survive the access token expiring part-way through, which at
-          // ACCESS_TOKEN_EXPIRE_MINUTES=30 a large import can easily outlive.
-          //
-          // Nothing was processed under a 401, so re-sending the batch cannot
-          // double-import. If the refresh fails it returns null and has already
-          // logged out, and the original 401 falls through to the throw below.
-          if (response.status === 401) {
-            const refreshed = await firstValueFrom(this.authService.refreshToken());
-            if (refreshed) response = await sendBatch(batch);
-          }
-
-          if (!response.ok) {
-            // Carries the API's `detail`, which is what the caller renders.
-            // filesProcessed says how much of the selection already committed
-            // — batches before this one are on the server and stay there.
-            throw { ...(await response.json().catch(() => ({}))), filesProcessed: filesDone };
-          }
-
-          reader = response.body!.getReader();
-          const decoder = new TextDecoder();
-          let buffer = '';
-          // How far this batch actually got, which is not always how many files
-          // it carried: the API's generator has an outer `except` that yields a
-          // single `complete` and stops, so a batch that dies at file 3 of 200
-          // streams no further events. Counting `file_done` — emitted after a
-          // file is processed, unlike `progress`, which precedes it — keeps the
-          // next batch from being numbered over files that never ran.
-          let batchDone = 0;
-
-          while (true) {
-            const { done, value } = await reader.read();
-            if (done) break;
-            buffer += decoder.decode(value, { stream: true });
-            const parts = buffer.split('\n\n');
-            buffer = parts.pop()!;
-            for (const part of parts) {
-              const line = part.trim();
-              if (!line.startsWith('data: ')) continue;
-              const parsed = snakeToCamelKeys(JSON.parse(line.slice(6))) as ImportProgressEvent;
-
-              // Held back: one `complete` is emitted for the whole run below.
-              if (parsed.type === 'complete') {
-                accumulate(parsed.summary as unknown as Record<string, unknown>);
-                continue;
-              }
-
-              if (parsed.type === 'file_done') {
-                batchDone = Math.max(batchDone, parsed.current);
-              }
-
-              // `current`/`total` arrive scoped to this request, so without
-              // this the progress bar would restart at zero on every batch.
-              const event = {
-                ...parsed,
-                current: filesDone + parsed.current,
-                total: accepted.length,
-              } as ImportProgressEvent;
-              this.ngZone.run(() => observer.next(event));
-            }
-          }
-
-          filesDone += batchDone;
+        // Refresh once and retry, mirroring errorInterceptor. That interceptor
+        // is an HttpInterceptorFn and this request goes through `fetch`, so it
+        // never sees this call — and batching is what made that gap reachable.
+        // A single request authenticated once and ran to completion however long
+        // it took; a run split into batches has to survive the access token
+        // expiring part-way through, which at ACCESS_TOKEN_EXPIRE_MINUTES=30 a
+        // large import can easily outlive.
+        //
+        // Nothing was processed under a 401, so re-sending cannot double-import.
+        // If the refresh fails it returns null and has already logged out, and
+        // the original 401 falls through to the throw below.
+        if (response.status === 401) {
+          const refreshed = await firstValueFrom(this.authService.refreshToken());
+          if (refreshed) response = await send();
         }
 
-        if (cancelled) return;
-        this.ngZone.run(() => {
-          observer.next({ type: 'complete', summary: summary as unknown as ImportResult });
-          observer.complete();
-        });
+        if (!response.ok) {
+          // Carries the API's `detail`, which is what the caller renders.
+          const body = await response.json().catch(() => ({}));
+          const error: ImportBatchError = { ...body, status: response.status };
+          throw error;
+        }
+
+        reader = response.body!.getReader();
+        const decoder = new TextDecoder();
+        let buffer = '';
+
+        while (true) {
+          const { done, value } = await reader.read();
+          if (done) break;
+          buffer += decoder.decode(value, { stream: true });
+          const parts = buffer.split('\n\n');
+          buffer = parts.pop()!;
+          for (const part of parts) {
+            const line = part.trim();
+            if (!line.startsWith('data: ')) continue;
+            const event = snakeToCamelKeys(JSON.parse(line.slice(6))) as ImportProgressEvent;
+            // `reader.read()` is not patched by zone.js, so control has already
+            // left the Angular zone by this point and signal writes downstream
+            // would not schedule change detection.
+            this.ngZone.run(() => observer.next(event));
+          }
+        }
+
+        this.ngZone.run(() => observer.complete());
       };
 
       run().catch(err => {
@@ -211,9 +183,9 @@ export class PatientService extends EntityCacheService<Patient, PatientCreate, P
       });
 
       return () => {
-        cancelled = true;
+        signal?.removeEventListener('abort', abort);
         controller.abort();
-        reader?.cancel();
+        reader?.cancel().catch(() => undefined);
       };
     });
   }

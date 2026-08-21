@@ -44,10 +44,15 @@ describe('Sidebar', () => {
     expect(component).toBeTruthy();
   });
 
-  it('renders all 7 nav links when user has all permissions', () => {
+  it('renders every nav link when the user has all permissions', () => {
     fixture.detectChanges();
     const items = fixture.nativeElement.querySelectorAll('[mat-list-item]');
-    expect(items.length).toBe(7);
+    expect(items.length).toBe(8);
+  });
+
+  it('gates the import link on the import permission', () => {
+    const link = component.navLinks().find(l => l.route === '/import');
+    expect(link?.permission).toBe(Permission.AdminImport);
   });
 
   it('home link uses exact matching', () => {

@@ -26,7 +26,13 @@ export class ConfirmDialogService {
         data,
         width: '400px',
         disableClose: true,
-        autoFocus: false,
+        // `false` moved focus nowhere, leaving it on the trigger behind the
+        // overlay: a screen reader never entered the dialog and a keyboard user
+        // tabbed through the page underneath it. `'dialog'` focuses the container
+        // itself, which announces the dialog without putting focus on the
+        // destructive confirm button — `cdkFocusInitial` in the template would
+        // otherwise make Enter confirm a delete immediately.
+        autoFocus: 'dialog',
       })
       .afterClosed()
       .pipe(map(result => result === true));

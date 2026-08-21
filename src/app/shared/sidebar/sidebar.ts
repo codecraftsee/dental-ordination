@@ -37,6 +37,7 @@ export class Sidebar {
     { route: '/visits', label: 'nav.visits', icon: 'calendar_month', exact: false, permission: Permission.VisitsRead },
     { route: '/diagnoses', label: 'nav.diagnoses', icon: 'biotech', exact: false, permission: Permission.DiagnosesRead },
     { route: '/treatments', label: 'nav.treatments', icon: 'medication', exact: false, permission: Permission.TreatmentsRead },
+    { route: '/import', label: 'nav.import', icon: 'upload_file', exact: false, permission: Permission.AdminImport },
     { route: '/admin', label: 'nav.admin', icon: 'settings', exact: false, permission: Permission.AdminBulkDelete },
   ];
 

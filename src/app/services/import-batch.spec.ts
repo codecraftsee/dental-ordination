@@ -85,6 +85,21 @@ describe('planImport', () => {
     expect(plan.batches.flat().map(f => f.name)).toEqual(files.map(f => f.name));
   });
 
+  /**
+   * The count limit is a UX lever, not only a backend one: it caps how much
+   * work a cancel throws away, how much a resume re-sends, and how long the bar
+   * sits still while a batch uploads. Pinned here so it cannot drift back up
+   * towards the endpoint's documented 200 without someone deciding to.
+   */
+  it('keeps the request small enough to bound cancel and resume cost', () => {
+    expect(MAX_FILES_PER_REQUEST).toBeLessThanOrEqual(50);
+    expect(MAX_FILES_PER_REQUEST).toBeGreaterThan(0);
+
+    const plan = planImport(Array.from({ length: 8140 }, (_, i) => fileOf(`f${i}.xlsx`, 50 * 1024)));
+    expect(plan.batches.length).toBeGreaterThanOrEqual(163);
+    expect(Math.max(...plan.batches.map(b => b.length))).toBeLessThanOrEqual(50);
+  });
+
   it('handles an empty selection', () => {
     const plan = planImport([]);
     expect(plan).toEqual({ batches: [], accepted: [], oversized: [], totalBytes: 0 });

@@ -3,7 +3,7 @@ import { provideHttpClient } from '@angular/common/http';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { vi } from 'vitest';
 import { of } from 'rxjs';
-import { ImportProgressEvent, PatientService } from './patient.service';
+import { ImportBatchError, ImportProgressEvent, PatientService } from './patient.service';
 import { AuthService } from './auth.service';
 import { Patient } from '../models/patient.model';
 import { environment } from '../../environments/environment';
@@ -154,212 +154,210 @@ describe('PatientService', () => {
   });
 
   /**
-   * importXlsx splits large selections across several requests but must not
-   * expose that to subscribers: progress stays numbered against the whole
-   * selection and exactly one `complete` arrives, carrying summed totals.
+   * `importXlsxBatch` is one request and nothing more. Splitting a selection,
+   * numbering progress across it, retrying and cancelling all belong to
+   * `PatientImportService`. What has to hold here is narrower: the stream is
+   * parsed faithfully, a failure carries a status the orchestrator can act on,
+   * and the request never outlives its subscription.
    */
-  describe('importXlsx batching', () => {
-    const BATCH = 200;
+  describe('importXlsxBatch', () => {
+    const fileDone = (file: string, current: number, total: number) => ({
+      type: 'file_done',
+      current,
+      total,
+      file,
+      patients_created: 1,
+      patients_found: 0,
+      visits_created: 2,
+      visits_skipped: 0,
+      patients_incomplete: 0,
+      visits_incomplete: 0,
+      errors: [],
+    });
 
     /** An SSE body for one request, in the API's event order. */
-    const sseBody = (files: string[], startsAt: number) => {
+    const sseBody = (files: string[]) => {
       const total = files.length;
-      const events = files.flatMap((file, i) => [
+      const events: unknown[] = files.flatMap((file, i) => [
         { type: 'progress', current: i + 1, total, file, status: 'processing' },
-        { type: 'file_done', current: i + 1, total, file, patients_created: 1, visits_created: 2, errors: [] },
+        fileDone(file, i + 1, total),
       ]);
       events.push({
         type: 'complete',
         summary: {
           patients_created: total, patients_found: 0, visits_created: total * 2,
-          files_processed: total, errors: [`batch at ${startsAt}`],
+          visits_skipped: 0, patients_incomplete: 0, visits_incomplete: 0,
+          files_processed: total, errors: [],
         },
-      } as never);
-      return events.map(e => `data: ${JSON.stringify(e)}\n\n`).join('');
-    };
-
-    const stubFetch = () => {
-      const calls: { files: string[]; doctorId: string | null }[] = [];
-      const fetchMock = vi.fn(async (_url: string, init: RequestInit) => {
-        const form = init.body as FormData;
-        const files = form.getAll('files').map(f => (f as File).name);
-        calls.push({ files, doctorId: (form.get('doctor_id') as string) ?? null });
-        return new Response(sseBody(files, calls.length), {
-          status: 200,
-          headers: { 'Content-Type': 'text/event-stream' },
-        });
       });
-      vi.stubGlobal('fetch', fetchMock);
-      return calls;
+      return events.map(e => `data: ${JSON.stringify(e)}\n\n`).join('');
     };
 
     const makeFiles = (n: number) =>
       Array.from({ length: n }, (_, i) => new File(['x'], `card${i}.xlsx`));
 
+    const stubFetch = () => {
+      const calls: { files: string[]; doctorId: string | null; auth: string | null }[] = [];
+      vi.stubGlobal('fetch', vi.fn(async (_url: string, init: RequestInit) => {
+        const form = init.body as FormData;
+        const files = form.getAll('files').map(f => (f as File).name);
+        calls.push({
+          files,
+          doctorId: (form.get('doctor_id') as string) ?? null,
+          auth: (init.headers as Record<string, string>)?.['Authorization'] ?? null,
+        });
+        return new Response(sseBody(files), {
+          status: 200,
+          headers: { 'Content-Type': 'text/event-stream' },
+        });
+      }));
+      return calls;
+    };
+
+    /** Runs a batch to its end, returning what it emitted and how it settled. */
+    const collect = (files: File[], doctorId?: string, signal?: AbortSignal) =>
+      new Promise<{ events: ImportProgressEvent[]; error?: ImportBatchError }>(resolve => {
+        const events: ImportProgressEvent[] = [];
+        service.importXlsxBatch(files, doctorId, signal).subscribe({
+          next: event => events.push(event),
+          error: (error: ImportBatchError) => resolve({ events, error }),
+          complete: () => resolve({ events }),
+        });
+      });
+
     afterEach(() => vi.unstubAllGlobals());
 
-    it('sends a single request when the selection fits in one batch', async () => {
+    it('sends every file in a single request, carrying the doctor override', async () => {
       const calls = stubFetch();
-      await new Promise<void>(done => service.importXlsx(makeFiles(BATCH)).subscribe({ complete: done }));
+      await collect(makeFiles(50), 'doc-1');
+
       expect(calls).toHaveLength(1);
-      expect(calls[0].files).toHaveLength(BATCH);
+      expect(calls[0].files).toHaveLength(50);
+      expect(calls[0].doctorId).toBe('doc-1');
     });
 
-    it('splits a larger selection into sequential batches', async () => {
-      const calls = stubFetch();
-      await new Promise<void>(done =>
-        service.importXlsx(makeFiles(450), 'doc-1').subscribe({ complete: done }),
-      );
-      expect(calls.map(c => c.files.length)).toEqual([200, 200, 50]);
-      // Every batch has to carry the doctor override, not just the first.
-      expect(calls.every(c => c.doctorId === 'doc-1')).toBe(true);
-      // No file sent twice, none dropped.
-      const sent = calls.flatMap(c => c.files);
-      expect(new Set(sent).size).toBe(450);
-    });
-
-    it('numbers progress against the whole selection, not the batch', async () => {
+    it('emits the stream verbatim, batch-scoped and camelCased', async () => {
       stubFetch();
-      const events: ImportProgressEvent[] = [];
-      await new Promise<void>(done =>
-        service.importXlsx(makeFiles(450)).subscribe({ next: e => events.push(e), complete: done }),
-      );
-      const fileDone = events.filter(e => e.type === 'file_done');
-      expect(fileDone).toHaveLength(450);
-      // Without renumbering these would restart at 1 on each new batch.
-      expect(fileDone.map(e => e.current)).toEqual(Array.from({ length: 450 }, (_, i) => i + 1));
-      expect(fileDone.every(e => e.total === 450)).toBe(true);
+      const { events } = await collect(makeFiles(3));
+
+      // No renumbering here — `current`/`total` stay scoped to the request, and
+      // the `complete` is passed through rather than held back.
+      expect(events.filter(e => e.type === 'progress')).toHaveLength(3);
+      const done = events.filter(e => e.type === 'file_done');
+      expect(done.map(e => e.current)).toEqual([1, 2, 3]);
+      expect(done.every(e => e.total === 3)).toBe(true);
+      // The case interceptor never sees a `fetch`, so the conversion is local.
+      expect(done[0].patientsCreated).toBe(1);
+      expect(done[0].visitsSkipped).toBe(0);
+      expect(events.filter(e => e.type === 'complete')).toHaveLength(1);
     });
 
-    it('emits one complete carrying the summed totals', async () => {
-      stubFetch();
-      const events: ImportProgressEvent[] = [];
-      await new Promise<void>(done =>
-        service.importXlsx(makeFiles(450)).subscribe({ next: e => events.push(e), complete: done }),
-      );
-      const completes = events.filter(e => e.type === 'complete');
-      expect(completes).toHaveLength(1);
-      const summary = completes[0].summary;
-      expect(summary.filesProcessed).toBe(450);
-      expect(summary.patientsCreated).toBe(450);
-      expect(summary.visitsCreated).toBe(900);
-      // Errors concatenate across batches rather than the last one winning.
-      expect(summary.errors).toEqual(['batch at 1', 'batch at 2', 'batch at 3']);
+    it('surfaces a rejected fetch as status 0, which is what marks it retryable', async () => {
+      vi.stubGlobal('fetch', vi.fn(() => Promise.reject(new TypeError('Failed to fetch'))));
+      const { error } = await collect(makeFiles(2));
+
+      expect(error?.status).toBe(0);
+      expect(error?.detail).toBe('Failed to fetch');
     });
 
-    it('reports how many files committed when a later batch fails', async () => {
-      let call = 0;
-      vi.stubGlobal('fetch', vi.fn(async (_url: string, init: RequestInit) => {
-        call++;
-        const files = (init.body as FormData).getAll('files').map(f => (f as File).name);
-        if (call === 3) {
-          return new Response(JSON.stringify({ detail: 'Too many files' }), { status: 400 });
-        }
-        return new Response(sseBody(files, call), { status: 200 });
-      }));
+    it('surfaces a server error with its status and the API detail', async () => {
+      vi.stubGlobal('fetch', vi.fn(async () =>
+        new Response(JSON.stringify({ detail: 'Too many files' }), { status: 400 })));
+      const { error } = await collect(makeFiles(2));
 
-      const err = await new Promise<{ detail: string; filesProcessed: number }>(resolve =>
-        service.importXlsx(makeFiles(450)).subscribe({ error: resolve }),
-      );
-      expect(err.detail).toBe('Too many files');
-      // The two batches before it are committed server-side and stay there.
-      expect(err.filesProcessed).toBe(400);
-    });
-
-    it('numbers the next batch from what completed, not from the batch size', async () => {
-      let call = 0;
-      vi.stubGlobal('fetch', vi.fn(async (_url: string, init: RequestInit) => {
-        call++;
-        const files = (init.body as FormData).getAll('files').map(f => (f as File).name);
-        if (call > 1) return new Response(sseBody(files, call), { status: 200 });
-
-        // The API's outer `except`: three files stream, then a fatal `complete`
-        // and the generator stops. The other 197 are never processed.
-        const events: unknown[] = files.slice(0, 3).flatMap((file, i) => [
-          { type: 'progress', current: i + 1, total: files.length, file },
-          { type: 'file_done', current: i + 1, total: files.length, file, patients_created: 1, visits_created: 2, errors: [] },
-        ]);
-        events.push({ type: 'complete', summary: { files_processed: 3, errors: ['Fatal error: boom'] } });
-        return new Response(events.map(e => `data: ${JSON.stringify(e)}\n\n`).join(''), { status: 200 });
-      }));
-
-      const seen: ImportProgressEvent[] = [];
-      await new Promise<void>(done =>
-        service.importXlsx(makeFiles(450)).subscribe({ next: e => seen.push(e), complete: done }),
-      );
-
-      const fileDone = seen.filter(e => e.type === 'file_done');
-      // Batch 1 finished 3 of its 200, so batch 2 starts at 4 — not at 201,
-      // which would march the bar over 197 files that never ran.
-      expect(fileDone.map(e => e.current).slice(0, 5)).toEqual([1, 2, 3, 4, 5]);
-      expect(fileDone).toHaveLength(3 + 200 + 50);
-      expect(fileDone[fileDone.length - 1].current).toBe(253);
+      expect(error?.status).toBe(400);
+      expect(error?.detail).toBe('Too many files');
     });
 
     /**
-     * A single request authenticated once and ran to completion. Split into
-     * batches, the run has to outlive an access token that expires part-way —
-     * and it cannot lean on errorInterceptor, which only wraps HttpClient.
+     * A run split across ~163 requests has to survive the access token expiring
+     * part-way through, and it cannot lean on errorInterceptor — that only wraps
+     * HttpClient, and this path is `fetch`.
      */
-    describe('access token expiring mid-run', () => {
-      /** 401s the nth request, serves every other one. */
-      const stubFetchFailingAuthOn = (nth: number) => {
-        const sent: (string | null)[] = [];
-        let call = 0;
-        vi.stubGlobal('fetch', vi.fn(async (_url: string, init: RequestInit) => {
-          call++;
-          sent.push((init.headers as Record<string, string>)?.['Authorization'] ?? null);
-          if (call === nth) {
-            return new Response(JSON.stringify({ detail: 'Could not validate credentials' }), { status: 401 });
-          }
-          const files = (init.body as FormData).getAll('files').map(f => (f as File).name);
-          return new Response(sseBody(files, call), { status: 200 });
-        }));
-        return sent;
-      };
-
-      it('refreshes once and retries the batch, then finishes the run', async () => {
-        const auth = TestBed.inject(AuthService);
-        let token = 'old-token';
-        vi.spyOn(auth, 'getAccessToken').mockImplementation(() => token);
-        const refresh = vi.spyOn(auth, 'refreshToken').mockImplementation(() => {
-          token = 'new-token';
-          return of({ accessToken: 'new-token', refreshToken: 'r' } as never);
-        });
-
-        const sent = stubFetchFailingAuthOn(2);
-        const events: ImportProgressEvent[] = [];
-        await new Promise<void>(done =>
-          service.importXlsx(makeFiles(450)).subscribe({ next: e => events.push(e), complete: done }),
-        );
-
-        expect(refresh).toHaveBeenCalledTimes(1);
-        // Batch 2 sent twice: once on the stale token, once on the fresh one.
-        expect(sent).toEqual([
-          'Bearer old-token', 'Bearer old-token', 'Bearer new-token', 'Bearer new-token',
-        ]);
-        // The run still delivers every file exactly once, despite the retry.
-        expect(events.filter(e => e.type === 'file_done')).toHaveLength(450);
-        expect(events.filter(e => e.type === 'complete')).toHaveLength(1);
+    it('refreshes once and retries the request on a 401', async () => {
+      const auth = TestBed.inject(AuthService);
+      let token = 'old-token';
+      vi.spyOn(auth, 'getAccessToken').mockImplementation(() => token);
+      const refresh = vi.spyOn(auth, 'refreshToken').mockImplementation(() => {
+        token = 'new-token';
+        return of({ accessToken: 'new-token', refreshToken: 'r' } as never);
       });
 
-      it('surfaces the 401 without retrying again when the refresh fails', async () => {
-        const auth = TestBed.inject(AuthService);
-        vi.spyOn(auth, 'getAccessToken').mockReturnValue('expired');
-        // refreshToken() resolves to null once it has given up and logged out.
-        const refresh = vi.spyOn(auth, 'refreshToken').mockReturnValue(of(null));
+      let call = 0;
+      const sent: (string | null)[] = [];
+      vi.stubGlobal('fetch', vi.fn(async (_url: string, init: RequestInit) => {
+        call++;
+        sent.push((init.headers as Record<string, string>)?.['Authorization'] ?? null);
+        if (call === 1) {
+          return new Response(JSON.stringify({ detail: 'Could not validate credentials' }), { status: 401 });
+        }
+        const files = (init.body as FormData).getAll('files').map(f => (f as File).name);
+        return new Response(sseBody(files), { status: 200 });
+      }));
 
-        const sent = stubFetchFailingAuthOn(2);
-        const err = await new Promise<{ detail: string; filesProcessed: number }>(resolve =>
-          service.importXlsx(makeFiles(450)).subscribe({ error: resolve }),
-        );
+      const { events, error } = await collect(makeFiles(2));
 
-        expect(refresh).toHaveBeenCalledTimes(1);
-        // Two requests only: the failed batch is not re-sent on a dead session.
-        expect(sent).toHaveLength(2);
-        expect(err.detail).toBe('Could not validate credentials');
-        expect(err.filesProcessed).toBe(200);
+      expect(refresh).toHaveBeenCalledTimes(1);
+      expect(sent).toEqual(['Bearer old-token', 'Bearer new-token']);
+      expect(error).toBeUndefined();
+      expect(events.filter(e => e.type === 'file_done')).toHaveLength(2);
+    });
+
+    it('gives up on the 401 when the refresh fails, without sending again', async () => {
+      const auth = TestBed.inject(AuthService);
+      vi.spyOn(auth, 'getAccessToken').mockReturnValue('expired');
+      // refreshToken() resolves to null once it has given up and logged out.
+      const refresh = vi.spyOn(auth, 'refreshToken').mockReturnValue(of(null));
+
+      const sent: string[] = [];
+      vi.stubGlobal('fetch', vi.fn(async () => {
+        sent.push('sent');
+        return new Response(JSON.stringify({ detail: 'Could not validate credentials' }), { status: 401 });
+      }));
+
+      const { error } = await collect(makeFiles(2));
+
+      expect(refresh).toHaveBeenCalledTimes(1);
+      expect(sent).toHaveLength(1);
+      expect(error?.status).toBe(401);
+      expect(error?.detail).toBe('Could not validate credentials');
+    });
+
+    /** Aborting is a normal way for a run to end, not a failure to report. */
+    it('an aborted request is swallowed rather than surfaced as an error', async () => {
+      vi.stubGlobal('fetch', vi.fn((_url: string, init: RequestInit) =>
+        new Promise((_resolve, reject) => {
+          init.signal?.addEventListener('abort', () =>
+            reject(new DOMException('Aborted', 'AbortError')));
+        })));
+
+      const controller = new AbortController();
+      const seen = { error: false, complete: false };
+      service.importXlsxBatch(makeFiles(2), undefined, controller.signal).subscribe({
+        error: () => (seen.error = true),
+        complete: () => (seen.complete = true),
       });
+
+      controller.abort();
+      await new Promise(resolve => setTimeout(resolve, 0));
+
+      expect(seen.error).toBe(false);
+      expect(seen.complete).toBe(false);
+    });
+
+    it('unsubscribing aborts the in-flight request', async () => {
+      let signal: AbortSignal | undefined;
+      vi.stubGlobal('fetch', vi.fn((_url: string, init: RequestInit) => {
+        signal = init.signal ?? undefined;
+        return new Promise(() => undefined);
+      }));
+
+      const subscription = service.importXlsxBatch(makeFiles(2)).subscribe();
+      await new Promise(resolve => setTimeout(resolve, 0));
+      expect(signal?.aborted).toBe(false);
+
+      subscription.unsubscribe();
+      expect(signal?.aborted).toBe(true);
     });
   });
 });

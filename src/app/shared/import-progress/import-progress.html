@@ -1,0 +1,138 @@
+@if (visible()) {
+  <section
+    class="import-panel"
+    [class.import-panel--collapsed]="collapsed()"
+    [class.import-panel--error]="error()"
+    role="region"
+    [attr.aria-label]="'import.panelTitle' | translate"
+  >
+    <!--
+      The only live region. Everything visible below changes once per file, which
+      on a real migration is thousands of updates; announcing those would make
+      the page unusable.
+    -->
+    <p class="import-panel__announcement" [attr.aria-live]="error() ? 'assertive' : 'polite'">
+      {{ announcement() }}
+    </p>
+
+    @if (collapsed()) {
+      <button
+        type="button"
+        class="import-panel__pill"
+        (click)="toggleCollapsed()"
+        aria-expanded="false"
+        [attr.aria-label]="'import.expand' | translate"
+      >
+        <mat-icon>upload_file</mat-icon>
+        <span class="import-panel__pill-value">{{ progress() }}%</span>
+      </button>
+    } @else {
+      <header class="import-panel__header">
+        <mat-icon class="import-panel__icon">upload_file</mat-icon>
+        <span class="import-panel__phase">{{ phaseText() }}</span>
+
+        <button
+          matIconButton
+          type="button"
+          (click)="toggleCollapsed()"
+          aria-expanded="true"
+          [attr.aria-label]="'import.collapse' | translate"
+        >
+          <mat-icon>expand_more</mat-icon>
+        </button>
+
+        <!-- Dismissable only once the run is over: a job with an hour left must
+             not be closable into invisibility. -->
+        @if (!importing()) {
+          <button
+            matIconButton
+            type="button"
+            (click)="dismiss()"
+            [attr.aria-label]="'import.dismiss' | translate"
+          >
+            <mat-icon>close</mat-icon>
+          </button>
+        }
+      </header>
+
+      <mat-progress-bar
+        mode="determinate"
+        [value]="progress()"
+        [attr.aria-label]="'import.panelTitle' | translate"
+      />
+
+      <p class="import-panel__counter">
+        <span>{{ counterText() }}</span>
+        <span class="import-panel__percent">{{ progress() }}%</span>
+      </p>
+
+      @if (importing() && currentFile()) {
+        <p class="import-panel__file" [title]="currentFile()">
+          {{ 'import.currentFile' | translate }} {{ currentFile() }}
+        </p>
+      }
+
+      @if (importing()) {
+        <dl class="import-panel__timing">
+          <div>
+            <dt>{{ 'import.elapsed' | translate }}</dt>
+            <dd>{{ elapsedText() }}</dd>
+          </div>
+          <div>
+            <dt>{{ 'import.remaining' | translate }}</dt>
+            <dd>{{ remainingText() }}</dd>
+          </div>
+          <div>
+            <dt>{{ 'import.throughput' | translate }}</dt>
+            <dd>{{ rateText() }}</dd>
+          </div>
+        </dl>
+      }
+
+      <dl class="import-panel__tallies">
+        <div>
+          <dt>{{ 'import.talliesPatients' | translate }}</dt>
+          <dd>{{ tallies().patientsCreated }}</dd>
+        </div>
+        <div>
+          <dt>{{ 'import.talliesVisits' | translate }}</dt>
+          <dd>{{ tallies().visitsCreated }}</dd>
+        </div>
+        <div>
+          <dt>{{ 'import.talliesSkipped' | translate }}</dt>
+          <dd>{{ tallies().visitsSkipped }}</dd>
+        </div>
+        <div class="import-panel__tally--failed">
+          <dt>{{ 'import.talliesFailed' | translate }}</dt>
+          <dd>{{ tallies().filesFailed }}</dd>
+        </div>
+      </dl>
+
+      @if (message()) {
+        <p class="import-panel__message">{{ message() }}</p>
+      }
+
+      <footer class="import-panel__actions">
+        @if (importing()) {
+          <button
+            matButton
+            type="button"
+            class="import-panel__stop"
+            [disabled]="state() === 'cancelling'"
+            (click)="requestCancel()"
+          >
+            <mat-icon>stop_circle</mat-icon>
+            {{ 'import.cancel' | translate }}
+          </button>
+        } @else {
+          @if (canResume()) {
+            <button matButton="elevated" type="button" (click)="resume()">
+              <mat-icon>play_arrow</mat-icon>
+              {{ 'import.resume' | translate }}
+            </button>
+          }
+        }
+      </footer>
+    }
+  </section>
+}
