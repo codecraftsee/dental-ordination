@@ -4,9 +4,10 @@
 // It replaces the retired Railway API, which still answered on DNS and so read
 // as working while returning 404 to everything.
 //
-// Replace with api.ourdomain.rs — or api.<dashed-ip>.sslip.io in the interim,
-// the pattern preprod uses — when the prod box exists. See
-// .github/workflows/deploy-prod.yml for everything else that has to happen first.
+// Replace with api.smiletimeclinic.rs when the prod box exists. The bare api.
+// name is reserved for production; preprod sits on preprod.api. of the same
+// domain. See .github/workflows/deploy-prod.yml for everything else that has
+// to happen first.
 export const environment = {
   production: true,
   apiUrl: 'https://api.CHANGE-ME.invalid',

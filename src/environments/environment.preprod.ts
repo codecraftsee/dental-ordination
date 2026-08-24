@@ -1,6 +1,7 @@
-// Pre-production (Hetzner). sslip.io resolves to the IP encoded in the hostname,
-// which gives real Let's Encrypt certificates without owning a domain yet.
+// Pre-production (Hetzner), on smiletimeclinic.rs — the real domain, replacing
+// the sslip.io hostnames this used before. The `preprod.` prefix is deliberate:
+// production will take the bare api. / admin. names on the same domain.
 export const environment = {
   production: true,
-  apiUrl: 'https://api.62-238-37-26.sslip.io',
+  apiUrl: 'https://preprod.api.smiletimeclinic.rs',
 };
