@@ -31,8 +31,9 @@ jobs:
     environment:
       name: preprod
       # Hardcoded rather than read from a secret because GitHub does not expand
-      # the secrets context here. Change it when the real domain replaces sslip.io.
-      url: https://admin.62-238-37-26.sslip.io
+      # the secrets context here. Cosmetic — it is only the link on the
+      # Deployments tab; the deploy itself reads ADMIN_HOST off the server.
+      url: https://preprod.admin.smiletimeclinic.rs
 
     steps:
       - uses: actions/checkout@v4
