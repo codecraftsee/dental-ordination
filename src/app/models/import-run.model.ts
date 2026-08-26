@@ -72,10 +72,25 @@ export function emptyTallies(): ImportRunTallies {
  * the user re-picks the folder and everything matching is left out of the new
  * run.
  */
+/**
+ * Who the imported visits are attributed to. The two are alternatives, not a
+ * pair: `doctorId` assigns every visit to one doctor and ignores what the cards
+ * say, while `fallbackDoctorId` keeps per-card matching and names only the
+ * owner of the rows a card could not identify.
+ *
+ * With neither, the API refuses a run that has more than one active doctor —
+ * there would be nobody to attribute the unidentifiable rows to, and inventing
+ * an owner is what this replaced.
+ */
+export interface ImportAttribution {
+  doctorId?: string;
+  fallbackDoctorId?: string;
+}
+
 export interface StoredRunManifest {
   doneIdentities: string[];
   total: number;
-  doctorId?: string;
+  attribution?: ImportAttribution;
   startedAt: number;
 }
 

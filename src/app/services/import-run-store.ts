@@ -110,7 +110,7 @@ function isManifest(value: unknown): value is StoredRunManifest {
     isStringArray(m.doneIdentities) &&
     typeof m.total === 'number' &&
     typeof m.startedAt === 'number' &&
-    (m.doctorId === undefined || typeof m.doctorId === 'string')
+    (m.attribution === undefined || (typeof m.attribution === 'object' && m.attribution !== null))
   );
 }
 

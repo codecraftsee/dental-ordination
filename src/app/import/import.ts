@@ -11,7 +11,7 @@ import { MAX_REQUEST_BYTES, planImport } from '../services/import-batch';
 import { fileIdentity } from '../shared/file-identity';
 import { formatBytes } from '../shared/format-bytes';
 import { formatDuration } from '../shared/format-duration';
-import { ImportFileOutcome, ImportFileResult } from '../models/import-run.model';
+import { ImportAttribution, ImportFileOutcome, ImportFileResult } from '../models/import-run.model';
 import { UserRole } from '../models/user.model';
 
 /**
@@ -57,6 +57,7 @@ export default class Import {
   readonly maxFileSize = formatBytes(MAX_REQUEST_BYTES);
 
   readonly selectedDoctorId = signal('');
+  readonly selectedFallbackDoctorId = signal('');
   readonly selectedFiles = signal<File[]>([]);
   readonly dragging = signal(false);
   readonly showFileList = signal(false);
@@ -122,6 +123,24 @@ export default class Import {
     return this.translate.format('import.planEstimate', { duration: this.estimatedDuration() });
   });
 
+  /**
+   * The two fields are alternatives, so exactly one is ever sent. A doctor
+   * chosen for the whole import makes the fallback meaningless — nothing is
+   * matched against the cards for it to catch — and sending a stale one would
+   * imply a decision the user did not make on this run.
+   */
+  readonly attribution = computed<ImportAttribution>(() => {
+    const doctorId = this.selectedDoctorId();
+    if (doctorId) return { doctorId };
+    const fallbackDoctorId = this.selectedFallbackDoctorId();
+    return fallbackDoctorId ? { fallbackDoctorId } : {};
+  });
+
+  readonly fallbackHint = computed(() => {
+    this.translate.version();
+    return this.translate.translate('import.fallbackDoctorDesc');
+  });
+
   readonly selectedDoctorName = computed(() => {
     const id = this.selectedDoctorId();
     return id ? this.userService.getDisplayName(id) : '';
@@ -164,7 +183,26 @@ export default class Import {
     });
   });
 
-  readonly canStart = computed(() => !this.importing() && this.acceptedCount() > 0);
+  /**
+   * Whether the run still has to be told who owns the visits no card can
+   * identify. Only with several doctors and no single doctor chosen: one doctor
+   * is the only possible answer, and `selectedDoctorId` skips card matching
+   * altogether, so neither leaves anything to decide.
+   */
+  readonly needsFallback = computed(
+    () =>
+      !this.selectedDoctorId() && this.doctors().length > 1 && !this.selectedFallbackDoctorId(),
+  );
+
+  /**
+   * Blocked rather than left to the API, which refuses such a run with a 400.
+   * That status is not in `isRetryableBatchError`, so letting it through would
+   * record the whole batch as permanently failed instead of asking a question
+   * the user can answer in one click.
+   */
+  readonly canStart = computed(
+    () => !this.importing() && this.acceptedCount() > 0 && !this.needsFallback(),
+  );
 
   onFilesSelected(event: Event): void {
     const input = event.target as HTMLInputElement;
@@ -234,9 +272,13 @@ export default class Import {
     this.selectedDoctorId.set((event.target as HTMLSelectElement).value);
   }
 
+  setFallbackDoctor(event: Event): void {
+    this.selectedFallbackDoctorId.set((event.target as HTMLSelectElement).value);
+  }
+
   start(): void {
     if (!this.canStart()) return;
-    this.importService.start(this.filesToImport(), this.selectedDoctorId() || undefined);
+    this.importService.start(this.filesToImport(), this.attribution());
     this.selectedFiles.set([]);
     this.showFileList.set(false);
   }
