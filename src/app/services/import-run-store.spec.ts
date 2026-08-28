@@ -14,7 +14,7 @@ const REPORT_KEY = 'import.run.report';
 const manifest: StoredRunManifest = {
   doneIdentities: ['a.xlsx|10|1', 'b.xlsx|20|2'],
   total: 5,
-  doctorId: 'doc-1',
+  attribution: { doctorId: 'doc-1' },
   startedAt: 1_700_000_000_000,
 };
 

@@ -47,6 +47,38 @@
           }
         </select>
       </label>
+
+      <!--
+        Only while the cards decide. Picking one doctor above sends `doctor_id`,
+        which skips card matching entirely, so there is nothing left for a
+        fallback to catch and offering one would suggest a choice that has no
+        effect.
+      -->
+      @if (!selectedDoctorId()) {
+        <label class="import-page__field">
+          <span class="import-page__field-label">
+            {{ 'import.fallbackDoctor' | translate }}
+          </span>
+          <select
+            class="form-control"
+            [value]="selectedFallbackDoctorId()"
+            (change)="setFallbackDoctor($event)"
+            [disabled]="importing()"
+          >
+            <option value="">{{ 'import.fallbackDoctorNone' | translate }}</option>
+            @for (doctor of doctors(); track doctor.id) {
+              <option [value]="doctor.id">Dr. {{ doctor.firstName }} {{ doctor.lastName }}</option>
+            }
+          </select>
+        </label>
+        <p class="import-page__hint">{{ fallbackHint() }}</p>
+
+        @if (needsFallback()) {
+          <p class="import-page__hint import-page__hint--warn">
+            {{ 'import.fallbackRequired' | translate }}
+          </p>
+        }
+      }
     </mat-card-content>
   </mat-card>
 

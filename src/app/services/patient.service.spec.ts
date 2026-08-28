@@ -6,6 +6,7 @@ import { of } from 'rxjs';
 import { ImportBatchError, ImportProgressEvent, PatientService } from './patient.service';
 import { AuthService } from './auth.service';
 import { Patient } from '../models/patient.model';
+import { ImportAttribution } from '../models/import-run.model';
 import { environment } from '../../environments/environment';
 
 const API = `${environment.apiUrl}/api/patients`;
@@ -197,13 +198,19 @@ describe('PatientService', () => {
       Array.from({ length: n }, (_, i) => new File(['x'], `card${i}.xlsx`));
 
     const stubFetch = () => {
-      const calls: { files: string[]; doctorId: string | null; auth: string | null }[] = [];
+      const calls: {
+        files: string[];
+        doctorId: string | null;
+        fallbackDoctorId: string | null;
+        auth: string | null;
+      }[] = [];
       vi.stubGlobal('fetch', vi.fn(async (_url: string, init: RequestInit) => {
         const form = init.body as FormData;
         const files = form.getAll('files').map(f => (f as File).name);
         calls.push({
           files,
           doctorId: (form.get('doctor_id') as string) ?? null,
+          fallbackDoctorId: (form.get('fallback_doctor_id') as string) ?? null,
           auth: (init.headers as Record<string, string>)?.['Authorization'] ?? null,
         });
         return new Response(sseBody(files), {
@@ -215,10 +222,10 @@ describe('PatientService', () => {
     };
 
     /** Runs a batch to its end, returning what it emitted and how it settled. */
-    const collect = (files: File[], doctorId?: string, signal?: AbortSignal) =>
+    const collect = (files: File[], attribution?: ImportAttribution, signal?: AbortSignal) =>
       new Promise<{ events: ImportProgressEvent[]; error?: ImportBatchError }>(resolve => {
         const events: ImportProgressEvent[] = [];
-        service.importXlsxBatch(files, doctorId, signal).subscribe({
+        service.importXlsxBatch(files, attribution, signal).subscribe({
           next: event => events.push(event),
           error: (error: ImportBatchError) => resolve({ events, error }),
           complete: () => resolve({ events }),
@@ -229,11 +236,20 @@ describe('PatientService', () => {
 
     it('sends every file in a single request, carrying the doctor override', async () => {
       const calls = stubFetch();
-      await collect(makeFiles(50), 'doc-1');
+      await collect(makeFiles(50), { doctorId: 'doc-1' });
 
       expect(calls).toHaveLength(1);
       expect(calls[0].files).toHaveLength(50);
       expect(calls[0].doctorId).toBe('doc-1');
+      expect(calls[0].fallbackDoctorId).toBeNull();
+    });
+
+    it('sends a fallback doctor on its own field, not as the override', async () => {
+      const calls = stubFetch();
+      await collect(makeFiles(2), { fallbackDoctorId: 'doc-2' });
+
+      expect(calls[0].fallbackDoctorId).toBe('doc-2');
+      expect(calls[0].doctorId).toBeNull();
     });
 
     it('emits the stream verbatim, batch-scoped and camelCased', async () => {

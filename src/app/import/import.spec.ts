@@ -57,6 +57,8 @@ describe('Import', () => {
   let tallies: WritableSignal<ImportRunTallies>;
   let lastReport: WritableSignal<StoredRunReport | null>;
   let interrupted: WritableSignal<StoredRunManifest | null>;
+  /** Set before `build()`; how many doctors exist decides whether a fallback is needed. */
+  let doctorList: { id: string; firstName: string; lastName: string }[];
   let state: WritableSignal<ImportRunState>;
   let importing: WritableSignal<boolean>;
   let canResume: WritableSignal<boolean>;
@@ -93,8 +95,7 @@ describe('Import', () => {
         {
           provide: UserService,
           useValue: {
-            getByRole: (role: UserRole) =>
-              role === UserRole.Doctor ? [{ id: 'd1', firstName: 'Ana', lastName: 'Jovanović' }] : [],
+            getByRole: (role: UserRole) => (role === UserRole.Doctor ? doctorList : []),
             getDisplayName: () => 'Dr. Ana',
           },
         },
@@ -122,6 +123,7 @@ describe('Import', () => {
     tallies = signal<ImportRunTallies>(emptyTallies());
     lastReport = signal<StoredRunReport | null>(null);
     interrupted = signal<StoredRunManifest | null>(null);
+    doctorList = [{ id: 'd1', firstName: 'Ana', lastName: 'Jovanović' }];
     state = signal<ImportRunState>('idle');
     importing = signal(false);
     canResume = signal(false);
@@ -251,14 +253,14 @@ describe('Import', () => {
 
       component.start();
 
-      expect(start).toHaveBeenCalledWith(expected, 'd1');
+      expect(start).toHaveBeenCalledWith(expected, { doctorId: 'd1' });
     });
 
-    it('passes no doctor when left on auto-detect', () => {
+    it('passes neither field when left on auto-detect with nothing to fall back to', () => {
       component.onFilesSelected(changeEvent([fileOf('a.xlsx')]));
       component.start();
 
-      expect(start.mock.calls[0][1]).toBeUndefined();
+      expect(start.mock.calls[0][1]).toEqual({});
     });
 
     it('clears the selection once the run is under way', () => {
@@ -289,7 +291,7 @@ describe('Import', () => {
       interrupted.set({
         doneIdentities: [fileIdentity(fileOf('a.xlsx', 100, 1)), fileIdentity(fileOf('b.xlsx', 100, 2))],
         total: 4,
-        doctorId: 'd1',
+        attribution: { doctorId: 'd1' },
         startedAt: 1,
       });
       await build();
@@ -522,6 +524,83 @@ describe('Import', () => {
       const csv = await readBlob(blobs[0]);
       expect(csv).toContain('"odd,name.xlsx"');
       expect(csv).toContain('"broke, badly"');
+    });
+  });
+  describe('choosing who owns unidentifiable visits', () => {
+    const twoDoctors = [
+      { id: 'd1', firstName: 'Ana', lastName: 'Jovanović' },
+      { id: 'd2', firstName: 'Marko', lastName: 'Petrović' },
+    ];
+
+    it('needs no fallback when only one doctor exists', async () => {
+      await build();
+      component.onFilesSelected(changeEvent([fileOf('a.xlsx')]));
+
+      expect(component.needsFallback()).toBe(false);
+      expect(component.canStart()).toBe(true);
+    });
+
+    it('blocks Start when several doctors exist and nobody has been chosen', async () => {
+      doctorList = twoDoctors;
+      await build();
+      component.onFilesSelected(changeEvent([fileOf('a.xlsx')]));
+
+      expect(component.needsFallback()).toBe(true);
+      expect(component.canStart()).toBe(false);
+
+      component.start();
+      expect(start).not.toHaveBeenCalled();
+    });
+
+    it('unblocks once a fallback is chosen, and sends it', async () => {
+      doctorList = twoDoctors;
+      await build();
+      component.onFilesSelected(changeEvent([fileOf('a.xlsx')]));
+      component.selectedFallbackDoctorId.set('d2');
+
+      expect(component.canStart()).toBe(true);
+
+      component.start();
+      expect(start.mock.calls[0][1]).toEqual({ fallbackDoctorId: 'd2' });
+    });
+
+    it('unblocks by assigning one doctor to the whole import instead', async () => {
+      doctorList = twoDoctors;
+      await build();
+      component.onFilesSelected(changeEvent([fileOf('a.xlsx')]));
+      component.selectedDoctorId.set('d1');
+
+      expect(component.needsFallback()).toBe(false);
+
+      component.start();
+      expect(start.mock.calls[0][1]).toEqual({ doctorId: 'd1' });
+    });
+
+    it('never sends both, even if a fallback was picked first', async () => {
+      doctorList = twoDoctors;
+      await build();
+      component.onFilesSelected(changeEvent([fileOf('a.xlsx')]));
+      component.selectedFallbackDoctorId.set('d2');
+      component.selectedDoctorId.set('d1');
+
+      component.start();
+
+      // doctor_id skips card matching outright, so a fallback has nothing to
+      // catch — sending one would imply a decision with no effect.
+      expect(start.mock.calls[0][1]).toEqual({ doctorId: 'd1' });
+    });
+
+    it('hides the fallback select once a doctor is assigned', async () => {
+      doctorList = twoDoctors;
+      await build();
+      const selects = () => fixture.nativeElement.querySelectorAll('select').length;
+
+      expect(selects()).toBe(2);
+
+      component.selectedDoctorId.set('d1');
+      fixture.detectChanges();
+
+      expect(selects()).toBe(1);
     });
   });
 });
