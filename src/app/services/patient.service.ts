@@ -22,6 +22,19 @@ export interface ImportCounts {
   visitsSkipped: number;
   patientsIncomplete: number;
   visitsIncomplete: number;
+  /**
+   * Why a visit is incomplete. `visitsIncomplete` on its own cannot be acted on,
+   * and a missing price is the one cause that appends no error string — so a
+   * file flagged only for that showed up as "Incomplete" with a blank message.
+   */
+  visitsMissingPrice: number;
+  /**
+   * Rows whose "Dr" cell named somebody the roster could not resolve. These are
+   * *not* flagged and raise no error: the fallback doctor is the caller's answer
+   * for exactly them. Reported because nothing else records that the card
+   * disagreed — the visit also keeps the card's text verbatim.
+   */
+  visitsUnmatchedDoctor: number;
 }
 
 export interface ImportResult extends ImportCounts {

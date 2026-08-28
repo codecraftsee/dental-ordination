@@ -28,6 +28,8 @@ const counts = (over: Partial<ImportCounts> = {}): ImportCounts => ({
   visitsSkipped: 0,
   patientsIncomplete: 0,
   visitsIncomplete: 0,
+  visitsMissingPrice: 0,
+  visitsUnmatchedDoctor: 0,
   ...over,
 });
 

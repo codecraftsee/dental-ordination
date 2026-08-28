@@ -255,6 +255,37 @@ export default class Import {
   }
 
   /**
+   * What to show in the row's detail column.
+   *
+   * Errors when there are any — they name a specific problem and are what the
+   * column has always shown. Otherwise the counters, because a file can be
+   * `incomplete` with an empty `errors`: a visit with no price is flagged and
+   * appends no error, which showed as "Incomplete" against a blank cell and gave
+   * the operator nothing to act on.
+   *
+   * An unresolved doctor is reported here too. It flags nothing and is not a
+   * problem — the fallback doctor is the answer for those rows — but it is the
+   * only place the app says the card named somebody the roster could not match.
+   */
+  rowDetail(row: ImportFileResult): string {
+    this.translate.version();
+    if (row.errors.length) return row.errors.join('; ');
+
+    const parts: string[] = [];
+    if (row.visitsMissingPrice) {
+      parts.push(
+        this.translate.format('import.rowMissingPrice', { count: row.visitsMissingPrice }),
+      );
+    }
+    if (row.visitsUnmatchedDoctor) {
+      parts.push(
+        this.translate.format('import.rowUnmatchedDoctor', { count: row.visitsUnmatchedDoctor }),
+      );
+    }
+    return parts.join('; ');
+  }
+
+  /**
    * Names the file in the button's label. Every row otherwise announces the same
    * bare "Remove", which in a list of thousands says nothing about what is about
    * to be removed.

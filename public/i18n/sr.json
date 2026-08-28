@@ -83,6 +83,8 @@
   "import.reportStoredOnly": "Prikazani su fajlovi kojima treba pažnja. Uspešno uvezeni fajlovi su prebrojani iznad.",
   "import.reportTruncated": "Previše redova za čuvanje — prikazani su samo prvi. Izvezite izveštaj pre novog uvoza.",
   "import.reportNoRows": "Nijedan fajl ne odgovara ovom filteru.",
+  "import.rowMissingPrice": "{count} poseta bez cene",
+  "import.rowUnmatchedDoctor": "{count} poseta dodeljeno rezervnom lekaru",
   "import.searchFiles": "Pretraga po imenu fajla",
   "import.exportCsv": "Izvezi CSV",
   "import.filter.all": "Sve",

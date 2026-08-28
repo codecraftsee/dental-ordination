@@ -83,6 +83,8 @@
   "import.reportStoredOnly": "Showing the files that need attention. Files that imported cleanly are counted above.",
   "import.reportTruncated": "Too many rows to keep — only the first ones are listed. Export the report before running another import.",
   "import.reportNoRows": "No files match this filter.",
+  "import.rowMissingPrice": "{count} visit(s) with no price",
+  "import.rowUnmatchedDoctor": "{count} visit(s) went to the fallback doctor",
   "import.searchFiles": "Search by file name",
   "import.exportCsv": "Export CSV",
   "import.filter.all": "All",
