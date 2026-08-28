@@ -31,6 +31,12 @@
 .import-page__field {
   display: block;
   max-width: 24rem;
+
+  // The fallback field follows the doctor field directly, and two bare selects
+  // stacked flush read as one control split in two.
+  + .import-page__field {
+    margin-top: var(--spacing-md);
+  }
 }
 
 .import-page__field-label {

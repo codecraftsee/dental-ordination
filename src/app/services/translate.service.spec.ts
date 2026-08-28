@@ -115,4 +115,21 @@ describe('TranslateService', () => {
     await service.setLanguage('en');
     expect(service.format('missing.key', { foo: 'bar' })).toBe('missing.key');
   });
+
+  /**
+   * The file keeps one URL across every release while the bundles are
+   * content-hashed, so a cached copy would answer with the strings from before
+   * the last deploy and every key added since would render as its own key.
+   */
+  it('revalidates the translation file instead of reusing a cached copy', async () => {
+    const service = TestBed.inject(TranslateService);
+    await service.setLanguage('sr');
+
+    const calls = (globalThis.fetch as ReturnType<typeof vi.fn>).mock.calls;
+    expect(calls.length).toBeGreaterThan(0);
+    for (const [url, init] of calls) {
+      expect(url).toContain('i18n/');
+      expect((init as RequestInit | undefined)?.cache).toBe('no-cache');
+    }
+  });
 });

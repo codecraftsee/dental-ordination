@@ -309,8 +309,8 @@
                 {{ outcomeKey(row.outcome) | translate }}
               </span>
               <span class="import-page__file-name" [title]="row.name">{{ row.name }}</span>
-              <span class="import-page__row-errors" [title]="row.errors.join('; ')">
-                {{ row.errors.join('; ') }}
+              <span class="import-page__row-errors" [title]="rowDetail(row)">
+                {{ rowDetail(row) }}
               </span>
             </div>
           </cdk-virtual-scroll-viewport>

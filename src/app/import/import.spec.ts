@@ -47,6 +47,8 @@ const row = (
   patientsUpdated: 0,
   visitsCreated: outcome === 'imported' ? 3 : 0,
   visitsSkipped: outcome === 'skipped' ? 5 : 0,
+  visitsMissingPrice: 0,
+  visitsUnmatchedDoctor: 0,
   errors,
 });
 
@@ -353,6 +355,47 @@ describe('Import', () => {
     it('lists every file of a finished run', () => {
       expect(component.reportRows()).toHaveLength(4);
       expect(component.hasReport()).toBe(true);
+    });
+
+    describe('the detail column', () => {
+      it('shows the errors when there are any', () => {
+        expect(component.rowDetail(row('c.xlsx', 'incomplete', ['row 7: no doctor']))).toBe(
+          'row 7: no doctor',
+        );
+      });
+
+      /**
+       * The gap this closed: a visit with no price is flagged and appends no
+       * error, so the row read "Incomplete" against an empty cell and the
+       * operator had nothing to act on.
+       */
+      it('explains an incomplete file that carries no error', () => {
+        const priced = { ...row('e.xlsx', 'incomplete'), visitsMissingPrice: 2 };
+
+        expect(component.rowDetail(priced)).toBe('import.rowMissingPrice|2');
+      });
+
+      it('reports rows that went to the fallback doctor, which flag nothing', () => {
+        const fallback = { ...row('f.xlsx', 'imported'), visitsUnmatchedDoctor: 3 };
+
+        expect(component.rowDetail(fallback)).toBe('import.rowUnmatchedDoctor|3');
+      });
+
+      it('joins both reasons when a file has each', () => {
+        const both = {
+          ...row('g.xlsx', 'incomplete'),
+          visitsMissingPrice: 1,
+          visitsUnmatchedDoctor: 4,
+        };
+
+        expect(component.rowDetail(both)).toBe(
+          'import.rowMissingPrice|1; import.rowUnmatchedDoctor|4',
+        );
+      });
+
+      it('says nothing for a clean file', () => {
+        expect(component.rowDetail(row('a.xlsx', 'imported'))).toBe('');
+      });
     });
 
     it('filters by outcome', () => {

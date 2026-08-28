@@ -61,7 +61,14 @@ export class TranslateService {
   private async loadTranslations(lang: Lang): Promise<void> {
     try {
       const baseUri = document.baseURI;
-      const response = await fetch(`${baseUri}i18n/${lang}.json`);
+      // `cache: 'no-cache'` revalidates instead of reusing a cached copy blindly.
+      // The JS bundles are content-hashed, so new code always arrives; this file
+      // keeps one URL across every release, and a browser holding the previous
+      // copy would serve strings from before the last deploy. Keys added since
+      // then resolve to nothing and render as the key itself. The request still
+      // answers 304 on an unchanged file, so this costs a revalidation, not a
+      // re-download.
+      const response = await fetch(`${baseUri}i18n/${lang}.json`, { cache: 'no-cache' });
       const data = await response.json();
       this.translations.set(data);
     } catch {
