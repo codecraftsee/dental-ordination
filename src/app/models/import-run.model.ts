@@ -39,6 +39,13 @@ export interface ImportFileResult {
   patientsUpdated: number;
   visitsCreated: number;
   visitsSkipped: number;
+  /**
+   * Kept per row so the report can say *why* a file is incomplete. A missing
+   * price appends no error, so without these the row showed the outcome and
+   * nothing else.
+   */
+  visitsMissingPrice: number;
+  visitsUnmatchedDoctor: number;
   errors: string[];
 }
 
@@ -59,6 +66,8 @@ export function emptyTallies(): ImportRunTallies {
     visitsSkipped: 0,
     patientsIncomplete: 0,
     visitsIncomplete: 0,
+    visitsMissingPrice: 0,
+    visitsUnmatchedDoctor: 0,
     filesImported: 0,
     filesSkipped: 0,
     filesIncomplete: 0,

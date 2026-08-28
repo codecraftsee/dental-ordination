@@ -26,6 +26,8 @@ const row = (name: string, outcome: ImportFileResult['outcome'] = 'failed'): Imp
   patientsUpdated: 0,
   visitsCreated: 0,
   visitsSkipped: 0,
+  visitsMissingPrice: 0,
+  visitsUnmatchedDoctor: 0,
   errors: ['boom'],
 });
 

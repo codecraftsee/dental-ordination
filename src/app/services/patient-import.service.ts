@@ -369,6 +369,8 @@ export class PatientImportService {
         patientsUpdated: 0,
         visitsCreated: 0,
         visitsSkipped: 0,
+        visitsMissingPrice: 0,
+        visitsUnmatchedDoctor: 0,
         errors: [this.describeBatchError(lastError)],
       });
       recorded.add(identity);
@@ -434,6 +436,8 @@ export class PatientImportService {
       patientsUpdated: event.patientsUpdated ?? 0,
       visitsCreated: event.visitsCreated ?? 0,
       visitsSkipped: event.visitsSkipped ?? 0,
+      visitsMissingPrice: event.visitsMissingPrice ?? 0,
+      visitsUnmatchedDoctor: event.visitsUnmatchedDoctor ?? 0,
       errors: event.errors ?? [],
     });
 
@@ -621,6 +625,8 @@ function tally(results: ImportFileResult[]): ImportRunTallies {
     totals.patientsUpdated += result.patientsUpdated;
     totals.visitsCreated += result.visitsCreated;
     totals.visitsSkipped += result.visitsSkipped;
+    totals.visitsMissingPrice += result.visitsMissingPrice;
+    totals.visitsUnmatchedDoctor += result.visitsUnmatchedDoctor;
     if (result.outcome === 'imported') totals.filesImported++;
     else if (result.outcome === 'skipped') totals.filesSkipped++;
     else if (result.outcome === 'incomplete') totals.filesIncomplete++;
