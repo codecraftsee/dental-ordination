@@ -85,21 +85,6 @@ export function emptyTallies(): ImportRunTallies {
 export interface ImportAttribution {
   doctorId?: string;
   fallbackDoctorId?: string;
-  /**
-   * Modifies `fallbackDoctorId`: the fallback is the answer for the rows a card
-   * could not identify, not a placeholder for one. Those rows then import clean
-   * instead of being flagged for review.
-   *
-   * Without it a card whose "Dr" cell names somebody the roster cannot resolve
-   * is marked incomplete, which on a migration written with initials is close to
-   * every row — a review queue nobody works through. The API still records what
-   * the card said on every visit, so the decision stays auditable either way.
-   *
-   * It does not suppress the *other* cause of an incomplete visit, a missing
-   * price. Meaningless alongside `doctorId`, which never matches in the first
-   * place.
-   */
-  fallbackIsAuthoritative?: boolean;
 }
 
 export interface StoredRunManifest {

@@ -202,7 +202,6 @@ describe('PatientService', () => {
         files: string[];
         doctorId: string | null;
         fallbackDoctorId: string | null;
-        fallbackIsAuthoritative: string | null;
         auth: string | null;
       }[] = [];
       vi.stubGlobal('fetch', vi.fn(async (_url: string, init: RequestInit) => {
@@ -212,7 +211,6 @@ describe('PatientService', () => {
           files,
           doctorId: (form.get('doctor_id') as string) ?? null,
           fallbackDoctorId: (form.get('fallback_doctor_id') as string) ?? null,
-          fallbackIsAuthoritative: (form.get('fallback_is_authoritative') as string) ?? null,
           auth: (init.headers as Record<string, string>)?.['Authorization'] ?? null,
         });
         return new Response(sseBody(files), {
@@ -252,26 +250,6 @@ describe('PatientService', () => {
 
       expect(calls[0].fallbackDoctorId).toBe('doc-2');
       expect(calls[0].doctorId).toBeNull();
-      // Absent rather than 'false': the API defaults it off, and the flag is
-      // what the whole review queue depends on.
-      expect(calls[0].fallbackIsAuthoritative).toBeNull();
-    });
-
-    it('marks the fallback authoritative only when asked to', async () => {
-      const calls = stubFetch();
-      await collect(makeFiles(2), { fallbackDoctorId: 'doc-2', fallbackIsAuthoritative: true });
-
-      expect(calls[0].fallbackDoctorId).toBe('doc-2');
-      // The API reads the form value as a string, so this must be 'true'.
-      expect(calls[0].fallbackIsAuthoritative).toBe('true');
-    });
-
-    it('never sends the authoritative flag without a fallback to modify', async () => {
-      const calls = stubFetch();
-      await collect(makeFiles(2), { doctorId: 'doc-1', fallbackIsAuthoritative: true });
-
-      expect(calls[0].doctorId).toBe('doc-1');
-      expect(calls[0].fallbackIsAuthoritative).toBeNull();
     });
 
     it('emits the stream verbatim, batch-scoped and camelCased', async () => {

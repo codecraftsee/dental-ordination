@@ -385,8 +385,6 @@
   "toast.unknownError": "An unexpected error occurred",
   "import.fallbackDoctor": "Fallback doctor",
   "import.fallbackDoctorNone": "Choose a doctor…",
-  "import.fallbackDoctorDesc": "Visits whose doctor the card does not identify are assigned to this doctor, so nothing is attributed at random.",
-  "import.fallbackAuthoritative": "These visits really are this doctor's",
-  "import.fallbackAuthoritativeDesc": "Import them without flagging them for review. Tick this only if you can answer for the rows the cards do not identify. What each card said is recorded either way, so the attribution can still be checked afterwards. Visits missing a price stay flagged regardless.",
+  "import.fallbackDoctorDesc": "Visits whose doctor the card does not identify are assigned to this doctor, so nothing is attributed at random. What each card said is recorded, so the attribution can be checked afterwards.",
   "import.fallbackRequired": "Choose a fallback doctor, or assign one doctor to the whole import, before starting."
 }

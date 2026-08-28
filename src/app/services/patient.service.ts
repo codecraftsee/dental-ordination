@@ -117,12 +117,6 @@ export class PatientService extends EntityCacheService<Patient, PatientCreate, P
         if (attribution?.doctorId) formData.append('doctor_id', attribution.doctorId);
         if (attribution?.fallbackDoctorId) {
           formData.append('fallback_doctor_id', attribution.fallbackDoctorId);
-          // Only alongside a fallback, which is the only thing it modifies. The
-          // API parses the string, so it has to be 'true'/'false' rather than a
-          // stringified boolean by accident.
-          if (attribution.fallbackIsAuthoritative) {
-            formData.append('fallback_is_authoritative', 'true');
-          }
         }
         const token = this.authService.getAccessToken();
 

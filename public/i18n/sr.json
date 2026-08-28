@@ -386,8 +386,6 @@
   "toast.unknownError": "Došlo je do neočekivane greške",
   "import.fallbackDoctor": "Rezervni lekar",
   "import.fallbackDoctorNone": "Izaberite lekara…",
-  "import.fallbackDoctorDesc": "Posete čiji lekar nije prepoznat sa kartona dodeljuju se ovom lekaru, tako da se ništa ne dodeljuje nasumično.",
-  "import.fallbackAuthoritative": "Ove posete zaista pripadaju ovom lekaru",
-  "import.fallbackAuthoritativeDesc": "Uvezi ih bez označavanja za proveru. Označite ovo samo ako možete da odgovarate za redove koje kartoni ne identifikuju. Ono što je na kartonu pisalo beleži se u svakom slučaju, pa dodela i dalje može da se proveri kasnije. Posete bez cene ostaju označene.",
+  "import.fallbackDoctorDesc": "Posete čiji lekar nije prepoznat sa kartona dodeljuju se ovom lekaru, tako da se ništa ne dodeljuje nasumično. Ono što je na kartonu pisalo se beleži, pa dodela može da se proveri kasnije.",
   "import.fallbackRequired": "Izaberite rezervnog lekara, ili dodelite jednog lekara celom uvozu, pre pokretanja."
 }
