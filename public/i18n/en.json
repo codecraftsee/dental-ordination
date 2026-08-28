@@ -382,5 +382,9 @@
   "toast.treatmentDeleted": "Treatment deleted successfully",
   "toast.inviteResent": "Invite resent successfully",
   "toast.importSuccess": "Import completed successfully",
-  "toast.unknownError": "An unexpected error occurred"
+  "toast.unknownError": "An unexpected error occurred",
+  "import.fallbackDoctor": "Fallback doctor",
+  "import.fallbackDoctorNone": "Choose a doctor…",
+  "import.fallbackDoctorDesc": "Visits whose doctor the card does not identify are assigned to this doctor and flagged for review, so nothing is attributed at random.",
+  "import.fallbackRequired": "Choose a fallback doctor, or assign one doctor to the whole import, before starting."
 }

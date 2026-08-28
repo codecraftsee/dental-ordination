@@ -18,7 +18,7 @@ import { TranslateService } from './translate.service';
 import { ImportRunStore } from './import-run-store';
 import { MAX_FILES_PER_REQUEST } from './import-batch';
 import { fileIdentity } from '../shared/file-identity';
-import { StoredRunManifest } from '../models/import-run.model';
+import { ImportAttribution, StoredRunManifest } from '../models/import-run.model';
 
 const counts = (over: Partial<ImportCounts> = {}): ImportCounts => ({
   patientsCreated: 1,
@@ -190,17 +190,21 @@ describe('PatientImportService', () => {
 
   describe('running a selection', () => {
     it('splits into sequential requests, each carrying the doctor override', async () => {
-      service.start(makeFiles(120), 'doc-1');
+      service.start(makeFiles(120), { doctorId: 'doc-1' });
       await flush();
 
       expect(importXlsxBatch).toHaveBeenCalledTimes(3);
       const sizes = importXlsxBatch.mock.calls.map(call => (call[0] as File[]).length);
       expect(sizes).toEqual([MAX_FILES_PER_REQUEST, MAX_FILES_PER_REQUEST, 20]);
-      expect(importXlsxBatch.mock.calls.every(call => call[1] === 'doc-1')).toBe(true);
+      expect(
+        importXlsxBatch.mock.calls.every(
+          call => (call[1] as ImportAttribution)?.doctorId === 'doc-1',
+        ),
+      ).toBe(true);
     });
 
     it('numbers progress against the whole selection, not the batch', async () => {
-      service.start(makeFiles(120), undefined);
+      service.start(makeFiles(120), {});
       await flush();
 
       expect(service.total()).toBe(120);
@@ -209,7 +213,7 @@ describe('PatientImportService', () => {
     });
 
     it('records a verdict and counts for every file', async () => {
-      service.start(makeFiles(3), undefined);
+      service.start(makeFiles(3), {});
       await flush();
 
       expect(service.results()).toHaveLength(3);
@@ -227,7 +231,7 @@ describe('PatientImportService', () => {
       );
       build();
 
-      service.start(makeFiles(2), undefined);
+      service.start(makeFiles(2), {});
       await flush();
 
       expect(service.tallies().filesSkipped).toBe(2);
@@ -239,14 +243,14 @@ describe('PatientImportService', () => {
       importXlsxBatch = vi.fn(() => gate);
       build();
 
-      service.start(makeFiles(2), undefined);
-      service.start(makeFiles(2), undefined);
+      service.start(makeFiles(2), {});
+      service.start(makeFiles(2), {});
 
       expect(importXlsxBatch).toHaveBeenCalledTimes(1);
     });
 
     it('fails a selection with nothing sendable rather than reporting success', async () => {
-      service.start([], undefined);
+      service.start([], {});
       await flush();
 
       expect(importXlsxBatch).not.toHaveBeenCalled();
@@ -259,7 +263,7 @@ describe('PatientImportService', () => {
       importXlsxBatch = vi.fn(() => new Subject<ImportProgressEvent>());
       build();
 
-      service.start(makeFiles(2), undefined);
+      service.start(makeFiles(2), {});
 
       expect(service.state()).toBe('uploading');
       expect(service.batchIndex()).toBe(1);
@@ -281,7 +285,7 @@ describe('PatientImportService', () => {
       });
       build();
 
-      service.start(makeFiles(60), undefined);
+      service.start(makeFiles(60), {});
       await vi.advanceTimersByTimeAsync(10_000);
 
       // Three attempts at the doomed batch, then one at the next.
@@ -300,7 +304,7 @@ describe('PatientImportService', () => {
       });
       build();
 
-      service.start(makeFiles(10), undefined);
+      service.start(makeFiles(10), {});
       await flush();
 
       expect(call).toBe(1);
@@ -316,7 +320,7 @@ describe('PatientImportService', () => {
       importXlsxBatch = vi.fn((files: File[]) => streamFor(files, { upTo: 3 }));
       build();
 
-      service.start(makeFiles(10), undefined);
+      service.start(makeFiles(10), {});
       await flush();
 
       expect(service.tallies().filesImported).toBe(3);
@@ -328,7 +332,7 @@ describe('PatientImportService', () => {
       importXlsxBatch = vi.fn((files: File[]) => streamFor(files, { upTo: 3 }));
       build();
 
-      service.start(makeFiles(10), undefined);
+      service.start(makeFiles(10), {});
       await flush();
 
       expect(service.state()).toBe('completed');
@@ -341,14 +345,15 @@ describe('PatientImportService', () => {
   describe('cancelling', () => {
     const startHanging = (fileCount: number) => {
       const gate = new Subject<ImportProgressEvent>();
-      importXlsxBatch = vi.fn((files: File[], _doctorId: string | undefined, signal?: AbortSignal) => {
+      importXlsxBatch = vi.fn(
+      (files: File[], _attribution: ImportAttribution | undefined, signal?: AbortSignal) => {
         // Mirrors the transport: an aborted request goes quiet rather than
         // erroring, which is what the orchestrator's abort listener exists for.
         signal?.addEventListener('abort', () => gate.complete(), { once: true });
         return gate;
       });
       build();
-      service.start(makeFiles(fileCount), undefined);
+      service.start(makeFiles(fileCount), {});
       return gate;
     };
 
@@ -400,7 +405,7 @@ describe('PatientImportService', () => {
       build();
 
       const files = makeFiles(10);
-      service.start(files, 'doc-1');
+      service.start(files, { doctorId: 'doc-1' });
       await flush();
       expect(service.outstanding()).toHaveLength(7);
 
@@ -412,14 +417,14 @@ describe('PatientImportService', () => {
       expect(resent).toHaveLength(7);
       expect(resent.map(f => f.name)).toEqual(files.slice(3).map(f => f.name));
       // The doctor override carries over without being asked for again.
-      expect(importXlsxBatch.mock.calls[1][1]).toBe('doc-1');
+      expect((importXlsxBatch.mock.calls[1][1] as ImportAttribution).doctorId).toBe('doc-1');
     });
 
     it('replaces the earlier verdict instead of counting the file twice', async () => {
       importXlsxBatch = vi.fn((files: File[]) => streamFor(files, { upTo: 3 }));
       build();
 
-      service.start(makeFiles(10), undefined);
+      service.start(makeFiles(10), {});
       await flush();
       expect(service.processed()).toBe(10);
       expect(service.tallies().filesFailed).toBe(7);
@@ -436,7 +441,7 @@ describe('PatientImportService', () => {
     });
 
     it('offers nothing to resume once everything landed', async () => {
-      service.start(makeFiles(5), undefined);
+      service.start(makeFiles(5), {});
       await flush();
 
       expect(service.outstanding()).toHaveLength(0);
@@ -450,17 +455,17 @@ describe('PatientImportService', () => {
       build();
 
       const files = makeFiles(10);
-      service.start(files, 'doc-1');
+      service.start(files, { doctorId: 'doc-1' });
       await flush();
 
       const manifest = TestBed.inject(ImportRunStore).readManifest();
       expect(manifest?.total).toBe(10);
-      expect(manifest?.doctorId).toBe('doc-1');
+      expect(manifest?.attribution?.doctorId).toBe('doc-1');
       expect(manifest?.doneIdentities).toEqual(files.slice(0, 3).map(fileIdentity));
     });
 
     it('clears the manifest once nothing is outstanding', async () => {
-      service.start(makeFiles(5), undefined);
+      service.start(makeFiles(5), {});
       await flush();
 
       expect(TestBed.inject(ImportRunStore).readManifest()).toBeNull();
@@ -470,7 +475,7 @@ describe('PatientImportService', () => {
       importXlsxBatch = vi.fn((files: File[]) => streamFor(files, { upTo: 3 }));
       build();
 
-      service.start(makeFiles(10), undefined);
+      service.start(makeFiles(10), {});
       await flush();
 
       const report = TestBed.inject(ImportRunStore).readReport();
@@ -487,7 +492,7 @@ describe('PatientImportService', () => {
       const manifest: StoredRunManifest = {
         doneIdentities: files.slice(0, 2).map(fileIdentity),
         total: 4,
-        doctorId: 'doc-9',
+        attribution: { doctorId: 'doc-9' },
         startedAt: 1,
       };
       localStorage.setItem('import.run.manifest', JSON.stringify(manifest));
@@ -516,7 +521,7 @@ describe('PatientImportService', () => {
 
   describe('cache refresh', () => {
     it('reloads every cache an import can invalidate', async () => {
-      service.start(makeFiles(2), undefined);
+      service.start(makeFiles(2), {});
       await flush();
 
       expect(loadAll['patient']).toHaveBeenCalled();
@@ -529,7 +534,7 @@ describe('PatientImportService', () => {
 
     it('skips caches the user has no permission to read', async () => {
       hasPermission.mockReturnValue(false);
-      service.start(makeFiles(2), undefined);
+      service.start(makeFiles(2), {});
       await flush();
 
       expect(loadAll['patient']).not.toHaveBeenCalled();
@@ -538,7 +543,7 @@ describe('PatientImportService', () => {
 
     it('one failing reload does not strand the others', async () => {
       loadAll['patient'].mockReturnValue(throwError(() => new Error('boom')));
-      service.start(makeFiles(2), undefined);
+      service.start(makeFiles(2), {});
 
       await expect(flush()).resolves.toBeUndefined();
       expect(loadAll['visit']).toHaveBeenCalled();
@@ -549,7 +554,7 @@ describe('PatientImportService', () => {
       importXlsxBatch = vi.fn(() => throwError(() => ({ status: 400 }) as ImportBatchError));
       build();
 
-      service.start(makeFiles(2), undefined);
+      service.start(makeFiles(2), {});
       await flush();
 
       expect(loadAll['patient']).not.toHaveBeenCalled();
@@ -558,7 +563,7 @@ describe('PatientImportService', () => {
 
   it('terminal state does not clear itself', async () => {
     vi.useFakeTimers();
-    service.start(makeFiles(2), undefined);
+    service.start(makeFiles(2), {});
     await vi.advanceTimersByTimeAsync(1000);
     expect(service.message()).toBe('home.importSummary');
 
@@ -575,7 +580,7 @@ describe('PatientImportService', () => {
     importXlsxBatch = vi.fn(() => gate);
     build();
 
-    service.start(makeFiles(4), undefined);
+    service.start(makeFiles(4), {});
     gate.next({ type: 'progress', current: 2, total: 4, file: 'card1.xlsx' });
 
     TestBed.resetTestingModule();

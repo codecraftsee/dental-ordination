@@ -14,6 +14,7 @@ import { planImport } from './import-batch';
 import { fileIdentity } from '../shared/file-identity';
 import { Permission } from '../models/user.model';
 import {
+  ImportAttribution,
   ImportFileOutcome,
   ImportFileResult,
   ImportRunTallies,
@@ -112,7 +113,7 @@ export class PatientImportService {
 
   /** Every file the current run covers, in the order they were planned. */
   private runFiles: File[] = [];
-  private runDoctorId: string | undefined;
+  private runAttribution: ImportAttribution | undefined;
 
   /**
    * One entry per file that has reached a verdict, keyed by identity so a file
@@ -202,11 +203,11 @@ export class PatientImportService {
 
   readonly canResume = computed(() => !this.importing() && this.outstanding().length > 0);
 
-  start(files: File[], doctorId: string | undefined): void {
+  start(files: File[], attribution: ImportAttribution): void {
     if (this.importing()) return;
     this.resetRun();
-    this.runDoctorId = doctorId;
-    void this.execute(files, doctorId);
+    this.runAttribution = attribution;
+    void this.execute(files, attribution);
   }
 
   /**
@@ -220,7 +221,7 @@ export class PatientImportService {
     if (this.importing()) return;
     const files = this.outstanding();
     if (files.length === 0) return;
-    void this.execute(files, this.runDoctorId, { keepResults: true });
+    void this.execute(files, this.runAttribution, { keepResults: true });
   }
 
   /**
@@ -267,7 +268,7 @@ export class PatientImportService {
 
   private async execute(
     files: File[],
-    doctorId: string | undefined,
+    attribution: ImportAttribution | undefined,
     options: { keepResults?: boolean } = {},
   ): Promise<void> {
     const plan = planImport(files);
@@ -315,7 +316,7 @@ export class PatientImportService {
 
     for (const batch of plan.batches) {
       if (this.cancelRequested) break;
-      await this.runBatch(batch, doctorId);
+      await this.runBatch(batch, attribution);
     }
 
     this.finish();
@@ -328,7 +329,7 @@ export class PatientImportService {
    * of them died — when the report can say exactly which files to re-run, and
    * re-running them is idempotent — trades a complete result for nothing.
    */
-  private async runBatch(batch: File[], doctorId: string | undefined): Promise<void> {
+  private async runBatch(batch: File[], attribution: ImportAttribution | undefined): Promise<void> {
     this.status.set('uploading');
     this._batchIndex.update(index => index + 1);
 
@@ -341,7 +342,7 @@ export class PatientImportService {
     for (let attempt = 1; attempt <= MAX_BATCH_ATTEMPTS; attempt++) {
       if (this.cancelRequested) return;
       try {
-        await this.streamBatch(batch, doctorId, recorded);
+        await this.streamBatch(batch, attribution, recorded);
         lastError = undefined;
         break;
       } catch (err) {
@@ -376,7 +377,11 @@ export class PatientImportService {
     this.flush();
   }
 
-  private streamBatch(batch: File[], doctorId: string | undefined, recorded: Set<string>): Promise<void> {
+  private streamBatch(
+    batch: File[],
+    attribution: ImportAttribution | undefined,
+    recorded: Set<string>,
+  ): Promise<void> {
     return new Promise<void>((resolve, reject) => {
       const signal = this.controller!.signal;
 
@@ -393,7 +398,7 @@ export class PatientImportService {
         settle();
       };
 
-      const subscription = this.patientService.importXlsxBatch(batch, doctorId, signal).subscribe({
+      const subscription = this.patientService.importXlsxBatch(batch, attribution, signal).subscribe({
         next: event => this.consume(event, batch, recorded),
         error: err => done(() => reject(err)),
         complete: () => done(resolve),
@@ -533,7 +538,7 @@ export class PatientImportService {
     this.store.writeManifest({
       doneIdentities,
       total: this._total(),
-      doctorId: this.runDoctorId,
+      attribution: this.runAttribution,
       startedAt: this.startedAt,
     });
   }

@@ -3,6 +3,7 @@ import { Observable, firstValueFrom } from 'rxjs';
 import { environment } from '../../environments/environment';
 import { Patient, PatientCreate, PatientUpdate } from '../models/patient.model';
 import { AuthService } from './auth.service';
+import { ImportAttribution } from '../models/import-run.model';
 import { EntityCacheService, matchesQuery } from './entity-cache.service';
 import { snakeToCamelKeys } from '../interceptors/case-transform.interceptor';
 
@@ -92,7 +93,11 @@ export class PatientService extends EntityCacheService<Patient, PatientCreate, P
    * `signal` lets the caller abort mid-stream; unsubscribing aborts as well, so
    * the request cannot outlive its subscription either way.
    */
-  importXlsxBatch(files: File[], doctorId?: string, signal?: AbortSignal): Observable<ImportProgressEvent> {
+  importXlsxBatch(
+    files: File[],
+    attribution?: ImportAttribution,
+    signal?: AbortSignal,
+  ): Observable<ImportProgressEvent> {
     return new Observable(observer => {
       const controller = new AbortController();
       const abort = () => controller.abort();
@@ -106,7 +111,13 @@ export class PatientService extends EntityCacheService<Patient, PatientCreate, P
       const send = () => {
         const formData = new FormData();
         for (const file of files) formData.append('files', file);
-        if (doctorId) formData.append('doctor_id', doctorId);
+        // Alternatives, and the API treats them as such: doctor_id skips card
+        // matching entirely, fallback_doctor_id only names who receives the rows
+        // matching could not identify.
+        if (attribution?.doctorId) formData.append('doctor_id', attribution.doctorId);
+        if (attribution?.fallbackDoctorId) {
+          formData.append('fallback_doctor_id', attribution.fallbackDoctorId);
+        }
         const token = this.authService.getAccessToken();
 
         return fetch(environment.apiUrl + '/api/import/xlsx', {

@@ -383,5 +383,9 @@
   "toast.treatmentDeleted": "Terapija je uspešno obrisana",
   "toast.inviteResent": "Pozivnica je uspešno ponovo poslata",
   "toast.importSuccess": "Uvoz uspešno završen",
-  "toast.unknownError": "Došlo je do neočekivane greške"
+  "toast.unknownError": "Došlo je do neočekivane greške",
+  "import.fallbackDoctor": "Rezervni lekar",
+  "import.fallbackDoctorNone": "Izaberite lekara…",
+  "import.fallbackDoctorDesc": "Posete čiji lekar nije prepoznat sa kartona dodeljuju se ovom lekaru i označavaju se za proveru, tako da se ništa ne dodeljuje nasumično.",
+  "import.fallbackRequired": "Izaberite rezervnog lekara, ili dodelite jednog lekara celom uvozu, pre pokretanja."
 }
