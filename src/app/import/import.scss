@@ -28,6 +28,24 @@
   }
 }
 
+// Sits between the fallback select and its hint, so it aligns with the field
+// above rather than with the card padding.
+.import-page__checkbox {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--spacing-sm);
+  max-width: 24rem;
+  margin: 0 0 var(--spacing-xs);
+  cursor: pointer;
+
+  input {
+    // The label wraps to two lines at this width; without this the box centres
+    // itself against the whole block instead of the first line.
+    margin-top: 0.2rem;
+    flex-shrink: 0;
+  }
+}
+
 .import-page__field {
   display: block;
   max-width: 24rem;

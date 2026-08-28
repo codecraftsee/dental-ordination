@@ -58,6 +58,7 @@ export default class Import {
 
   readonly selectedDoctorId = signal('');
   readonly selectedFallbackDoctorId = signal('');
+  readonly fallbackIsAuthoritative = signal(false);
   readonly selectedFiles = signal<File[]>([]);
   readonly dragging = signal(false);
   readonly showFileList = signal(false);
@@ -128,17 +129,31 @@ export default class Import {
    * chosen for the whole import makes the fallback meaningless — nothing is
    * matched against the cards for it to catch — and sending a stale one would
    * imply a decision the user did not make on this run.
+   *
+   * `fallbackIsAuthoritative` rides along only with a fallback, for the same
+   * reason: it modifies what the fallback means and says nothing on its own. The
+   * checkbox is hidden without one, but the signal keeps its value while hidden,
+   * so it is read from the same branch that sends the id rather than trusted
+   * independently.
    */
   readonly attribution = computed<ImportAttribution>(() => {
     const doctorId = this.selectedDoctorId();
     if (doctorId) return { doctorId };
     const fallbackDoctorId = this.selectedFallbackDoctorId();
-    return fallbackDoctorId ? { fallbackDoctorId } : {};
+    if (!fallbackDoctorId) return {};
+    return this.fallbackIsAuthoritative()
+      ? { fallbackDoctorId, fallbackIsAuthoritative: true }
+      : { fallbackDoctorId };
   });
 
   readonly fallbackHint = computed(() => {
     this.translate.version();
     return this.translate.translate('import.fallbackDoctorDesc');
+  });
+
+  readonly fallbackAuthoritativeHint = computed(() => {
+    this.translate.version();
+    return this.translate.translate('import.fallbackAuthoritativeDesc');
   });
 
   readonly selectedDoctorName = computed(() => {
@@ -274,6 +289,10 @@ export default class Import {
 
   setFallbackDoctor(event: Event): void {
     this.selectedFallbackDoctorId.set((event.target as HTMLSelectElement).value);
+  }
+
+  setFallbackIsAuthoritative(event: Event): void {
+    this.fallbackIsAuthoritative.set((event.target as HTMLInputElement).checked);
   }
 
   start(): void {

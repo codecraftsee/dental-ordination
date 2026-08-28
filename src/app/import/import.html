@@ -73,6 +73,24 @@
         </label>
         <p class="import-page__hint">{{ fallbackHint() }}</p>
 
+        <!--
+          Only once a fallback is actually chosen. The setting modifies what that
+          fallback means, so with none picked there is nothing for it to say, and
+          a checkbox above an empty select reads as a separate decision.
+        -->
+        @if (selectedFallbackDoctorId()) {
+          <label class="import-page__checkbox">
+            <input
+              type="checkbox"
+              [checked]="fallbackIsAuthoritative()"
+              (change)="setFallbackIsAuthoritative($event)"
+              [disabled]="importing()"
+            />
+            <span>{{ 'import.fallbackAuthoritative' | translate }}</span>
+          </label>
+          <p class="import-page__hint">{{ fallbackAuthoritativeHint() }}</p>
+        }
+
         @if (needsFallback()) {
           <p class="import-page__hint import-page__hint--warn">
             {{ 'import.fallbackRequired' | translate }}

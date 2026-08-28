@@ -564,6 +564,35 @@ describe('Import', () => {
       expect(start.mock.calls[0][1]).toEqual({ fallbackDoctorId: 'd2' });
     });
 
+    it('marks the fallback authoritative when the box is ticked', async () => {
+      doctorList = twoDoctors;
+      await build();
+      component.onFilesSelected(changeEvent([fileOf('a.xlsx')]));
+      component.selectedFallbackDoctorId.set('d2');
+      component.fallbackIsAuthoritative.set(true);
+
+      component.start();
+      expect(start.mock.calls[0][1]).toEqual({
+        fallbackDoctorId: 'd2',
+        fallbackIsAuthoritative: true,
+      });
+    });
+
+    it('drops the authoritative flag when the fallback it modifies is cleared', async () => {
+      doctorList = twoDoctors;
+      await build();
+      component.onFilesSelected(changeEvent([fileOf('a.xlsx')]));
+      component.selectedFallbackDoctorId.set('d2');
+      component.fallbackIsAuthoritative.set(true);
+      // Picking one doctor for the whole import hides the fallback field, but
+      // the signal keeps its value — it must not travel on its own and turn off
+      // flagging for a run the user never ticked it for.
+      component.selectedDoctorId.set('d1');
+
+      component.start();
+      expect(start.mock.calls[0][1]).toEqual({ doctorId: 'd1' });
+    });
+
     it('unblocks by assigning one doctor to the whole import instead', async () => {
       doctorList = twoDoctors;
       await build();
